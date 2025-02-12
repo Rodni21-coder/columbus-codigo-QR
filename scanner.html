@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Escáner QR - Columbus Hospital</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.4/html5-qrcode.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <style>
         body {
             font-family: 'Arial', sans-serif;
@@ -77,56 +78,6 @@
         tr:nth-child(even) {
             background-color: #f5f5f5;
         }
-        .delete-btn {
-            background-color: transparent;
-            color: #ff4444;
-            border: 1px solid #ff4444;
-            padding: 5px 10px;
-            border-radius: 4px;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-        .delete-btn:hover {
-            background-color: #ff4444;
-            color: white;
-        }
-        .duplicate {
-            background-color: #fff3cd !important;
-        }
-        .button-container {
-            display: flex;
-            gap: 10px;
-            margin: 20px 0;
-        }
-        .action-button {
-            padding: 10px 20px;
-            background-color: #ffffff;
-            color: #333;
-            border: 2px solid #333;
-            border-radius: 5px;
-            cursor: pointer;
-            font-weight: bold;
-            transition: all 0.3s;
-        }
-        .action-button.delete {
-            border-color: #ff4444;
-            color: #ff4444;
-        }
-        .status-message {
-            text-align: center;
-            margin: 10px 0;
-            padding: 10px;
-            border-radius: 5px;
-            display: none;
-        }
-        .status-message.success {
-            background-color: #d4edda;
-            color: #155724;
-        }
-        .status-message.error {
-            background-color: #f8d7da;
-            color: #721c24;
-        }
     </style>
 </head>
 <body>
@@ -138,18 +89,13 @@
     </div>
     <div class="container">
         <div id="reader"></div>
-        <div id="statusMessage" class="status-message"></div>
-        <div class="button-container">
-            <button class="action-button delete" onclick="borrarRegistros()">Borrar Todos los Registros</button>
-            <button class="action-button" onclick="location.href='index.html'">Volver al Inicio</button>
-        </div>
+        <button onclick="descargarPDF()">Descargar Lista en PDF</button>
         <table id="registros">
             <thead>
                 <tr>
                     <th>Cédula</th>
                     <th>Nombre</th>
                     <th>Fecha y Hora</th>
-                    <th>Acciones</th>
                 </tr>
             </thead>
             <tbody></tbody>
@@ -157,81 +103,24 @@
     </div>
 
     <script>
-        let lastScannedCode = '';
-        let lastScannedTime = 0;
-        const SCAN_COOLDOWN = 5000;
-
-        function showStatus(message, isError = false) {
-            const statusElement = document.getElementById('statusMessage');
-            statusElement.textContent = message;
-            statusElement.style.display = 'block';
-            statusElement.className = 'status-message ' + (isError ? 'error' : 'success');
-            setTimeout(() => {
-                statusElement.style.display = 'none';
-            }, 3000);
-        }
-
-        function checkDuplicates() {
-            const tbody = document.querySelector('#registros tbody');
-            const rows = tbody.querySelectorAll('tr');
-            const seen = new Map();
-
-            rows.forEach(row => {
-                row.classList.remove('duplicate');
-                const cedula = row.cells[0].textContent;
-                const nombre = row.cells[1].textContent;
-                const key = `${cedula}-${nombre}`;
-                
-                if (seen.has(key)) {
-                    row.classList.add('duplicate');
-                    seen.get(key).classList.add('duplicate');
-                } else {
-                    seen.set(key, row);
-                }
-            });
-        }
-
-        function deleteRegistro(index) {
-            if (confirm('¿Está seguro que desea eliminar este registro?')) {
-                const registros = JSON.parse(localStorage.getItem('registros') || '[]');
-                registros.splice(index, 1);
-                localStorage.setItem('registros', JSON.stringify(registros));
-                actualizarTabla();
-                showStatus('Registro eliminado exitosamente');
-            }
-        }
-
         function actualizarTabla() {
             const registros = JSON.parse(localStorage.getItem('registros') || '[]');
             const tbody = document.querySelector('#registros tbody');
             tbody.innerHTML = '';
             
-            registros.forEach((registro, index) => {
+            registros.forEach((registro) => {
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
                     <td>${registro.cedula}</td>
                     <td>${registro.nombre}</td>
                     <td>${registro.timestamp}</td>
-                    <td>
-                        <button class="delete-btn" onclick="deleteRegistro(${index})">
-                            Eliminar
-                        </button>
-                    </td>
                 `;
                 tbody.appendChild(tr);
             });
-            
-            checkDuplicates();
         }
 
         function onScanSuccess(decodedText) {
             try {
-                const currentTime = Date.now();
-                if (decodedText === lastScannedCode && currentTime - lastScannedTime < SCAN_COOLDOWN) {
-                    showStatus('Por favor espere unos segundos antes de escanear el mismo código', true);
-                    return;
-                }
-
                 const datos = JSON.parse(decodedText);
                 const timestamp = new Date().toLocaleString();
                 
@@ -242,29 +131,30 @@
                     timestamp: timestamp
                 });
                 localStorage.setItem('registros', JSON.stringify(registros));
-
-                lastScannedCode = decodedText;
-                lastScannedTime = currentTime;
                 
                 actualizarTabla();
-                showStatus('Registro exitoso');
             } catch (e) {
-                showStatus('Error al procesar el código QR', true);
                 console.error('Error al procesar el código QR:', e);
             }
         }
 
-        function borrarRegistros() {
-            if (confirm('¿Está seguro que desea borrar todos los registros?')) {
-                localStorage.removeItem('registros');
-                actualizarTabla();
-                showStatus('Registros borrados exitosamente');
-            }
+        function descargarPDF() {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            doc.text('Lista de Registros', 10, 10);
+            
+            const registros = JSON.parse(localStorage.getItem('registros') || '[]');
+            let y = 20;
+            registros.forEach((registro, index) => {
+                doc.text(`${index + 1}. ${registro.cedula} - ${registro.nombre} - ${registro.timestamp}`, 10, y);
+                y += 10;
+            });
+            
+            doc.save('Registros.pdf');
         }
 
         const html5QrcodeScanner = new Html5QrcodeScanner(
             "reader", { fps: 10, qrbox: 250 });
-
         html5QrcodeScanner.render(onScanSuccess);
 
         window.onload = () => {
