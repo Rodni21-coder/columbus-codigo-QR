@@ -232,6 +232,40 @@
     </div>
 
     <script>
+        let lastScannedCode = '';
+        let lastScannedTime = 0;
+        const SCAN_COOLDOWN = 5000; // 5 segundos de espera entre escaneos
+
+        function showStatus(message, isError = false) {
+            const statusElement = document.getElementById('statusMessage');
+            statusElement.textContent = message;
+            statusElement.style.display = 'block';
+            statusElement.className = 'status-message ' + (isError ? 'error' : 'success');
+            setTimeout(() => {
+                statusElement.style.display = 'none';
+            }, 3000);
+        }
+
+        function checkDuplicates() {
+            const tbody = document.querySelector('#registros tbody');
+            const rows = tbody.querySelectorAll('tr');
+            const seen = new Map();
+
+            rows.forEach(row => {
+                row.classList.remove('duplicate');
+                const cedula = row.cells[0].textContent;
+                const nombre = row.cells[1].textContent;
+                const key = `${cedula}-${nombre}`;
+                
+                if (seen.has(key)) {
+                    row.classList.add('duplicate');
+                    seen.get(key).classList.add('duplicate');
+                } else {
+                    seen.set(key, row);
+                }
+            });
+        }
+
         // ... (previous variables and functions remain the same) ...
         
         const PASSWORD = "admin123"; // Cambia esta contraseña por la que desees
@@ -285,7 +319,84 @@
             
             checkDuplicates();
         }
+        function onScanSuccess(decodedText) {
+            try {
+                const currentTime = Date.now();
+                if (decodedText === lastScannedCode && currentTime - lastScannedTime < SCAN_COOLDOWN) {
+                    showStatus('Por favor espere unos segundos antes de escanear el mismo código', true);
+                    return;
+                }
 
+                const datos = JSON.parse(decodedText);
+                const timestamp = new Date().toLocaleString();
+                
+                const registros = JSON.parse(localStorage.getItem('registros') || '[]');
+                registros.unshift({
+                    cedula: datos.cedula,
+                    nombre: datos.nombre,
+                    timestamp: timestamp
+                });
+                localStorage.setItem('registros', JSON.stringify(registros));
+
+                lastScannedCode = decodedText;
+                lastScannedTime = currentTime;
+                
+                actualizarTabla();
+                showStatus('Registro exitoso');
+            } catch (e) {
+                showStatus('Error al procesar el código QR', true);
+                console.error('Error al procesar el código QR:', e);
+            }
+        }
+
+        function generarPDF() {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            
+            // Agregar título
+            doc.setFontSize(16);
+            doc.text('Registro de Asistencia - Columbus Hospital', 14, 20);
+            
+            // Agregar fecha de generación
+            doc.setFontSize(12);
+            doc.text(`Generado: ${new Date().toLocaleString()}`, 14, 30);
+            
+            // Obtener datos de la tabla
+            const registros = JSON.parse(localStorage.getItem('registros') || '[]');
+            const datos = registros.map(registro => [
+                registro.cedula,
+                registro.nombre,
+                registro.timestamp
+            ]);
+            
+            // Generar tabla en PDF
+            doc.autoTable({
+                head: [['Cédula', 'Nombre', 'Fecha y Hora']],
+                body: datos,
+                startY: 40,
+                styles: {
+                    fontSize: 10,
+                    cellPadding: 3
+                },
+                headStyles: {
+                    fillColor: [30, 61, 89]
+                }
+            });
+            
+            // Guardar PDF
+            doc.save('registro-asistencia.pdf');
+            showStatus('PDF generado exitosamente');
+        }
+
+        // Initialize scanner and table
+        const html5QrcodeScanner = new Html5QrcodeScanner(
+            "reader", { fps: 10, qrbox: 250 });
+
+        html5QrcodeScanner.render(onScanSuccess);
+
+        window.onload = () => {
+            actualizarTabla();
+        };
         // Event listener para cerrar el modal con la tecla Enter
         document.getElementById('passwordInput').addEventListener('keyup', function(event) {
             if (event.key === 'Enter') {
@@ -305,5 +416,3 @@
     </script>
 </body>
 </html>
-
-
