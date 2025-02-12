@@ -6,12 +6,13 @@
     <title>Escáner QR - Columbus Hospital</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.4/html5-qrcode.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.29/jspdf.plugin.autotable.min.js"></script>
     <style>
         body {
             font-family: 'Arial', sans-serif;
             margin: 0;
             padding: 0;
-            background-color: #0d4ecf;
+            background-color: #142ebd;
             color: #333;
         }
         .header {
@@ -72,11 +73,53 @@
             text-align: left;
         }
         th {
-            background-color: #1a276e;
+            background-color: #1e3d59;
             color: white;
         }
         tr:nth-child(even) {
             background-color: #f5f5f5;
+        }
+        .duplicate {
+            background-color: #fff3cd !important;
+        }
+        .button-container {
+            display: flex;
+            gap: 10px;
+            margin: 20px 0;
+            justify-content: center;
+        }
+        .action-button {
+            padding: 10px 20px;
+            background-color: #ffffff;
+            color: #333;
+            border: 2px solid #333;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+        .action-button.download {
+            border-color: #28a745;
+            color: #28a745;
+        }
+        .action-button.download:hover {
+            background-color: #28a745;
+            color: white;
+        }
+        .status-message {
+            text-align: center;
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 5px;
+            display: none;
+        }
+        .status-message.success {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        .status-message.error {
+            background-color: #f8d7da;
+            color: #721c24;
         }
     </style>
 </head>
@@ -89,7 +132,11 @@
     </div>
     <div class="container">
         <div id="reader"></div>
-        <button onclick="descargarPDF()">Descargar Lista en PDF</button>
+        <div id="statusMessage" class="status-message"></div>
+        <div class="button-container">
+            <button class="action-button download" onclick="generarPDF()">Descargar PDF</button>
+            <button class="action-button" onclick="location.href='index.html'">Volver al Inicio</button>
+        </div>
         <table id="registros">
             <thead>
                 <tr>
@@ -103,12 +150,46 @@
     </div>
 
     <script>
+        let lastScannedCode = '';
+        let lastScannedTime = 0;
+        const SCAN_COOLDOWN = 5000; // 5 segundos de espera entre escaneos
+
+        function showStatus(message, isError = false) {
+            const statusElement = document.getElementById('statusMessage');
+            statusElement.textContent = message;
+            statusElement.style.display = 'block';
+            statusElement.className = 'status-message ' + (isError ? 'error' : 'success');
+            setTimeout(() => {
+                statusElement.style.display = 'none';
+            }, 3000);
+        }
+
+        function checkDuplicates() {
+            const tbody = document.querySelector('#registros tbody');
+            const rows = tbody.querySelectorAll('tr');
+            const seen = new Map();
+
+            rows.forEach(row => {
+                row.classList.remove('duplicate');
+                const cedula = row.cells[0].textContent;
+                const nombre = row.cells[1].textContent;
+                const key = `${cedula}-${nombre}`;
+                
+                if (seen.has(key)) {
+                    row.classList.add('duplicate');
+                    seen.get(key).classList.add('duplicate');
+                } else {
+                    seen.set(key, row);
+                }
+            });
+        }
+
         function actualizarTabla() {
             const registros = JSON.parse(localStorage.getItem('registros') || '[]');
             const tbody = document.querySelector('#registros tbody');
             tbody.innerHTML = '';
             
-            registros.forEach((registro) => {
+            registros.forEach(registro => {
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
                     <td>${registro.cedula}</td>
@@ -117,10 +198,18 @@
                 `;
                 tbody.appendChild(tr);
             });
+            
+            checkDuplicates();
         }
 
         function onScanSuccess(decodedText) {
             try {
+                const currentTime = Date.now();
+                if (decodedText === lastScannedCode && currentTime - lastScannedTime < SCAN_COOLDOWN) {
+                    showStatus('Por favor espere unos segundos antes de escanear el mismo código', true);
+                    return;
+                }
+
                 const datos = JSON.parse(decodedText);
                 const timestamp = new Date().toLocaleString();
                 
@@ -131,30 +220,61 @@
                     timestamp: timestamp
                 });
                 localStorage.setItem('registros', JSON.stringify(registros));
+
+                lastScannedCode = decodedText;
+                lastScannedTime = currentTime;
                 
                 actualizarTabla();
+                showStatus('Registro exitoso');
             } catch (e) {
+                showStatus('Error al procesar el código QR', true);
                 console.error('Error al procesar el código QR:', e);
             }
         }
 
-        function descargarPDF() {
+        function generarPDF() {
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF();
-            doc.text('Lista de Registros', 10, 10);
             
+            // Agregar título
+            doc.setFontSize(16);
+            doc.text('Registro de Asistencia - Columbus Hospital', 14, 20);
+            
+            // Agregar fecha de generación
+            doc.setFontSize(12);
+            doc.text(`Generado: ${new Date().toLocaleString()}`, 14, 30);
+            
+            // Obtener datos de la tabla
             const registros = JSON.parse(localStorage.getItem('registros') || '[]');
-            let y = 20;
-            registros.forEach((registro, index) => {
-                doc.text(`${index + 1}. ${registro.cedula} - ${registro.nombre} - ${registro.timestamp}`, 10, y);
-                y += 10;
+            const datos = registros.map(registro => [
+                registro.cedula,
+                registro.nombre,
+                registro.timestamp
+            ]);
+            
+            // Generar tabla en PDF
+            doc.autoTable({
+                head: [['Cédula', 'Nombre', 'Fecha y Hora']],
+                body: datos,
+                startY: 40,
+                styles: {
+                    fontSize: 10,
+                    cellPadding: 3
+                },
+                headStyles: {
+                    fillColor: [30, 61, 89]
+                }
             });
             
-            doc.save('Registros.pdf');
+            // Guardar PDF
+            doc.save('registro-asistencia.pdf');
+            showStatus('PDF generado exitosamente');
         }
 
+        // Initialize scanner and table
         const html5QrcodeScanner = new Html5QrcodeScanner(
             "reader", { fps: 10, qrbox: 250 });
+
         html5QrcodeScanner.render(onScanSuccess);
 
         window.onload = () => {
