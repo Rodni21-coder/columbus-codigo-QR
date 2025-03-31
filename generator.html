@@ -6,91 +6,222 @@
     <title>Generador QR - Columbus Hospital</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <style>
+        :root {
+            --color-primario: #05117e;
+            --color-secundario: #102e9b;
+            --color-terciario: #1a56d6;
+            --color-accent: #00b4d8;
+            --color-blanco: #ffffff;
+            --color-texto: #2b2d42;
+            --color-texto-claro: #8d99ae;
+            --color-fondo: #f8f9fa;
+            --sombra: 0 4px 6px rgba(0, 0, 0, 0.1);
+            --sombra-hover: 0 8px 15px rgba(0, 0, 0, 0.2);
+            --transicion: all 0.3s ease;
+        }
+
         body {
-            font-family: 'times', sans-serif;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             margin: 0;
             padding: 0;
-            background-color: #05117e;
-            color: rgb(249, 243, 243);
+            background-color: var(--color-fondo);
+            color: var(--color-texto);
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(0, 180, 216, 0.05) 0%, rgba(0, 180, 216, 0.05) 90%),
+                radial-gradient(circle at 90% 80%, rgba(5, 17, 126, 0.05) 0%, rgba(5, 17, 126, 0.05) 90%);
+            min-height: 100vh;
         }
+
         .header {
-            background-color: #fffdfd;
-            padding: 20px;
+            background-color: var(--color-blanco);
+            padding: 15px 40px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            box-shadow: var(--sombra);
+            position: relative;
+            z-index: 10;
+            background: linear-gradient(135deg, var(--color-blanco) 0%, #f0f8ff 100%);
         }
+
         .logo {
             width: 150px;
-            height: 60px;
+            height: 70px;
             display: flex;
             align-items: center;
             justify-content: center;
             margin-left: 20px;
+            transition: var(--transicion);
         }
+
+        .logo:hover {
+            transform: scale(1.05);
+        }
+
         .logo img {
             max-width: 100%;
             max-height: 100%;
             object-fit: contain;
+            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
         }
+
         .title {
-            text-align: center;
-            color: rgb(0, 0, 0);
+            font-size: 1.8rem;
+            color: var(--color-primario);
             margin: 0;
             flex-grow: 1;
-            font-size: 24px;
+            text-align: center;
+            font-weight: 700;
+            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.1);
+            background: linear-gradient(to right, var(--color-primario), var(--color-terciario));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: -0.5px;
         }
+
         .container {
             max-width: 800px;
-            margin: 20px auto;
-            padding: 20px;
-            background-color: white;
-            border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
-            color: #333;
+            margin: 40px auto;
+            padding: 40px;
+            background-color: var(--color-blanco);
+            border-radius: 15px;
+            box-shadow: var(--sombra);
+            position: relative;
+            overflow: hidden;
+            border: 1px solid rgba(0, 0, 0, 0.05);
         }
+
+        .container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 5px;
+            background: linear-gradient(90deg, var(--color-primario), var(--color-accent));
+        }
+
         .form-group {
-            margin-bottom: 20px;
+            margin-bottom: 25px;
         }
+
         label {
             display: block;
-            margin-bottom: 8px;
-            color: #1e3d59;
-            font-weight: bold;
+            margin-bottom: 10px;
+            color: var(--color-primario);
+            font-weight: 600;
+            font-size: 1.1rem;
         }
+
         input {
             width: 100%;
-            padding: 12px;
-            border: 2px solid #1e3d59;
-            border-radius: 5px;
-            font-size: 16px;
+            padding: 14px 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1rem;
             box-sizing: border-box;
+            transition: var(--transicion);
+            background-color: #f9f9f9;
         }
+
+        input:focus {
+            outline: none;
+            border-color: var(--color-accent);
+            box-shadow: 0 0 0 3px rgba(0, 180, 216, 0.2);
+            background-color: var(--color-blanco);
+        }
+
         button {
-            background-color: #1e3d59;
-            color: white;
-            padding: 12px 24px;
+            background: linear-gradient(135deg, var(--color-secundario), var(--color-terciario));
+            color: var(--color-blanco);
+            padding: 16px 24px;
             border: none;
-            border-radius: 5px;
+            border-radius: 8px;
             cursor: pointer;
-            font-size: 16px;
+            font-size: 1.1rem;
             width: 100%;
-            transition: background-color 0.3s;
+            transition: var(--transicion);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            box-shadow: var(--sombra);
+            margin-top: 10px;
+            position: relative;
+            overflow: hidden;
         }
+
+        button::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: var(--transicion);
+        }
+
         button:hover {
-            background-color: #131fac;
+            transform: translateY(-3px);
+            box-shadow: var(--sombra-hover);
+            background: linear-gradient(135deg, var(--color-terciario), var(--color-secundario));
         }
+
+        button:hover::after {
+            left: 100%;
+        }
+
         #qrcode {
-            margin-top: 20px;
+            margin: 30px auto;
             text-align: center;
-            padding: 20px;
-            background-color: #f5f5f5;
-            border-radius: 5px;
+            padding: 25px;
+            background-color: #f9f9f9;
+            border-radius: 10px;
+            border: 1px solid #e0e0e0;
+            max-width: 300px;
         }
+
         #downloadQR {
             display: none;
-            margin-top: 10px;
+            margin-top: 20px;
+            background: linear-gradient(135deg, #00b4d8, #0096c7);
+        }
+
+        @media (max-width: 768px) {
+            .header {
+                flex-direction: column;
+                padding: 20px;
+                text-align: center;
+            }
+
+            .logo {
+                margin: 15px 0 0 0;
+            }
+
+            .title {
+                font-size: 1.5rem;
+                order: -1;
+            }
+
+            .container {
+                margin: 20px;
+                padding: 30px 20px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .title {
+                font-size: 1.3rem;
+            }
+
+            input {
+                padding: 12px 14px;
+            }
+
+            button {
+                padding: 14px;
+                font-size: 1rem;
+            }
         }
     </style>
 </head>
@@ -104,11 +235,11 @@
     <div class="container">
         <div class="form-group">
             <label for="cedula">Cédula:</label>
-            <input type="text" id="cedula" required>
+            <input type="text" id="cedula" required placeholder="Ingrese su número de cédula">
         </div>
         <div class="form-group">
             <label for="nombre">Nombre:</label>
-            <input type="text" id="nombre" required>
+            <input type="text" id="nombre" required placeholder="Ingrese su nombre completo">
         </div>
         <button onclick="generarQR()">Generar QR</button>
         <div id="qrcode"></div>
@@ -136,11 +267,15 @@
             const qr = new QRCode(qrCodeDiv, {
                 text: JSON.stringify(datos),
                 width: 256,
-                height: 256
+                height: 256,
+                colorDark: "#05117e",
+                colorLight: "#ffffff",
+                correctLevel: QRCode.CorrectLevel.H
             });
 
             setTimeout(() => {
                 document.getElementById('downloadQR').style.display = 'block';
+                document.getElementById('downloadQR').scrollIntoView({ behavior: 'smooth' });
             }, 500);
         }
 
@@ -151,9 +286,13 @@
                 return;
             }
 
+            const cedula = document.getElementById('cedula').value;
+            const nombre = document.getElementById('nombre').value;
+            const nombreArchivo = `QR_${nombre.replace(/\s+/g, '_')}_${cedula}.png`;
+
             const link = document.createElement('a');
             link.href = qrCanvas.toDataURL("image/png");
-            link.download = 'codigo_qr.png';
+            link.download = nombreArchivo;
             link.click();
         }
     </script>
