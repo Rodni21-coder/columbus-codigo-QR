@@ -8,21 +8,47 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.29/jspdf.plugin.autotable.min.js"></script>
     <style>
+        :root {
+            --color-primario: #05117e;
+            --color-secundario: #102e9b;
+            --color-terciario: #1a56d6;
+            --color-accent: #00b4d8;
+            --color-blanco: #ffffff;
+            --color-texto: #2b2d42;
+            --color-texto-claro: #8d99ae;
+            --color-fondo: #f8f9fa;
+            --color-exito: #28a745;
+            --color-error: #dc3545;
+            --color-advertencia: #ffc107;
+            --sombra: 0 4px 6px rgba(0, 0, 0, 0.1);
+            --sombra-hover: 0 8px 15px rgba(0, 0, 0, 0.2);
+            --transicion: all 0.3s ease;
+        }
+
         body {
-            font-family: 'Times', sans-serif;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             margin: 0;
             padding: 0;
-            background-color: #05117e;
-            color: #333;
+            background-color: var(--color-fondo);
+            color: var(--color-texto);
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(0, 180, 216, 0.05) 0%, rgba(0, 180, 216, 0.05) 90%),
+                radial-gradient(circle at 90% 80%, rgba(5, 17, 126, 0.05) 0%, rgba(5, 17, 126, 0.05) 90%);
+            min-height: 100vh;
         }
+
         .header {
-            background-color: #ffffff;
-            padding: 20px;
+            background-color: var(--color-blanco);
+            padding: 15px 40px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            box-shadow: var(--sombra);
+            position: relative;
+            z-index: 10;
+            background: linear-gradient(135deg, var(--color-blanco) 0%, #f0f8ff 100%);
         }
+
         .logo {
             width: 150px;
             height: 70px;
@@ -30,110 +56,204 @@
             align-items: center;
             justify-content: center;
             margin-left: 20px;
+            transition: var(--transicion);
         }
+
+        .logo:hover {
+            transform: scale(1.05);
+        }
+
         .logo img {
             max-width: 100%;
             max-height: 100%;
             object-fit: contain;
+            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
         }
+
         .title {
-            text-align: center;
-            color: #333;
+            font-size: 1.8rem;
+            color: var(--color-primario);
             margin: 0;
             flex-grow: 1;
-            font-size: 45px;
+            text-align: center;
+            font-weight: 700;
+            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.1);
+            background: linear-gradient(to right, var(--color-primario), var(--color-terciario));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: -0.5px;
         }
+
         .container {
-            max-width: 800px;
-            margin: 20px auto;
-            padding: 20px;
-            background-color: white;
-            border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            max-width: 1000px;
+            margin: 40px auto;
+            padding: 40px;
+            background-color: var(--color-blanco);
+            border-radius: 15px;
+            box-shadow: var(--sombra);
+            position: relative;
+            overflow: hidden;
+            border: 1px solid rgba(0, 0, 0, 0.05);
         }
+
+        .container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 5px;
+            background: linear-gradient(90deg, var(--color-primario), var(--color-accent));
+        }
+
         #reader {
             width: 100%;
             max-width: 600px;
             margin: 0 auto;
-            background: white;
+            background: var(--color-blanco);
             padding: 20px;
             border-radius: 10px;
+            box-shadow: var(--sombra);
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            position: relative;
+            overflow: hidden;
         }
+
+        #reader::after {
+            content: 'Escaneando...';
+            position: absolute;
+            bottom: 10px;
+            left: 0;
+            width: 100%;
+            text-align: center;
+            color: var(--color-primario);
+            font-weight: 600;
+        }
+
         table {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 20px;
-            background-color: white;
-            border-radius: 5px;
+            margin-top: 30px;
+            background-color: var(--color-blanco);
+            border-radius: 10px;
             overflow: hidden;
+            box-shadow: var(--sombra);
         }
+
         th, td {
-            border: 1px solid #ddd;
-            padding: 12px;
+            border: 1px solid #e0e0e0;
+            padding: 14px;
             text-align: left;
         }
+
         th {
-            background-color: #1e3d59;
-            color: white;
+            background: linear-gradient(135deg, var(--color-primario), var(--color-secundario));
+            color: var(--color-blanco);
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.9rem;
+            letter-spacing: 0.5px;
         }
+
         tr:nth-child(even) {
-            background-color: #f5f5f5;
+            background-color: #f9f9f9;
         }
+
         .duplicate {
-            background-color: #fff3cd !important;
+            background-color: #fff8e1 !important;
         }
+
         .button-container {
             display: flex;
-            gap: 10px;
-            margin: 20px 0;
+            gap: 15px;
+            margin: 30px 0;
             justify-content: center;
+            flex-wrap: wrap;
         }
+
         .action-button {
-            padding: 10px 20px;
-            background-color: #ffffff;
-            color: #333;
-            border: 2px solid #333;
-            border-radius: 5px;
+            padding: 14px 28px;
+            background-color: var(--color-blanco);
+            color: var(--color-texto);
+            border: 2px solid var(--color-primario);
+            border-radius: 8px;
             cursor: pointer;
-            font-weight: bold;
-            transition: all 0.3s;
+            font-weight: 600;
+            transition: var(--transicion);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-size: 0.9rem;
+            box-shadow: var(--sombra);
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
+
+        .action-button:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--sombra-hover);
+        }
+
         .action-button.download {
-            border-color: #28a745;
-            color: #28a745;
+            border-color: var(--color-exito);
+            color: var(--color-exito);
         }
+
         .action-button.download:hover {
-            background-color: #28a745;
-            color: white;
+            background-color: var(--color-exito);
+            color: var(--color-blanco);
         }
+
+        .action-button.home {
+            border-color: var(--color-primario);
+            color: var(--color-primario);
+        }
+
+        .action-button.home:hover {
+            background-color: var(--color-primario);
+            color: var(--color-blanco);
+        }
+
         .status-message {
             text-align: center;
-            margin: 10px 0;
-            padding: 10px;
-            border-radius: 5px;
+            margin: 20px 0;
+            padding: 15px;
+            border-radius: 8px;
             display: none;
+            font-weight: 500;
+            box-shadow: var(--sombra);
         }
+
         .status-message.success {
-            background-color: #d4edda;
-            color: #155724;
+            background-color: #e8f5e9;
+            color: var(--color-exito);
+            border-left: 5px solid var(--color-exito);
         }
+
         .status-message.error {
-            background-color: #f8d7da;
-            color: #721c24;
+            background-color: #ffebee;
+            color: var(--color-error);
+            border-left: 5px solid var(--color-error);
         }
+
         .delete-btn {
             background-color: transparent;
-            color: #ff4444;
-            border: 1px solid #ff4444;
-            padding: 5px 10px;
-            border-radius: 4px;
+            color: var(--color-error);
+            border: 1px solid var(--color-error);
+            padding: 8px 16px;
+            border-radius: 6px;
             cursor: pointer;
-            transition: all 0.3s;
+            transition: var(--transicion);
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 5px;
         }
-        
+
         .delete-btn:hover {
-            background-color: #ff4444;
-            color: white;
+            background-color: var(--color-error);
+            color: var(--color-blanco);
+            transform: translateY(-2px);
         }
 
         /* Modal styles */
@@ -146,58 +266,153 @@
             height: 100%;
             background-color: rgba(0,0,0,0.5);
             z-index: 1000;
+            backdrop-filter: blur(3px);
         }
 
         .modal-content {
             background-color: white;
             margin: 15% auto;
-            padding: 20px;
-            border-radius: 5px;
-            width: 300px;
+            padding: 25px;
+            border-radius: 10px;
+            width: 350px;
             text-align: center;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+            border-top: 5px solid var(--color-primario);
+        }
+
+        .modal h3 {
+            color: var(--color-primario);
+            margin-top: 0;
+            font-size: 1.3rem;
         }
 
         .modal input {
             width: 100%;
-            padding: 8px;
-            margin: 10px 0;
+            padding: 12px;
+            margin: 15px 0;
             border: 1px solid #ddd;
-            border-radius: 4px;
+            border-radius: 6px;
+            font-size: 1rem;
+            transition: var(--transicion);
+        }
+
+        .modal input:focus {
+            outline: none;
+            border-color: var(--color-accent);
+            box-shadow: 0 0 0 3px rgba(0, 180, 216, 0.2);
         }
 
         .modal-buttons {
             display: flex;
             justify-content: center;
-            gap: 10px;
-            margin-top: 15px;
+            gap: 15px;
+            margin-top: 20px;
         }
 
         .modal-btn {
-            padding: 8px 16px;
+            padding: 10px 20px;
             border: none;
-            border-radius: 4px;
+            border-radius: 6px;
             cursor: pointer;
+            font-weight: 600;
+            transition: var(--transicion);
+            min-width: 100px;
         }
 
         .confirm-btn {
-            background-color: #28a745;
+            background-color: var(--color-exito);
             color: white;
         }
 
+        .confirm-btn:hover {
+            background-color: #218838;
+            transform: translateY(-2px);
+        }
+
         .cancel-btn {
-            background-color: #dc3545;
+            background-color: var(--color-error);
             color: white;
+        }
+
+        .cancel-btn:hover {
+            background-color: #c82333;
+            transform: translateY(-2px);
+        }
+
+        @media (max-width: 768px) {
+            .header {
+                flex-direction: column;
+                padding: 20px;
+                text-align: center;
+            }
+
+            .logo {
+                margin: 15px 0 0 0;
+            }
+
+            .title {
+                font-size: 1.5rem;
+                order: -1;
+            }
+
+            .container {
+                margin: 20px;
+                padding: 30px 20px;
+            }
+
+            th, td {
+                padding: 10px;
+                font-size: 0.9rem;
+            }
+
+            .action-button {
+                padding: 12px 20px;
+                font-size: 0.8rem;
+            }
+
+            .modal-content {
+                width: 90%;
+                margin: 20% auto;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .title {
+                font-size: 1.3rem;
+            }
+
+            .button-container {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .action-button {
+                width: 100%;
+                justify-content: center;
+            }
+
+            table {
+                display: block;
+                overflow-x: auto;
+            }
+
+            .modal-buttons {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .modal-btn {
+                width: 100%;
+            }
         }
     </style>
 </head>
 <body>
-    <!-- ... (previous header and container HTML remains the same) ... -->
-
     <!-- Password Modal -->
     <div id="passwordModal" class="modal">
         <div class="modal-content">
             <h3>Verificar Contraseña</h3>
-            <input type="password" id="passwordInput" placeholder="Ingrese la contraseña">
+            <input type="password" id="passwordInput" placeholder="Ingrese la contraseña de administrador">
             <div class="modal-buttons">
                 <button class="modal-btn confirm-btn" onclick="confirmarEliminacion()">Confirmar</button>
                 <button class="modal-btn cancel-btn" onclick="cerrarModal()">Cancelar</button>
@@ -215,8 +430,12 @@
         <div id="reader"></div>
         <div id="statusMessage" class="status-message"></div>
         <div class="button-container">
-            <button class="action-button download" onclick="generarPDF()">Descargar PDF</button>
-            <button class="action-button" onclick="location.href='index.html'">Volver al Inicio</button>
+            <button class="action-button download" onclick="generarPDF()">
+                <i class="fas fa-download"></i> Descargar PDF
+            </button>
+            <button class="action-button home" onclick="location.href='index.html'">
+                <i class="fas fa-home"></i> Volver al Inicio
+            </button>
         </div>
         <table id="registros">
             <thead>
@@ -231,10 +450,15 @@
         </table>
     </div>
 
+    <!-- Font Awesome para iconos -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
+
     <script>
         let lastScannedCode = '';
         let lastScannedTime = 0;
         const SCAN_COOLDOWN = 5000; // 5 segundos de espera entre escaneos
+        const PASSWORD = "admin123"; // Cambia esta contraseña por la que desees
+        let registroAEliminar = null;
 
         function showStatus(message, isError = false) {
             const statusElement = document.getElementById('statusMessage');
@@ -265,11 +489,6 @@
                 }
             });
         }
-
-        // ... (previous variables and functions remain the same) ...
-        
-        const PASSWORD = "admin123"; // Cambia esta contraseña por la que desees
-        let registroAEliminar = null;
 
         function mostrarModal(index) {
             registroAEliminar = index;
@@ -310,7 +529,7 @@
                     <td>${registro.timestamp}</td>
                     <td>
                         <button class="delete-btn" onclick="mostrarModal(${index})">
-                            Eliminar
+                            <i class="fas fa-trash-alt"></i> Eliminar
                         </button>
                     </td>
                 `;
@@ -319,6 +538,7 @@
             
             checkDuplicates();
         }
+
         function onScanSuccess(decodedText) {
             try {
                 const currentTime = Date.now();
@@ -342,7 +562,7 @@
                 lastScannedTime = currentTime;
                 
                 actualizarTabla();
-                showStatus('Registro exitoso');
+                showStatus('Registro exitoso: ' + datos.nombre);
             } catch (e) {
                 showStatus('Error al procesar el código QR', true);
                 console.error('Error al procesar el código QR:', e);
@@ -355,11 +575,15 @@
             
             // Agregar título
             doc.setFontSize(16);
-            doc.text('Registro de Asistencia - Columbus Hospital', 14, 20);
+            doc.setTextColor(5, 17, 126);
+            doc.setFont('helvetica', 'bold');
+            doc.text('Registro de Asistencia - Columbus Hospital', 105, 20, { align: 'center' });
             
             // Agregar fecha de generación
             doc.setFontSize(12);
-            doc.text(`Generado: ${new Date().toLocaleString()}`, 14, 30);
+            doc.setTextColor(0, 0, 0);
+            doc.setFont('helvetica', 'normal');
+            doc.text(`Generado: ${new Date().toLocaleString()}`, 105, 30, { align: 'center' });
             
             // Obtener datos de la tabla
             const registros = JSON.parse(localStorage.getItem('registros') || '[]');
@@ -376,15 +600,22 @@
                 startY: 40,
                 styles: {
                     fontSize: 10,
-                    cellPadding: 3
+                    cellPadding: 3,
+                    textColor: [0, 0, 0]
                 },
                 headStyles: {
-                    fillColor: [30, 61, 89]
-                }
+                    fillColor: [5, 17, 126],
+                    textColor: [255, 255, 255],
+                    fontStyle: 'bold'
+                },
+                alternateRowStyles: {
+                    fillColor: [240, 240, 240]
+                },
+                margin: { top: 40 }
             });
             
             // Guardar PDF
-            doc.save('registro-asistencia.pdf');
+            doc.save(`registro-asistencia-${new Date().toISOString().slice(0,10)}.pdf`);
             showStatus('PDF generado exitosamente');
         }
 
@@ -397,6 +628,7 @@
         window.onload = () => {
             actualizarTabla();
         };
+
         // Event listener para cerrar el modal con la tecla Enter
         document.getElementById('passwordInput').addEventListener('keyup', function(event) {
             if (event.key === 'Enter') {
@@ -411,8 +643,6 @@
                 cerrarModal();
             }
         }
-
-        // ... (rest of the previous code remains the same) ...
     </script>
 </body>
 </html>
