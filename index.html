@@ -9,11 +9,11 @@
             --color-primario: #05117e;
             --color-secundario: #102e9b;
             --color-terciario: #1a56d6;
-            --color-accent: #00b4d8;
+            --color-accent: #202e97;
             --color-blanco: #ffffff;
             --color-texto: #2b2d42;
-            --color-texto-claro: #8d99ae;
-            --color-fondo: #f8f9fa;
+            --color-texto-claro: #202e97;
+            --color-fondo: #ffffff;
             --sombra: 0 4px 6px rgba(0, 0, 0, 0.1);
             --sombra-hover: 0 8px 15px rgba(0, 0, 0, 0.2);
             --transicion: all 0.3s ease;
@@ -23,7 +23,7 @@
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             margin: 0;
             padding: 0;
-            background-color: var(--color-fondo);
+            background-color: var(--color-primario);
             color: var(--color-texto);
             background-image: 
                 radial-gradient(circle at 10% 20%, rgba(0, 180, 216, 0.05) 0%, rgba(0, 180, 216, 0.05) 90%),
@@ -282,7 +282,7 @@
     <div class="header">
         <h1 class="title">Columbus Hospital Simulation Center</h1>
         <div class="logo">
-            <img src="logo.png.png" alt="Columbus Hospital Logo">
+            <img src="logo.png" alt="Columbus Hospital Logo">
         </div>
     </div>
     <div class="container">
@@ -292,7 +292,7 @@
         </div>
         <div class="menu-container">
             <a href="generator.html" class="menu-button">Generar QR</a>
-            <a href="#" class="menu-button" onclick="validarAcceso()">Escanear QR</a>
+            <a href="scanner2.html" class="menu-button" onclick="validarAcceso()">Escanear QR</a>
         </div>
         <div class="rules">
             <h3>Reglamento:</h3>
