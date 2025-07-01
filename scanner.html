@@ -130,6 +130,33 @@
             font-weight: 600;
         }
 
+        .filters {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin: 20px 0;
+            align-items: center;
+        }
+
+        .filter-group {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .filter-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: var(--color-primario);
+        }
+
+        .filter-group select, .filter-group input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+
         table {
             width: 100%;
             border-collapse: collapse;
@@ -254,6 +281,36 @@
             background-color: var(--color-error);
             color: var(--color-blanco);
             transform: translateY(-2px);
+        }
+
+        .pagination {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+            gap: 5px;
+        }
+
+        .page-btn {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            background-color: white;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+
+        .page-btn.active {
+            background-color: var(--color-primario);
+            color: white;
+            border-color: var(--color-primario);
+        }
+
+        .page-btn:hover:not(.active) {
+            background-color: #f0f0f0;
+        }
+
+        .page-btn.disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
         }
 
         /* Modal styles */
@@ -429,6 +486,32 @@
     <div class="container">
         <div id="reader"></div>
         <div id="statusMessage" class="status-message"></div>
+        
+        <div class="filters">
+            <div class="filter-group">
+                <label for="filterMateria">Filtrar por Materia:</label>
+                <select id="filterMateria" onchange="filtrarRegistros()">
+                    <option value="">Todas las materias</option>
+                    <option value="Anatomía">Anatomía</option>
+                    <option value="Fisiología">Fisiología</option>
+                    <option value="Farmacología">Farmacología</option>
+                    <option value="Cirugía">Cirugía</option>
+                    <option value="Pediatría">Pediatría</option>
+                    <option value="Ginecología">Ginecología</option>
+                    <option value="Cardiología">Cardiología</option>
+                    <option value="Neurología">Neurología</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label for="filterGrupo">Filtrar por Grupo:</label>
+                <input type="text" id="filterGrupo" placeholder="Grupo (ej: A1)" oninput="filtrarRegistros()">
+            </div>
+            <div class="filter-group">
+                <label for="filterNombre">Buscar por Nombre:</label>
+                <input type="text" id="filterNombre" placeholder="Nombre o cédula" oninput="filtrarRegistros()">
+            </div>
+        </div>
+        
         <div class="button-container">
             <button class="action-button download" onclick="generarPDF()">
                 <i class="fas fa-download"></i> Descargar PDF
@@ -437,17 +520,24 @@
                 <i class="fas fa-home"></i> Volver al Inicio
             </button>
         </div>
+        
         <table id="registros">
             <thead>
                 <tr>
                     <th>Cédula</th>
                     <th>Nombre</th>
+                    <th>Materia</th>
+                    <th>Grupo</th>
                     <th>Fecha y Hora</th>
                     <th>Acciones</th>
                 </tr>
             </thead>
             <tbody></tbody>
         </table>
+        
+        <div class="pagination" id="pagination">
+            <!-- Pagination buttons will be added here by JavaScript -->
+        </div>
     </div>
 
     <!-- Font Awesome para iconos -->
@@ -459,6 +549,9 @@
         const SCAN_COOLDOWN = 5000; // 5 segundos de espera entre escaneos
         const PASSWORD = "admin123"; // Cambia esta contraseña por la que desees
         let registroAEliminar = null;
+        let currentPage = 1;
+        const recordsPerPage = 20;
+        let filteredRegistros = [];
 
         function showStatus(message, isError = false) {
             const statusElement = document.getElementById('statusMessage');
@@ -508,7 +601,7 @@
                 const registros = JSON.parse(localStorage.getItem('registros') || '[]');
                 registros.splice(registroAEliminar, 1);
                 localStorage.setItem('registros', JSON.stringify(registros));
-                actualizarTabla();
+                filtrarRegistros();
                 showStatus('Registro eliminado exitosamente');
                 cerrarModal();
             } else {
@@ -516,19 +609,45 @@
             }
         }
 
-        function actualizarTabla() {
+        function filtrarRegistros() {
+            const materiaFilter = document.getElementById('filterMateria').value.toLowerCase();
+            const grupoFilter = document.getElementById('filterGrupo').value.toLowerCase();
+            const nombreFilter = document.getElementById('filterNombre').value.toLowerCase();
+            
             const registros = JSON.parse(localStorage.getItem('registros') || '[]');
+            
+            filteredRegistros = registros.filter(registro => {
+                const matchesMateria = !materiaFilter || (registro.materia && registro.materia.toLowerCase().includes(materiaFilter));
+                const matchesGrupo = !grupoFilter || (registro.grupo && registro.grupo.toLowerCase().includes(grupoFilter));
+                const matchesNombre = !nombreFilter || 
+                    (registro.nombre && registro.nombre.toLowerCase().includes(nombreFilter)) || 
+                    (registro.cedula && registro.cedula.toLowerCase().includes(nombreFilter));
+                
+                return matchesMateria && matchesGrupo && matchesNombre;
+            });
+            
+            currentPage = 1;
+            actualizarTabla();
+        }
+
+        function actualizarTabla() {
             const tbody = document.querySelector('#registros tbody');
             tbody.innerHTML = '';
             
-            registros.forEach((registro, index) => {
+            const startIndex = (currentPage - 1) * recordsPerPage;
+            const endIndex = startIndex + recordsPerPage;
+            const paginatedRegistros = filteredRegistros.slice(startIndex, endIndex);
+            
+            paginatedRegistros.forEach((registro, index) => {
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
                     <td>${registro.cedula}</td>
                     <td>${registro.nombre}</td>
+                    <td>${registro.materia || 'N/A'}</td>
+                    <td>${registro.grupo || 'N/A'}</td>
                     <td>${registro.timestamp}</td>
                     <td>
-                        <button class="delete-btn" onclick="mostrarModal(${index})">
+                        <button class="delete-btn" onclick="mostrarModal(${filteredRegistros.indexOf(registro)})">
                             <i class="fas fa-trash-alt"></i> Eliminar
                         </button>
                     </td>
@@ -537,6 +656,54 @@
             });
             
             checkDuplicates();
+            setupPagination();
+        }
+
+        function setupPagination() {
+            const paginationDiv = document.getElementById('pagination');
+            paginationDiv.innerHTML = '';
+            
+            const pageCount = Math.ceil(filteredRegistros.length / recordsPerPage);
+            
+            if (pageCount <= 1) return;
+            
+            // Previous button
+            const prevButton = document.createElement('button');
+            prevButton.innerText = '«';
+            prevButton.className = 'page-btn';
+            prevButton.disabled = currentPage === 1;
+            prevButton.onclick = () => {
+                if (currentPage > 1) {
+                    currentPage--;
+                    actualizarTabla();
+                }
+            };
+            paginationDiv.appendChild(prevButton);
+            
+            // Page buttons
+            for (let i = 1; i <= pageCount; i++) {
+                const pageButton = document.createElement('button');
+                pageButton.innerText = i;
+                pageButton.className = 'page-btn ' + (i === currentPage ? 'active' : '');
+                pageButton.onclick = () => {
+                    currentPage = i;
+                    actualizarTabla();
+                };
+                paginationDiv.appendChild(pageButton);
+            }
+            
+            // Next button
+            const nextButton = document.createElement('button');
+            nextButton.innerText = '»';
+            nextButton.className = 'page-btn';
+            nextButton.disabled = currentPage === pageCount;
+            nextButton.onclick = () => {
+                if (currentPage < pageCount) {
+                    currentPage++;
+                    actualizarTabla();
+                }
+            };
+            paginationDiv.appendChild(nextButton);
         }
 
         function onScanSuccess(decodedText) {
@@ -554,6 +721,8 @@
                 registros.unshift({
                     cedula: datos.cedula,
                     nombre: datos.nombre,
+                    materia: datos.materia,
+                    grupo: datos.grupo,
                     timestamp: timestamp
                 });
                 localStorage.setItem('registros', JSON.stringify(registros));
@@ -561,7 +730,7 @@
                 lastScannedCode = decodedText;
                 lastScannedTime = currentTime;
                 
-                actualizarTabla();
+                filtrarRegistros();
                 showStatus('Registro exitoso: ' + datos.nombre);
             } catch (e) {
                 showStatus('Error al procesar el código QR', true);
@@ -585,21 +754,35 @@
             doc.setFont('helvetica', 'normal');
             doc.text(`Generado: ${new Date().toLocaleString()}`, 105, 30, { align: 'center' });
             
-            // Obtener datos de la tabla
-            const registros = JSON.parse(localStorage.getItem('registros') || '[]');
-            const datos = registros.map(registro => [
+            // Agregar filtros aplicados
+            const materiaFilter = document.getElementById('filterMateria').value;
+            const grupoFilter = document.getElementById('filterGrupo').value;
+            const nombreFilter = document.getElementById('filterNombre').value;
+            
+            if (materiaFilter || grupoFilter || nombreFilter) {
+                let filtros = 'Filtros: ';
+                if (materiaFilter) filtros += `Materia: ${materiaFilter} `;
+                if (grupoFilter) filtros += `Grupo: ${grupoFilter} `;
+                if (nombreFilter) filtros += `Búsqueda: ${nombreFilter}`;
+                doc.text(filtros, 105, 40, { align: 'center' });
+            }
+            
+            // Obtener datos filtrados
+            const datos = filteredRegistros.map(registro => [
                 registro.cedula,
                 registro.nombre,
+                registro.materia || 'N/A',
+                registro.grupo || 'N/A',
                 registro.timestamp
             ]);
             
             // Generar tabla en PDF
             doc.autoTable({
-                head: [['Cédula', 'Nombre', 'Fecha y Hora']],
+                head: [['Cédula', 'Nombre', 'Materia', 'Grupo', 'Fecha y Hora']],
                 body: datos,
-                startY: 40,
+                startY: 50,
                 styles: {
-                    fontSize: 10,
+                    fontSize: 8,
                     cellPadding: 3,
                     textColor: [0, 0, 0]
                 },
@@ -611,11 +794,12 @@
                 alternateRowStyles: {
                     fillColor: [240, 240, 240]
                 },
-                margin: { top: 40 }
+                margin: { top: 50 }
             });
             
             // Guardar PDF
-            doc.save(`registro-asistencia-${new Date().toISOString().slice(0,10)}.pdf`);
+            const fileName = `registro-asistencia-${new Date().toISOString().slice(0,10)}.pdf`;
+            doc.save(fileName);
             showStatus('PDF generado exitosamente');
         }
 
@@ -626,7 +810,7 @@
         html5QrcodeScanner.render(onScanSuccess);
 
         window.onload = () => {
-            actualizarTabla();
+            filtrarRegistros();
         };
 
         // Event listener para cerrar el modal con la tecla Enter
