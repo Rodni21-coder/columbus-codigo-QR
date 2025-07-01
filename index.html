@@ -263,20 +263,6 @@
             }
         }
     </style>
-    <script>
-        function validarAcceso() {
-            var clave = prompt("Ingrese la contraseña para acceder:");
-            var claveCorrecta = "HsimuladoCU2025"; // Cambia esta clave por la que desees
-
-            if (clave === claveCorrecta) {
-                window.location.href = "scanner.html";
-            } else if (clave !== null && clave !== "") {
-                alert("Contraseña incorrecta. Intente nuevamente.");
-            } else if (clave === "") {
-                alert("La contraseña no puede estar vacía. Intente nuevamente.");
-            }
-        }
-    </script>
 </head>
 <body>
     <div class="header">
@@ -304,5 +290,22 @@
             </ul>
         </div>
     </div>
+    <script>
+function validarAcceso() {
+    event.preventDefault();
+    var clave = prompt("Ingrese la contraseña para acceder:");
+    var claveCorrecta = "HsimuladoCU2025";
+
+    if (clave === claveCorrecta) {
+        window.location.href = event.target.href;
+    } else if (clave === null) {
+        alert("Acceso cancelado");
+        return false;
+    } else {
+        alert(clave === "" ? "La contraseña no puede estar vacía" : "Contraseña incorrecta");
+        return false;
+    }
+}
+</script>
 </body>
 </html>
