@@ -113,7 +113,7 @@
             font-size: 1.1rem;
         }
 
-        input {
+        input, select {
             width: 100%;
             padding: 14px 16px;
             border: 2px solid #e0e0e0;
@@ -124,7 +124,7 @@
             background-color: #f9f9f9;
         }
 
-        input:focus {
+        input:focus, select:focus {
             outline: none;
             border-color: var(--color-accent);
             box-shadow: 0 0 0 3px rgba(0, 180, 216, 0.2);
@@ -214,7 +214,7 @@
                 font-size: 1.3rem;
             }
 
-            input {
+            input, select {
                 padding: 12px 14px;
             }
 
@@ -241,6 +241,24 @@
             <label for="nombre">Nombre:</label>
             <input type="text" id="nombre" required placeholder="Ingrese su nombre completo">
         </div>
+        <div class="form-group">
+            <label for="materia">Materia:</label>
+            <select id="materia" required>
+                <option value="">Seleccione una materia</option>
+                <option value="Anatomía">Anatomía</option>
+                <option value="Fisiología">Fisiología</option>
+                <option value="Farmacología">Farmacología</option>
+                <option value="Cirugía">Cirugía</option>
+                <option value="Pediatría">Pediatría</option>
+                <option value="Ginecología">Ginecología</option>
+                <option value="Cardiología">Cardiología</option>
+                <option value="Neurología">Neurología</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="grupo">Grupo:</label>
+            <input type="text" id="grupo" required placeholder="Ingrese el grupo (ej: A1, B2, etc.)">
+        </div>
         <button onclick="generarQR()">Generar QR</button>
         <div id="qrcode"></div>
         <button id="downloadQR" onclick="descargarQR()">Descargar QR</button>
@@ -248,52 +266,71 @@
 
     <script>
         function generarQR() {
-            const cedula = document.getElementById('cedula').value;
-            const nombre = document.getElementById('nombre').value;
+            const cedula = document.getElementById('cedula').value.trim();
+            const nombre = document.getElementById('nombre').value.trim();
+            const materia = document.getElementById('materia').value;
+            const grupo = document.getElementById('grupo').value.trim();
 
-            if (!cedula || !nombre) {
+            // Validación de campos
+            if (!cedula || !nombre || !materia || !grupo) {
                 alert('Por favor complete todos los campos');
                 return;
             }
 
+            // Crear objeto con los datos
             const datos = {
                 cedula: cedula,
-                nombre: nombre
+                nombre: nombre,
+                materia: materia,
+                grupo: grupo
             };
 
+            // Limpiar contenedor QR anterior
             const qrCodeDiv = document.getElementById('qrcode');
             qrCodeDiv.innerHTML = '';
+            
+            try {
+                // Generar nuevo QR
+                new QRCode(qrCodeDiv, {
+                    text: JSON.stringify(datos),
+                    width: 256,
+                    height: 256,
+                    colorDark: "#05117e",
+                    colorLight: "#ffffff",
+                    correctLevel: QRCode.CorrectLevel.L
+                });
 
-            const qr = new QRCode(qrCodeDiv, {
-                text: JSON.stringify(datos),
-                width: 256,
-                height: 256,
-                colorDark: "#05117e",
-                colorLight: "#ffffff",
-                correctLevel: QRCode.CorrectLevel.H
-            });
-
-            setTimeout(() => {
-                document.getElementById('downloadQR').style.display = 'block';
-                document.getElementById('downloadQR').scrollIntoView({ behavior: 'smooth' });
-            }, 500);
+                // Mostrar botón de descarga después de 500ms
+                setTimeout(() => {
+                    const downloadBtn = document.getElementById('downloadQR');
+                    downloadBtn.style.display = 'block';
+                    downloadBtn.scrollIntoView({ behavior: 'smooth' });
+                }, 500);
+                
+            } catch (error) {
+                console.error('Error al generar QR:', error);
+                alert('Error al generar el código QR. Por favor intente nuevamente.');
+            }
         }
 
         function descargarQR() {
             const qrCanvas = document.querySelector('#qrcode canvas');
             if (!qrCanvas) {
-                alert('Primero genera un código QR');
+                alert('Primero genere un código QR');
                 return;
             }
 
-            const cedula = document.getElementById('cedula').value;
-            const nombre = document.getElementById('nombre').value;
+            const nombre = document.getElementById('nombre').value.trim();
+            const cedula = document.getElementById('cedula').value.trim();
             const nombreArchivo = `QR_${nombre.replace(/\s+/g, '_')}_${cedula}.png`;
 
+            // Crear enlace de descarga
             const link = document.createElement('a');
             link.href = qrCanvas.toDataURL("image/png");
             link.download = nombreArchivo;
+            document.body.appendChild(link);
             link.click();
+            document.body.removeChild(link);
         }
     </script>
 </body>
