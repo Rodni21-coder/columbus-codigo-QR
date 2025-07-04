@@ -462,6 +462,15 @@
                 width: 100%;
             }
         }
+        .action-button.clear-all {
+    border-color: var(--color-error);
+    color: var(--color-error);
+}
+
+.action-button.clear-all:hover {
+    background-color: var(--color-error);
+    color: var(--color-blanco);
+}
     </style>
 </head>
 <body>
@@ -519,6 +528,9 @@
             <button class="action-button home" onclick="location.href='index.html'">
                 <i class="fas fa-home"></i> Volver al Inicio
             </button>
+                <button class="action-button clear-all" onclick="mostrarModalEliminarTodos()">
+        <i class="fas fa-trash-alt"></i> Eliminar Todos
+    </button>
         </div>
         
         <table id="registros">
@@ -539,11 +551,23 @@
             <!-- Pagination buttons will be added here by JavaScript -->
         </div>
     </div>
-
+<div id="deleteAllModal" class="modal">
+    <div class="modal-content">
+        <h3>Eliminar Todos los Registros</h3>
+        <p>¿Está seguro que desea eliminar todos los registros? Esta acción no se puede deshacer.</p>
+        <input type="password" id="deleteAllPassword" placeholder="Ingrese la contraseña de administrador">
+        <div class="modal-buttons">
+            <button class="modal-btn confirm-btn" onclick="confirmarEliminacionTotal()">Confirmar</button>
+            <button class="modal-btn cancel-btn" onclick="cerrarModalEliminarTodos()">Cancelar</button>
+        </div>
+    </div>
+</div>
     <!-- Font Awesome para iconos -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
 
     <script>
+        const SYNC_INTERVAL = 5000; // 5 segundos entre sincronizaciones
+        let syncIntervalId = null;
         let lastScannedCode = '';
         let lastScannedTime = 0;
         const SCAN_COOLDOWN = 5000; // 5 segundos de espera entre escaneos
@@ -608,7 +632,113 @@
                 showStatus('Contraseña incorrecta', true);
             }
         }
+// Agrega estas funciones con las demás
+function mostrarModalEliminarTodos() {
+    document.getElementById('deleteAllModal').style.display = 'block';
+    document.getElementById('deleteAllPassword').value = '';
+    document.getElementById('deleteAllPassword').focus();
+}
 
+function cerrarModalEliminarTodos() {
+    document.getElementById('deleteAllModal').style.display = 'none';
+}
+
+function confirmarEliminacionTotal() {
+    const password = document.getElementById('deleteAllPassword').value;
+    if (password === PASSWORD) {
+        localStorage.removeItem('registros');
+        filteredRegistros = [];
+        actualizarTabla();
+        showStatus('Todos los registros han sido eliminados');
+        cerrarModalEliminarTodos();
+    } else {
+        showStatus('Contraseña incorrecta', true);
+    }
+}
+
+// Función para sincronizar datos entre pestañas/dispositivos
+function setupDataSync() {
+    // Escuchar cambios en localStorage
+    window.addEventListener('storage', (event) => {
+        if (event.key === 'registros') {
+            filtrarRegistros();
+        }
+    });
+
+    // Forzar actualización periódica (para dispositivos que no disparan bien el evento storage)
+    syncIntervalId = setInterval(() => {
+        filtrarRegistros();
+    }, SYNC_INTERVAL);
+}
+
+// Modifica la función onScanSuccess para disparar evento de actualización
+function onScanSuccess(decodedText) {
+    try {
+        const currentTime = Date.now();
+        if (decodedText === lastScannedCode && currentTime - lastScannedTime < SCAN_COOLDOWN) {
+            showStatus('Por favor espere unos segundos antes de escanear el mismo código', true);
+            return;
+        }
+
+        const datos = JSON.parse(decodedText);
+        const timestamp = new Date().toLocaleString();
+        
+        const registros = JSON.parse(localStorage.getItem('registros') || '[]');
+        registros.unshift({
+            cedula: datos.cedula,
+            nombre: datos.nombre,
+            materia: datos.materia,
+            grupo: datos.grupo,
+            timestamp: timestamp
+        });
+        localStorage.setItem('registros', JSON.stringify(registros));
+        
+        // Disparar evento personalizado para notificar a otras pestañas
+        const event = new Event('localStorageUpdated');
+        window.dispatchEvent(event);
+
+        lastScannedCode = decodedText;
+        lastScannedTime = currentTime;
+        
+        filtrarRegistros();
+        showStatus('Registro exitoso: ' + datos.nombre);
+    } catch (e) {
+        showStatus('Error al procesar el código QR', true);
+        console.error('Error al procesar el código QR:', e);
+    }
+}
+
+// Modifica window.onload para incluir la sincronización
+window.onload = () => {
+    filtrarRegistros();
+    setupDataSync();
+};
+
+// Agrega estos event listeners para manejar el modal de eliminación masiva
+document.getElementById('deleteAllPassword').addEventListener('keyup', function(event) {
+    if (event.key === 'Enter') {
+        confirmarEliminacionTotal();
+    }
+});
+
+window.onclick = function(event) {
+    const modal = document.getElementById('passwordModal');
+    if (event.target === modal) {
+        cerrarModal();
+    }
+    
+    const deleteAllModal = document.getElementById('deleteAllModal');
+    if (event.target === deleteAllModal) {
+        cerrarModalEliminarTodos();
+    }
+}
+
+// Limpiar intervalo al salir de la página
+window.addEventListener('beforeunload', () => {
+    if (syncIntervalId) {
+        clearInterval(syncIntervalId);
+    }
+});
         function filtrarRegistros() {
             const materiaFilter = document.getElementById('filterMateria').value.toLowerCase();
             const grupoFilter = document.getElementById('filterGrupo').value.toLowerCase();
