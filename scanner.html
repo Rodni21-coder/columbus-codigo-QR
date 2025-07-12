@@ -106,6 +106,64 @@
             background: linear-gradient(90deg, var(--color-primario), var(--color-accent));
         }
 
+        .scanner-section {
+            margin-bottom: 30px;
+        }
+
+        .scanner-controls {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            align-items: center;
+        }
+
+        .control-group label {
+            font-weight: 600;
+            color: var(--color-primario);
+            font-size: 0.9rem;
+        }
+
+        .control-group select, .control-group input {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 0.9rem;
+        }
+
+        .scanner-toggle {
+            padding: 12px 24px;
+            background-color: var(--color-exito);
+            color: var(--color-blanco);
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: var(--transicion);
+            font-size: 0.9rem;
+        }
+
+        .scanner-toggle:hover {
+            background-color: #218838;
+            transform: translateY(-2px);
+        }
+
+        .scanner-toggle.stop {
+            background-color: var(--color-error);
+        }
+
+        .scanner-toggle.stop:hover {
+            background-color: #c82333;
+        }
+
         #reader {
             width: 100%;
             max-width: 600px;
@@ -119,15 +177,52 @@
             overflow: hidden;
         }
 
-        #reader::after {
-            content: 'Escaneando...';
-            position: absolute;
-            bottom: 10px;
-            left: 0;
-            width: 100%;
+        #reader video {
+            width: 100% !important;
+            height: auto !important;
+            border-radius: 8px;
+        }
+
+        .scanner-status {
             text-align: center;
-            color: var(--color-primario);
+            margin-top: 15px;
+            padding: 10px;
+            border-radius: 8px;
             font-weight: 600;
+            background: linear-gradient(45deg, var(--color-primario), var(--color-accent));
+            color: var(--color-blanco);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 0.8; }
+            50% { opacity: 1; }
+            100% { opacity: 0.8; }
+        }
+
+        .scanner-tips {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+            border-left: 4px solid var(--color-accent);
+        }
+
+        .scanner-tips h4 {
+            margin: 0 0 10px 0;
+            color: var(--color-primario);
+            font-size: 1rem;
+        }
+
+        .scanner-tips ul {
+            margin: 0;
+            padding-left: 20px;
+        }
+
+        .scanner-tips li {
+            margin: 5px 0;
+            color: var(--color-texto);
+            font-size: 0.9rem;
         }
 
         .filters {
@@ -238,6 +333,16 @@
 
         .action-button.home:hover {
             background-color: var(--color-primario);
+            color: var(--color-blanco);
+        }
+
+        .action-button.clear-all {
+            border-color: var(--color-error);
+            color: var(--color-error);
+        }
+
+        .action-button.clear-all:hover {
+            background-color: var(--color-error);
             color: var(--color-blanco);
         }
 
@@ -417,6 +522,11 @@
                 padding: 30px 20px;
             }
 
+            .scanner-controls {
+                flex-direction: column;
+                gap: 10px;
+            }
+
             th, td {
                 padding: 10px;
                 font-size: 0.9rem;
@@ -462,15 +572,6 @@
                 width: 100%;
             }
         }
-        .action-button.clear-all {
-    border-color: var(--color-error);
-    color: var(--color-error);
-}
-
-.action-button.clear-all:hover {
-    background-color: var(--color-error);
-    color: var(--color-blanco);
-}
     </style>
 </head>
 <body>
@@ -486,29 +587,87 @@
         </div>
     </div>
 
+    <!-- Delete All Modal -->
+    <div id="deleteAllModal" class="modal">
+        <div class="modal-content">
+            <h3>Eliminar Todos los Registros</h3>
+            <p>¿Está seguro que desea eliminar todos los registros? Esta acción no se puede deshacer.</p>
+            <input type="password" id="deleteAllPassword" placeholder="Ingrese la contraseña de administrador">
+            <div class="modal-buttons">
+                <button class="modal-btn confirm-btn" onclick="confirmarEliminacionTotal()">Confirmar</button>
+                <button class="modal-btn cancel-btn" onclick="cerrarModalEliminarTodos()">Cancelar</button>
+            </div>
+        </div>
+    </div>
+
     <div class="header">
         <h1 class="title">Columbus Hospital Simulation Center</h1>
         <div class="logo">
             <img src="logo.png" alt="Columbus Hospital Logo">
         </div>
     </div>
+
     <div class="container">
-        <div id="reader"></div>
+        <div class="scanner-section">
+            <div class="scanner-controls">
+                <div class="control-group">
+                    <label for="cameraSelect">Cámara:</label>
+                    <select id="cameraSelect">
+                        <option value="">Seleccionar cámara...</option>
+                    </select>
+                </div>
+                <div class="control-group">
+                    <label for="fpsRange">FPS:</label>
+                    <input type="range" id="fpsRange" min="5" max="30" value="15">
+                    <span id="fpsValue">15</span>
+                </div>
+                <div class="control-group">
+                    <label for="torchToggle">Linterna:</label>
+                    <input type="checkbox" id="torchToggle">
+                </div>
+                <button id="scannerToggle" class="scanner-toggle" onclick="toggleScanner()">
+                    Iniciar Escáner
+                </button>
+            </div>
+
+            <div id="reader"></div>
+            <div class="scanner-status" id="scannerStatus">
+                Scanner inactivo - Presione "Iniciar Escáner" para comenzar
+            </div>
+
+            <div class="scanner-tips">
+                <h4>💡 Consejos para un mejor escaneo:</h4>
+                <ul>
+                    <li>Mantenga el código QR centrado en la cámara</li>
+                    <li>Asegúrese de que haya buena iluminación</li>
+                    <li>Mantenga la distancia entre 10-30 cm del código</li>
+                    <li>Use la linterna en ambientes oscuros</li>
+                    <li>Evite movimientos bruscos durante el escaneo</li>
+                </ul>
+                
+                <div style="margin-top: 15px; padding: 10px; background: #e3f2fd; border-radius: 5px; border-left: 4px solid var(--color-accent);">
+                    <strong>🔄 Sincronización Automática:</strong><br>
+                    <small>Los registros se sincronizan automáticamente entre todos los dispositivos cada 2 segundos. 
+                    Todos los usuarios verán la lista actualizada en tiempo real.</small>
+                </div>
+            </div>
+        </div>
+
         <div id="statusMessage" class="status-message"></div>
         
         <div class="filters">
             <div class="filter-group">
                 <label for="filterMateria">Filtrar por Materia:</label>
                 <select id="filterMateria" onchange="filtrarRegistros()">
-                <option value="">Todas las Materias</option>
-                <option value="RCP">RCP</option>
-                <option value="Propedeutica">Propedeutica</option>
-                <option value="Obstetricia">Obstetricia</option>
-                <option value="Medicina Interna I">Medicina Interna I</option>
-                <option value="Pediatria">Pediatría</option>
-                <option value="Ginecologia">Ginecología</option>
-                <option value="Cardiologia">Cardiología</option>
-                <option value="EKG">EKG</option>
+                    <option value="">Todas las Materias</option>
+                    <option value="RCP">RCP</option>
+                    <option value="Propedeutica">Propedeutica</option>
+                    <option value="Obstetricia">Obstetricia</option>
+                    <option value="Medicina Interna I">Medicina Interna I</option>
+                    <option value="Pediatria">Pediatría</option>
+                    <option value="Ginecologia">Ginecología</option>
+                    <option value="Cardiologia">Cardiología</option>
+                    <option value="EKG">EKG</option>
                 </select>
             </div>
             <div class="filter-group">
@@ -519,6 +678,30 @@
                 <label for="filterNombre">Buscar por Nombre:</label>
                 <input type="text" id="filterNombre" placeholder="Nombre o cédula" oninput="filtrarRegistros()">
             </div>
+            <div class="filter-group">
+                <label for="filterFecha">Filtrar por Fecha:</label>
+                <select id="filterFecha" onchange="cambiarTipoFiltroFecha()">
+                    <option value="">Todas las Fechas</option>
+                    <option value="hoy">Hoy</option>
+                    <option value="ayer">Ayer</option>
+                    <option value="esta_semana">Esta Semana</option>
+                    <option value="este_mes">Este Mes</option>
+                    <option value="fecha_especifica">Fecha Específica</option>
+                    <option value="rango_fechas">Rango de Fechas</option>
+                </select>
+            </div>
+            <div class="filter-group" id="fechaEspecificaGroup" style="display: none;">
+                <label for="fechaEspecifica">Fecha:</label>
+                <input type="date" id="fechaEspecifica" onchange="filtrarRegistros()">
+            </div>
+            <div class="filter-group" id="rangoFechasGroup" style="display: none;">
+                <label for="fechaInicio">Desde:</label>
+                <input type="date" id="fechaInicio" onchange="filtrarRegistros()">
+            </div>
+            <div class="filter-group" id="rangoFechasGroup2" style="display: none;">
+                <label for="fechaFin">Hasta:</label>
+                <input type="date" id="fechaFin" onchange="filtrarRegistros()">
+            </div>
         </div>
         
         <div class="button-container">
@@ -528,9 +711,9 @@
             <button class="action-button home" onclick="location.href='index.html'">
                 <i class="fas fa-home"></i> Volver al Inicio
             </button>
-                <button class="action-button clear-all" onclick="mostrarModalEliminarTodos()">
-        <i class="fas fa-trash-alt"></i> Eliminar Todos
-    </button>
+            <button class="action-button clear-all" onclick="mostrarModalEliminarTodos()">
+                <i class="fas fa-trash-alt"></i> Eliminar Todos
+            </button>
         </div>
         
         <table id="registros">
@@ -547,35 +730,252 @@
             <tbody></tbody>
         </table>
         
-        <div class="pagination" id="pagination">
-            <!-- Pagination buttons will be added here by JavaScript -->
-        </div>
+        <div class="pagination" id="pagination"></div>
     </div>
-<div id="deleteAllModal" class="modal">
-    <div class="modal-content">
-        <h3>Eliminar Todos los Registros</h3>
-        <p>¿Está seguro que desea eliminar todos los registros? Esta acción no se puede deshacer.</p>
-        <input type="password" id="deleteAllPassword" placeholder="Ingrese la contraseña de administrador">
-        <div class="modal-buttons">
-            <button class="modal-btn confirm-btn" onclick="confirmarEliminacionTotal()">Confirmar</button>
-            <button class="modal-btn cancel-btn" onclick="cerrarModalEliminarTodos()">Cancelar</button>
-        </div>
-    </div>
-</div>
+
     <!-- Font Awesome para iconos -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
 
     <script>
-        const SYNC_INTERVAL = 5000; // 5 segundos entre sincronizaciones
+        const SYNC_INTERVAL = 2000; // Reducido a 2 segundos para mejor sincronización
         let syncIntervalId = null;
         let lastScannedCode = '';
         let lastScannedTime = 0;
-        const SCAN_COOLDOWN = 5000; // 5 segundos de espera entre escaneos
-        const PASSWORD = "admin123"; // Cambia esta contraseña por la que desees
+        const SCAN_COOLDOWN = 5000;
+        const PASSWORD = "admin123";
         let registroAEliminar = null;
         let currentPage = 1;
         const recordsPerPage = 20;
         let filteredRegistros = [];
+        let html5QrCode = null;
+        let isScanning = false;
+        let currentCameraId = null;
+        let availableCameras = [];
+        let currentStream = null;
+        let lastSyncTimestamp = 0;
+        let localDataVersion = 0;
+
+        // Configuración mejorada del scanner
+        const scannerConfig = {
+            fps: 15,
+            qrbox: { width: 300, height: 300 },
+            aspectRatio: 1.0,
+            disableFlip: false,
+            videoConstraints: {
+                facingMode: "environment", // Preferir cámara trasera
+                width: { ideal: 1920, max: 1920 },
+                height: { ideal: 1080, max: 1080 }
+            },
+            formatsToSupport: [Html5QrcodeSupportedFormats.QR_CODE],
+            useBarCodeDetectorIfSupported: true,
+            experimentalFeatures: {
+                useBarCodeDetectorIfSupported: true
+            }
+        };
+
+        async function initializeCameras() {
+            try {
+                const devices = await Html5Qrcode.getCameras();
+                availableCameras = devices;
+                const cameraSelect = document.getElementById('cameraSelect');
+                cameraSelect.innerHTML = '<option value="">Seleccionar cámara...</option>';
+                
+                devices.forEach((device, index) => {
+                    const option = document.createElement('option');
+                    option.value = device.id;
+                    option.textContent = device.label || `Cámara ${index + 1}`;
+                    cameraSelect.appendChild(option);
+                });
+
+                // Seleccionar automáticamente la cámara trasera si está disponible
+                const backCamera = devices.find(device => 
+                    device.label.toLowerCase().includes('back') || 
+                    device.label.toLowerCase().includes('rear') ||
+                    device.label.toLowerCase().includes('environment')
+                );
+                
+                if (backCamera) {
+                    cameraSelect.value = backCamera.id;
+                    currentCameraId = backCamera.id;
+                } else if (devices.length > 0) {
+                    cameraSelect.value = devices[0].id;
+                    currentCameraId = devices[0].id;
+                }
+            } catch (error) {
+                console.error('Error al obtener cámaras:', error);
+                showStatus('Error al acceder a las cámaras. Verifique los permisos.', true);
+            }
+        }
+
+        function updateScannerStatus(message, isActive = false) {
+            const statusElement = document.getElementById('scannerStatus');
+            statusElement.textContent = message;
+            statusElement.style.display = 'block';
+            
+            if (isActive) {
+                statusElement.style.animation = 'pulse 2s infinite';
+            } else {
+                statusElement.style.animation = 'none';
+            }
+        }
+
+        async function toggleScanner() {
+            const toggleBtn = document.getElementById('scannerToggle');
+            const cameraSelect = document.getElementById('cameraSelect');
+            
+            if (!isScanning) {
+                if (!currentCameraId) {
+                    showStatus('Por favor seleccione una cámara', true);
+                    return;
+                }
+                
+                try {
+                    html5QrCode = new Html5Qrcode("reader");
+                    
+                    // Configuración avanzada para mejor detección
+                    const config = {
+                        fps: parseInt(document.getElementById('fpsRange').value),
+                        qrbox: function(viewfinderWidth, viewfinderHeight) {
+                            const minEdgePercentage = 0.7;
+                            const minEdgeSize = Math.min(viewfinderWidth, viewfinderHeight);
+                            const qrboxSize = Math.floor(minEdgeSize * minEdgePercentage);
+                            return {
+                                width: qrboxSize,
+                                height: qrboxSize
+                            };
+                        },
+                        aspectRatio: 1.0,
+                        disableFlip: false,
+                        videoConstraints: {
+                            width: { ideal: 1920, max: 1920 },
+                            height: { ideal: 1080, max: 1080 },
+                            facingMode: "environment"
+                        },
+                        formatsToSupport: [Html5QrcodeSupportedFormats.QR_CODE],
+                        useBarCodeDetectorIfSupported: true,
+                        experimentalFeatures: {
+                            useBarCodeDetectorIfSupported: true
+                        }
+                    };
+                    
+                    await html5QrCode.start(
+                        currentCameraId,
+                        config,
+                        onScanSuccess,
+                        onScanError
+                    );
+                    
+                    isScanning = true;
+                    toggleBtn.textContent = 'Detener Escáner';
+                    toggleBtn.classList.add('stop');
+                    cameraSelect.disabled = true;
+                    updateScannerStatus('Escáner activo - Enfoque el código QR', true);
+                    
+                    // Habilitar linterna si está disponible
+                    enableTorchControl();
+                    
+                } catch (error) {
+                    console.error('Error al iniciar el escáner:', error);
+                    showStatus('Error al iniciar el escáner. Verifique los permisos de cámara.', true);
+                }
+            } else {
+                await stopScanner();
+            }
+        }
+
+        async function stopScanner() {
+            if (html5QrCode && isScanning) {
+                try {
+                    await html5QrCode.stop();
+                    html5QrCode.clear();
+                    html5QrCode = null;
+                } catch (error) {
+                    console.error('Error al detener el escáner:', error);
+                }
+            }
+            
+            isScanning = false;
+            const toggleBtn = document.getElementById('scannerToggle');
+            toggleBtn.textContent = 'Iniciar Escáner';
+            toggleBtn.classList.remove('stop');
+            document.getElementById('cameraSelect').disabled = false;
+            updateScannerStatus('Scanner detenido', false);
+            
+            // Desactivar linterna
+            document.getElementById('torchToggle').checked = false;
+            document.getElementById('torchToggle').disabled = true;
+        }
+
+        async function enableTorchControl() {
+            try {
+                const torchToggle = document.getElementById('torchToggle');
+                torchToggle.disabled = false;
+                
+                torchToggle.addEventListener('change', async (event) => {
+                    if (html5QrCode && isScanning) {
+                        try {
+                            await html5QrCode.applyVideoConstraints({
+                                advanced: [{ torch: event.target.checked }]
+                            });
+                        } catch (error) {
+                            console.log('Linterna no disponible en este dispositivo');
+                            event.target.checked = false;
+                        }
+                    }
+                });
+            } catch (error) {
+                document.getElementById('torchToggle').disabled = true;
+            }
+        }
+
+        function onScanSuccess(decodedText, decodedResult) {
+            try {
+                const currentTime = Date.now();
+                if (decodedText === lastScannedCode && currentTime - lastScannedTime < SCAN_COOLDOWN) {
+                    showStatus('Por favor espere unos segundos antes de escanear el mismo código', true);
+                    return;
+                }
+
+                // Feedback visual y sonoro
+                const readerElement = document.getElementById('reader');
+                readerElement.style.border = '3px solid #28a745';
+                setTimeout(() => {
+                    readerElement.style.border = '1px solid rgba(0, 0, 0, 0.1)';
+                }, 1000);
+
+                const datos = JSON.parse(decodedText);
+                const timestamp = new Date().toLocaleString();
+                const nuevoRegistro = {
+                    cedula: datos.cedula,
+                    nombre: datos.nombre,
+                    materia: datos.materia,
+                    grupo: datos.grupo,
+                    timestamp: timestamp
+                };
+                
+                // Usar la función mejorada de guardado con sincronización
+                if (saveRegistro(nuevoRegistro)) {
+                    lastScannedCode = decodedText;
+                    lastScannedTime = currentTime;
+                    
+                    filtrarRegistros();
+                    showStatus('✅ Registro exitoso: ' + datos.nombre);
+                    updateScannerStatus('Último escaneo: ' + datos.nombre + ' - ' + new Date().toLocaleTimeString(), true);
+                } else {
+                    showStatus('Error al guardar el registro', true);
+                }
+                
+            } catch (e) {
+                showStatus('Error al procesar el código QR. Verifique el formato.', true);
+                console.error('Error al procesar el código QR:', e);
+            }
+        }
+
+        function onScanError(errorMessage) {
+            // No mostrar errores de escaneo continuo para evitar spam
+            // Solo log para debugging
+            // console.log('Escaneando...', errorMessage);
+        }
 
         function showStatus(message, isError = false) {
             const statusElement = document.getElementById('statusMessage');
@@ -622,127 +1022,346 @@
         function confirmarEliminacion() {
             const password = document.getElementById('passwordInput').value;
             if (password === PASSWORD) {
-                const registros = JSON.parse(localStorage.getItem('registros') || '[]');
-                registros.splice(registroAEliminar, 1);
-                localStorage.setItem('registros', JSON.stringify(registros));
-                filtrarRegistros();
-                showStatus('Registro eliminado exitosamente');
-                cerrarModal();
+                if (deleteRegistro(registroAEliminar)) {
+                    filtrarRegistros();
+                    showStatus('Registro eliminado exitosamente');
+                    cerrarModal();
+                } else {
+                    showStatus('Error al eliminar el registro', true);
+                }
             } else {
                 showStatus('Contraseña incorrecta', true);
             }
         }
-// Agrega estas funciones con las demás
-function mostrarModalEliminarTodos() {
-    document.getElementById('deleteAllModal').style.display = 'block';
-    document.getElementById('deleteAllPassword').value = '';
-    document.getElementById('deleteAllPassword').focus();
-}
 
-function cerrarModalEliminarTodos() {
-    document.getElementById('deleteAllModal').style.display = 'none';
-}
+        function mostrarModalEliminarTodos() {
+            document.getElementById('deleteAllModal').style.display = 'block';
+            document.getElementById('deleteAllPassword').value = '';
+            document.getElementById('deleteAllPassword').focus();
+        }
 
-function confirmarEliminacionTotal() {
-    const password = document.getElementById('deleteAllPassword').value;
-    if (password === PASSWORD) {
-        localStorage.removeItem('registros');
-        filteredRegistros = [];
-        actualizarTabla();
-        showStatus('Todos los registros han sido eliminados');
-        cerrarModalEliminarTodos();
-    } else {
-        showStatus('Contraseña incorrecta', true);
-    }
-}
+        function cerrarModalEliminarTodos() {
+            document.getElementById('deleteAllModal').style.display = 'none';
+        }
 
-// Función para sincronizar datos entre pestañas/dispositivos
-function setupDataSync() {
-    // Escuchar cambios en localStorage
-    window.addEventListener('storage', (event) => {
-        if (event.key === 'registros') {
+        function confirmarEliminacionTotal() {
+            const password = document.getElementById('deleteAllPassword').value;
+            if (password === PASSWORD) {
+                if (clearAllRegistros()) {
+                    filteredRegistros = [];
+                    actualizarTabla();
+                    showStatus('Todos los registros han sido eliminados');
+                    cerrarModalEliminarTodos();
+                } else {
+                    showStatus('Error al eliminar los registros', true);
+                }
+            } else {
+                showStatus('Contraseña incorrecta', true);
+            }
+        }
+
+        // Sistema de sincronización mejorado entre dispositivos
+        // Función para cambiar el tipo de filtro de fecha
+        function cambiarTipoFiltroFecha() {
+            const filtroFecha = document.getElementById('filterFecha').value;
+            const fechaEspecificaGroup = document.getElementById('fechaEspecificaGroup');
+            const rangoFechasGroup = document.getElementById('rangoFechasGroup');
+            const rangoFechasGroup2 = document.getElementById('rangoFechasGroup2');
+            
+            // Ocultar todos los grupos adicionales
+            fechaEspecificaGroup.style.display = 'none';
+            rangoFechasGroup.style.display = 'none';
+            rangoFechasGroup2.style.display = 'none';
+            
+            // Mostrar el grupo correspondiente
+            if (filtroFecha === 'fecha_especifica') {
+                fechaEspecificaGroup.style.display = 'block';
+                // Establecer fecha de hoy por defecto
+                document.getElementById('fechaEspecifica').value = new Date().toISOString().split('T')[0];
+            } else if (filtroFecha === 'rango_fechas') {
+                rangoFechasGroup.style.display = 'block';
+                rangoFechasGroup2.style.display = 'block';
+                // Establecer rango de esta semana por defecto
+                const hoy = new Date();
+                const inicioSemana = new Date(hoy);
+                inicioSemana.setDate(hoy.getDate() - hoy.getDay());
+                document.getElementById('fechaInicio').value = inicioSemana.toISOString().split('T')[0];
+                document.getElementById('fechaFin').value = hoy.toISOString().split('T')[0];
+            }
+            
             filtrarRegistros();
         }
-    });
 
-    // Forzar actualización periódica (para dispositivos que no disparan bien el evento storage)
-    syncIntervalId = setInterval(() => {
-        filtrarRegistros();
-    }, SYNC_INTERVAL);
-}
+        // Función mejorada para verificar si una fecha está en el rango especificado
+        function estaEnRangoFecha(fechaRegistro, tipoFiltro, fechaEspecifica = null, fechaInicio = null, fechaFin = null) {
+            if (!fechaRegistro || !tipoFiltro) return true;
+            
+            try {
+                // Parsear la fecha del registro (formato: "12/7/2025, 3:45:30 PM")
+                const fechaRegistroParts = fechaRegistro.split(', ')[0]; // "12/7/2025"
+                const [mes, dia, año] = fechaRegistroParts.split('/').map(num => parseInt(num));
+                const fechaRegistroObj = new Date(año, mes - 1, dia); // mes - 1 porque Date usa 0-11 para meses
+                
+                const hoy = new Date();
+                hoy.setHours(0, 0, 0, 0);
+                
+                switch (tipoFiltro) {
+                    case 'hoy':
+                        const fechaHoy = new Date();
+                        fechaHoy.setHours(0, 0, 0, 0);
+                        return fechaRegistroObj.toDateString() === fechaHoy.toDateString();
+                        
+                    case 'ayer':
+                        const fechaAyer = new Date();
+                        fechaAyer.setDate(fechaAyer.getDate() - 1);
+                        fechaAyer.setHours(0, 0, 0, 0);
+                        return fechaRegistroObj.toDateString() === fechaAyer.toDateString();
+                        
+                    case 'esta_semana':
+                        const inicioSemana = new Date(hoy);
+                        inicioSemana.setDate(hoy.getDate() - hoy.getDay());
+                        const finSemana = new Date(inicioSemana);
+                        finSemana.setDate(inicioSemana.getDate() + 6);
+                        finSemana.setHours(23, 59, 59, 999);
+                        return fechaRegistroObj >= inicioSemana && fechaRegistroObj <= finSemana;
+                        
+                    case 'este_mes':
+                        const inicioMes = new Date(hoy.getFullYear(), hoy.getMonth(), 1);
+                        const finMes = new Date(hoy.getFullYear(), hoy.getMonth() + 1, 0);
+                        finMes.setHours(23, 59, 59, 999);
+                        return fechaRegistroObj >= inicioMes && fechaRegistroObj <= finMes;
+                        
+                    case 'fecha_especifica':
+                        if (!fechaEspecifica) return true;
+                        const fechaEsp = new Date(fechaEspecifica);
+                        fechaEsp.setHours(0, 0, 0, 0);
+                        return fechaRegistroObj.toDateString() === fechaEsp.toDateString();
+                        
+                    case 'rango_fechas':
+                        if (!fechaInicio || !fechaFin) return true;
+                        const inicio = new Date(fechaInicio);
+                        inicio.setHours(0, 0, 0, 0);
+                        const fin = new Date(fechaFin);
+                        fin.setHours(23, 59, 59, 999);
+                        return fechaRegistroObj >= inicio && fechaRegistroObj <= fin;
+                        
+                    default:
+                        return true;
+                }
+            } catch (error) {
+                console.error('Error al filtrar por fecha:', error, 'Fecha:', fechaRegistro);
+                return true; // En caso de error, mostrar el registro
+            }
+        }
+            // Escuchar cambios en localStorage (entre pestañas del mismo dispositivo)
+            window.addEventListener('storage', (event) => {
+                if (event.key === 'registros' || event.key === 'dataVersion') {
+                    console.log('🔄 Cambio detectado en localStorage:', event.key);
+                    syncDataFromStorage();
+                }
+            });
 
-// Modifica la función onScanSuccess para disparar evento de actualización
-function onScanSuccess(decodedText) {
-    try {
-        const currentTime = Date.now();
-        if (decodedText === lastScannedCode && currentTime - lastScannedTime < SCAN_COOLDOWN) {
-            showStatus('Por favor espere unos segundos antes de escanear el mismo código', true);
-            return;
+            // Sincronización forzada periódica (para diferentes dispositivos)
+            syncIntervalId = setInterval(() => {
+                syncDataFromStorage();
+            }, SYNC_INTERVAL);
+
+            // Escuchar eventos personalizados de actualización
+            window.addEventListener('localStorageUpdated', () => {
+                syncDataFromStorage();
+            });
+
+            // Sincronización cuando la ventana recupera el foco
+            window.addEventListener('focus', () => {
+                console.log('🔄 Ventana recuperó el foco - sincronizando...');
+                syncDataFromStorage();
+            });
+
+            // Heartbeat para mantener la sincronización activa
+            setInterval(() => {
+                updateLastActivity();
+            }, 30000); // Cada 30 segundos
         }
 
-        const datos = JSON.parse(decodedText);
-        const timestamp = new Date().toLocaleString();
-        
-        const registros = JSON.parse(localStorage.getItem('registros') || '[]');
-        registros.unshift({
-            cedula: datos.cedula,
-            nombre: datos.nombre,
-            materia: datos.materia,
-            grupo: datos.grupo,
-            timestamp: timestamp
-        });
-        localStorage.setItem('registros', JSON.stringify(registros));
-        
-        // Disparar evento personalizado para notificar a otras pestañas
-        const event = new Event('localStorageUpdated');
-        window.dispatchEvent(event);
+        function syncDataFromStorage() {
+            try {
+                const currentVersion = parseInt(localStorage.getItem('dataVersion') || '0');
+                const currentTimestamp = parseInt(localStorage.getItem('lastSyncTimestamp') || '0');
+                
+                // Solo sincronizar si hay cambios
+                if (currentVersion > localDataVersion || currentTimestamp > lastSyncTimestamp) {
+                    console.log('📊 Sincronizando datos... Versión:', currentVersion);
+                    localDataVersion = currentVersion;
+                    lastSyncTimestamp = currentTimestamp;
+                    
+                    // Mantener filtros actuales
+                    const currentFilters = {
+                        materia: document.getElementById('filterMateria').value,
+                        grupo: document.getElementById('filterGrupo').value,
+                        nombre: document.getElementById('filterNombre').value,
+                        fecha: document.getElementById('filterFecha').value,
+                        fechaEspecifica: document.getElementById('fechaEspecifica').value,
+                        fechaInicio: document.getElementById('fechaInicio').value,
+                        fechaFin: document.getElementById('fechaFin').value
+                    };
+                    
+                    filtrarRegistros();
+                    
+                    // Restaurar filtros
+                    document.getElementById('filterMateria').value = currentFilters.materia;
+                    document.getElementById('filterGrupo').value = currentFilters.grupo;
+                    document.getElementById('filterNombre').value = currentFilters.nombre;
+                    document.getElementById('filterFecha').value = currentFilters.fecha;
+                    document.getElementById('fechaEspecifica').value = currentFilters.fechaEspecifica;
+                    document.getElementById('fechaInicio').value = currentFilters.fechaInicio;
+                    document.getElementById('fechaFin').value = currentFilters.fechaFin;
+                    
+                    // Restablecer visibilidad de campos de fecha
+                    cambiarTipoFiltroFecha();
+                    
+                    // Mostrar notificación sutil de sincronización
+                    showSyncNotification();
+                }
+            } catch (error) {
+                console.error('Error en sincronización:', error);
+            }
+        }
 
-        lastScannedCode = decodedText;
-        lastScannedTime = currentTime;
-        
-        filtrarRegistros();
-        showStatus('Registro exitoso: ' + datos.nombre);
-    } catch (e) {
-        showStatus('Error al procesar el código QR', true);
-        console.error('Error al procesar el código QR:', e);
-    }
-}
+        function updateDataVersion() {
+            const newVersion = Date.now();
+            localStorage.setItem('dataVersion', newVersion.toString());
+            localStorage.setItem('lastSyncTimestamp', newVersion.toString());
+            localDataVersion = newVersion;
+            lastSyncTimestamp = newVersion;
+            
+            // Disparar evento para notificar a otras pestañas/dispositivos
+            const event = new StorageEvent('storage', {
+                key: 'dataVersion',
+                newValue: newVersion.toString(),
+                storageArea: localStorage
+            });
+            window.dispatchEvent(event);
+        }
 
-// Modifica window.onload para incluir la sincronización
-window.onload = () => {
-    filtrarRegistros();
-    setupDataSync();
-};
+        function updateLastActivity() {
+            localStorage.setItem('lastActivity', Date.now().toString());
+        }
 
-// Agrega estos event listeners para manejar el modal de eliminación masiva
-document.getElementById('deleteAllPassword').addEventListener('keyup', function(event) {
-    if (event.key === 'Enter') {
-        confirmarEliminacionTotal();
-    }
-});
+        function showSyncNotification() {
+            // Crear notificación sutil que no interrumpa el flujo
+            const notification = document.createElement('div');
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: linear-gradient(45deg, var(--color-accent), var(--color-primario));
+                color: white;
+                padding: 10px 20px;
+                border-radius: 25px;
+                font-size: 0.9rem;
+                font-weight: 500;
+                z-index: 10000;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+                transform: translateX(100%);
+                transition: transform 0.3s ease;
+                display: flex;
+                align-items: center;
+                gap: 8px;
+            `;
+            notification.innerHTML = '<i class="fas fa-sync-alt"></i> Lista actualizada';
+            
+            document.body.appendChild(notification);
+            
+            // Animación de entrada
+            setTimeout(() => {
+                notification.style.transform = 'translateX(0)';
+            }, 100);
+            
+            // Animación de salida
+            setTimeout(() => {
+                notification.style.transform = 'translateX(100%)';
+                setTimeout(() => {
+                    document.body.removeChild(notification);
+                }, 300);
+            }, 2000);
+        }
 
-window.onclick = function(event) {
-    const modal = document.getElementById('passwordModal');
-    if (event.target === modal) {
-        cerrarModal();
-    }
-    
-    const deleteAllModal = document.getElementById('deleteAllModal');
-    if (event.target === deleteAllModal) {
-        cerrarModalEliminarTodos();
-    }
-}
+        // Función mejorada para guardar registros con sincronización
+        function saveRegistro(registro) {
+            try {
+                const registros = JSON.parse(localStorage.getItem('registros') || '[]');
+                registros.unshift(registro);
+                localStorage.setItem('registros', JSON.stringify(registros));
+                
+                // Actualizar versión de datos
+                updateDataVersion();
+                
+                // Disparar evento personalizado
+                const customEvent = new CustomEvent('localStorageUpdated', {
+                    detail: { action: 'add', registro: registro }
+                });
+                window.dispatchEvent(customEvent);
+                
+                console.log('💾 Registro guardado y sincronizado:', registro.nombre);
+                return true;
+            } catch (error) {
+                console.error('Error al guardar registro:', error);
+                return false;
+            }
+        }
 
-// Limpiar intervalo al salir de la página
-window.addEventListener('beforeunload', () => {
-    if (syncIntervalId) {
-        clearInterval(syncIntervalId);
-    }
-});
+        // Función mejorada para eliminar registros con sincronización
+        function deleteRegistro(index) {
+            try {
+                const registros = JSON.parse(localStorage.getItem('registros') || '[]');
+                const deletedRecord = registros.splice(index, 1)[0];
+                localStorage.setItem('registros', JSON.stringify(registros));
+                
+                // Actualizar versión de datos
+                updateDataVersion();
+                
+                // Disparar evento personalizado
+                const customEvent = new CustomEvent('localStorageUpdated', {
+                    detail: { action: 'delete', registro: deletedRecord }
+                });
+                window.dispatchEvent(customEvent);
+                
+                console.log('🗑️ Registro eliminado y sincronizado:', deletedRecord?.nombre);
+                return true;
+            } catch (error) {
+                console.error('Error al eliminar registro:', error);
+                return false;
+            }
+        }
+
+        // Función mejorada para limpiar todos los registros
+        function clearAllRegistros() {
+            try {
+                localStorage.removeItem('registros');
+                updateDataVersion();
+                
+                // Disparar evento personalizado
+                const customEvent = new CustomEvent('localStorageUpdated', {
+                    detail: { action: 'clear' }
+                });
+                window.dispatchEvent(customEvent);
+                
+                console.log('🧹 Todos los registros eliminados y sincronizados');
+                return true;
+            } catch (error) {
+                console.error('Error al limpiar registros:', error);
+                return false;
+            }
+        }
+
         function filtrarRegistros() {
             const materiaFilter = document.getElementById('filterMateria').value.toLowerCase();
             const grupoFilter = document.getElementById('filterGrupo').value.toLowerCase();
             const nombreFilter = document.getElementById('filterNombre').value.toLowerCase();
+            const fechaFilter = document.getElementById('filterFecha').value;
+            const fechaEspecifica = document.getElementById('fechaEspecifica').value;
+            const fechaInicio = document.getElementById('fechaInicio').value;
+            const fechaFin = document.getElementById('fechaFin').value;
             
             const registros = JSON.parse(localStorage.getItem('registros') || '[]');
             
@@ -752,12 +1371,81 @@ window.addEventListener('beforeunload', () => {
                 const matchesNombre = !nombreFilter || 
                     (registro.nombre && registro.nombre.toLowerCase().includes(nombreFilter)) || 
                     (registro.cedula && registro.cedula.toLowerCase().includes(nombreFilter));
+                const matchesFecha = estaEnRangoFecha(registro.timestamp, fechaFilter, fechaEspecifica, fechaInicio, fechaFin);
                 
-                return matchesMateria && matchesGrupo && matchesNombre;
+                return matchesMateria && matchesGrupo && matchesNombre && matchesFecha;
             });
             
             currentPage = 1;
             actualizarTabla();
+            
+            // Mostrar información de filtros aplicados
+            mostrarResumenFiltros();
+        }
+
+        function mostrarResumenFiltros() {
+            const totalRegistros = JSON.parse(localStorage.getItem('registros') || '[]').length;
+            const registrosFiltrados = filteredRegistros.length;
+            
+            // Crear o actualizar el resumen de filtros
+            let resumenElement = document.getElementById('filtrosResumen');
+            if (!resumenElement) {
+                resumenElement = document.createElement('div');
+                resumenElement.id = 'filtrosResumen';
+                resumenElement.style.cssText = `
+                    text-align: center;
+                    margin: 15px 0;
+                    padding: 10px;
+                    background: linear-gradient(45deg, #f8f9fa, #e9ecef);
+                    border-radius: 8px;
+                    border-left: 4px solid var(--color-accent);
+                    font-weight: 500;
+                    color: var(--color-texto);
+                `;
+                document.querySelector('.filters').after(resumenElement);
+            }
+            
+            let mensaje = `Mostrando ${registrosFiltrados} de ${totalRegistros} registros`;
+            
+            // Agregar información sobre filtros activos
+            const filtrosActivos = [];
+            const materiaFilter = document.getElementById('filterMateria').value;
+            const grupoFilter = document.getElementById('filterGrupo').value;
+            const nombreFilter = document.getElementById('filterNombre').value;
+            const fechaFilter = document.getElementById('filterFecha').value;
+            
+            if (materiaFilter) filtrosActivos.push(`Materia: ${materiaFilter}`);
+            if (grupoFilter) filtrosActivos.push(`Grupo: ${grupoFilter}`);
+            if (nombreFilter) filtrosActivos.push(`Búsqueda: ${nombreFilter}`);
+            if (fechaFilter) {
+                const fechaTextos = {
+                    'hoy': 'Hoy',
+                    'ayer': 'Ayer',
+                    'esta_semana': 'Esta Semana',
+                    'este_mes': 'Este Mes',
+                    'fecha_especifica': `Fecha: ${document.getElementById('fechaEspecifica').value}`,
+                    'rango_fechas': `Del ${document.getElementById('fechaInicio').value} al ${document.getElementById('fechaFin').value}`
+                };
+                filtrosActivos.push(fechaTextos[fechaFilter] || fechaFilter);
+            }
+            
+            if (filtrosActivos.length > 0) {
+                mensaje += ` | Filtros: ${filtrosActivos.join(', ')}`;
+            }
+            
+            resumenElement.innerHTML = `
+                <i class="fas fa-filter"></i> ${mensaje}
+                ${filtrosActivos.length > 0 ? '<button onclick="limpiarFiltros()" style="margin-left: 10px; padding: 5px 10px; background: var(--color-primario); color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 0.8rem;"><i class="fas fa-times"></i> Limpiar</button>' : ''}
+            `;
+        }
+
+        function limpiarFiltros() {
+            document.getElementById('filterMateria').value = '';
+            document.getElementById('filterGrupo').value = '';
+            document.getElementById('filterNombre').value = '';
+            document.getElementById('filterFecha').value = '';
+            cambiarTipoFiltroFecha(); // Esto ocultará los campos adicionales
+            filtrarRegistros();
         }
 
         function actualizarTabla() {
@@ -797,7 +1485,6 @@ window.addEventListener('beforeunload', () => {
             
             if (pageCount <= 1) return;
             
-            // Previous button
             const prevButton = document.createElement('button');
             prevButton.innerText = '«';
             prevButton.className = 'page-btn';
@@ -810,7 +1497,6 @@ window.addEventListener('beforeunload', () => {
             };
             paginationDiv.appendChild(prevButton);
             
-            // Page buttons
             for (let i = 1; i <= pageCount; i++) {
                 const pageButton = document.createElement('button');
                 pageButton.innerText = i;
@@ -822,7 +1508,6 @@ window.addEventListener('beforeunload', () => {
                 paginationDiv.appendChild(pageButton);
             }
             
-            // Next button
             const nextButton = document.createElement('button');
             nextButton.innerText = '»';
             nextButton.className = 'page-btn';
@@ -836,68 +1521,53 @@ window.addEventListener('beforeunload', () => {
             paginationDiv.appendChild(nextButton);
         }
 
-        function onScanSuccess(decodedText) {
-            try {
-                const currentTime = Date.now();
-                if (decodedText === lastScannedCode && currentTime - lastScannedTime < SCAN_COOLDOWN) {
-                    showStatus('Por favor espere unos segundos antes de escanear el mismo código', true);
-                    return;
-                }
-
-                const datos = JSON.parse(decodedText);
-                const timestamp = new Date().toLocaleString();
-                
-                const registros = JSON.parse(localStorage.getItem('registros') || '[]');
-                registros.unshift({
-                    cedula: datos.cedula,
-                    nombre: datos.nombre,
-                    materia: datos.materia,
-                    grupo: datos.grupo,
-                    timestamp: timestamp
-                });
-                localStorage.setItem('registros', JSON.stringify(registros));
-
-                lastScannedCode = decodedText;
-                lastScannedTime = currentTime;
-                
-                filtrarRegistros();
-                showStatus('Registro exitoso: ' + datos.nombre);
-            } catch (e) {
-                showStatus('Error al procesar el código QR', true);
-                console.error('Error al procesar el código QR:', e);
-            }
-        }
-
         function generarPDF() {
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF();
             
-            // Agregar título
             doc.setFontSize(16);
             doc.setTextColor(5, 17, 126);
             doc.setFont('helvetica', 'bold');
             doc.text('Registro de Asistencia - Columbus Hospital', 105, 20, { align: 'center' });
             
-            // Agregar fecha de generación
             doc.setFontSize(12);
             doc.setTextColor(0, 0, 0);
             doc.setFont('helvetica', 'normal');
             doc.text(`Generado: ${new Date().toLocaleString()}`, 105, 30, { align: 'center' });
             
-            // Agregar filtros aplicados
             const materiaFilter = document.getElementById('filterMateria').value;
             const grupoFilter = document.getElementById('filterGrupo').value;
             const nombreFilter = document.getElementById('filterNombre').value;
             
-            if (materiaFilter || grupoFilter || nombreFilter) {
-                let filtros = 'Filtros: ';
-                if (materiaFilter) filtros += `Materia: ${materiaFilter} `;
-                if (grupoFilter) filtros += `Grupo: ${grupoFilter} `;
-                if (nombreFilter) filtros += `Búsqueda: ${nombreFilter}`;
-                doc.text(filtros, 105, 40, { align: 'center' });
+            const materiaFilter = document.getElementById('filterMateria').value;
+            const grupoFilter = document.getElementById('filterGrupo').value;
+            const nombreFilter = document.getElementById('filterNombre').value;
+            const fechaFilter = document.getElementById('filterFecha').value;
+            const fechaEspecifica = document.getElementById('fechaEspecifica').value;
+            const fechaInicio = document.getElementById('fechaInicio').value;
+            const fechaFin = document.getElementById('fechaFin').value;
+            
+            if (materiaFilter || grupoFilter || nombreFilter || fechaFilter) {
+                let filtros = 'Filtros aplicados: ';
+                const filtrosArray = [];
+                if (materiaFilter) filtrosArray.push(`Materia: ${materiaFilter}`);
+                if (grupoFilter) filtrosArray.push(`Grupo: ${grupoFilter}`);
+                if (nombreFilter) filtrosArray.push(`Búsqueda: ${nombreFilter}`);
+                if (fechaFilter) {
+                    const fechaTextos = {
+                        'hoy': 'Hoy',
+                        'ayer': 'Ayer',
+                        'esta_semana': 'Esta Semana',
+                        'este_mes': 'Este Mes',
+                        'fecha_especifica': `Fecha: ${fechaEspecifica}`,
+                        'rango_fechas': `Del ${fechaInicio} al ${fechaFin}`
+                    };
+                    filtrosArray.push(fechaTextos[fechaFilter]);
+                }
+                filtros += filtrosArray.join(', ');
+                doc.text(filtros, 105, 50, { align: 'center' });
             }
             
-            // Obtener datos filtrados
             const datos = filteredRegistros.map(registro => [
                 registro.cedula,
                 registro.nombre,
@@ -906,11 +1576,10 @@ window.addEventListener('beforeunload', () => {
                 registro.timestamp
             ]);
             
-            // Generar tabla en PDF
             doc.autoTable({
                 head: [['Cédula', 'Nombre', 'Materia', 'Grupo', 'Fecha y Hora']],
                 body: datos,
-                startY: 50,
+                startY: materiaFilter || grupoFilter || nombreFilter || fechaFilter ? 60 : 50,
                 styles: {
                     fontSize: 8,
                     cellPadding: 3,
@@ -927,36 +1596,82 @@ window.addEventListener('beforeunload', () => {
                 margin: { top: 50 }
             });
             
-            // Guardar PDF
             const fileName = `registro-asistencia-${new Date().toISOString().slice(0,10)}.pdf`;
             doc.save(fileName);
             showStatus('PDF generado exitosamente');
         }
 
-        // Initialize scanner and table
-        const html5QrcodeScanner = new Html5QrcodeScanner(
-            "reader", { fps: 10, qrbox: 250 });
+        // Event Listeners
+        document.getElementById('cameraSelect').addEventListener('change', (event) => {
+            currentCameraId = event.target.value;
+        });
 
-        html5QrcodeScanner.render(onScanSuccess);
+        document.getElementById('fpsRange').addEventListener('input', (event) => {
+            document.getElementById('fpsValue').textContent = event.target.value;
+        });
 
-        window.onload = () => {
-            filtrarRegistros();
-        };
-
-        // Event listener para cerrar el modal con la tecla Enter
         document.getElementById('passwordInput').addEventListener('keyup', function(event) {
             if (event.key === 'Enter') {
                 confirmarEliminacion();
             }
         });
 
-        // Event listener para cerrar el modal si se hace clic fuera de él
+        document.getElementById('deleteAllPassword').addEventListener('keyup', function(event) {
+            if (event.key === 'Enter') {
+                confirmarEliminacionTotal();
+            }
+        });
+
         window.onclick = function(event) {
             const modal = document.getElementById('passwordModal');
             if (event.target === modal) {
                 cerrarModal();
             }
+            
+            const deleteAllModal = document.getElementById('deleteAllModal');
+            if (event.target === deleteAllModal) {
+                cerrarModalEliminarTodos();
+            }
         }
+
+        window.addEventListener('beforeunload', async () => {
+            if (syncIntervalId) {
+                clearInterval(syncIntervalId);
+            }
+            if (isScanning) {
+                await stopScanner();
+            }
+        });
+
+        // Inicialización mejorada
+        window.onload = async () => {
+            console.log('🚀 Iniciando aplicación...');
+            
+            // Inicializar cámaras
+            await initializeCameras();
+            
+            // Cargar datos iniciales
+            filtrarRegistros();
+            
+            // Configurar sincronización mejorada
+            setupDataSync();
+            
+            // Inicializar versión de datos local
+            localDataVersion = parseInt(localStorage.getItem('dataVersion') || '0');
+            lastSyncTimestamp = parseInt(localStorage.getItem('lastSyncTimestamp') || '0');
+            
+            // Marcar actividad inicial
+            updateLastActivity();
+            
+            console.log('✅ Aplicación iniciada correctamente');
+            console.log('📊 Versión de datos local:', localDataVersion);
+            
+            // Mostrar estado de sincronización
+            const registrosCount = JSON.parse(localStorage.getItem('registros') || '[]').length;
+            if (registrosCount > 0) {
+                console.log(`📋 ${registrosCount} registros cargados`);
+            }
+        };
     </script>
 </body>
 </html>
