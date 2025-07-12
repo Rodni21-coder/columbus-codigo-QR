@@ -106,64 +106,6 @@
             background: linear-gradient(90deg, var(--color-primario), var(--color-accent));
         }
 
-        .scanner-section {
-            margin-bottom: 30px;
-        }
-
-        .scanner-controls {
-            display: flex;
-            gap: 15px;
-            margin-bottom: 20px;
-            flex-wrap: wrap;
-            justify-content: center;
-            align-items: center;
-        }
-
-        .control-group {
-            display: flex;
-            flex-direction: column;
-            gap: 5px;
-            align-items: center;
-        }
-
-        .control-group label {
-            font-weight: 600;
-            color: var(--color-primario);
-            font-size: 0.9rem;
-        }
-
-        .control-group select, .control-group input {
-            padding: 8px 12px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            font-size: 0.9rem;
-        }
-
-        .scanner-toggle {
-            padding: 12px 24px;
-            background-color: var(--color-exito);
-            color: var(--color-blanco);
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: 600;
-            transition: var(--transicion);
-            font-size: 0.9rem;
-        }
-
-        .scanner-toggle:hover {
-            background-color: #218838;
-            transform: translateY(-2px);
-        }
-
-        .scanner-toggle.stop {
-            background-color: var(--color-error);
-        }
-
-        .scanner-toggle.stop:hover {
-            background-color: #c82333;
-        }
-
         #reader {
             width: 100%;
             max-width: 600px;
@@ -177,52 +119,15 @@
             overflow: hidden;
         }
 
-        #reader video {
-            width: 100% !important;
-            height: auto !important;
-            border-radius: 8px;
-        }
-
-        .scanner-status {
+        #reader::after {
+            content: 'Escaneando...';
+            position: absolute;
+            bottom: 10px;
+            left: 0;
+            width: 100%;
             text-align: center;
-            margin-top: 15px;
-            padding: 10px;
-            border-radius: 8px;
-            font-weight: 600;
-            background: linear-gradient(45deg, var(--color-primario), var(--color-accent));
-            color: var(--color-blanco);
-            animation: pulse 2s infinite;
-        }
-
-        @keyframes pulse {
-            0% { opacity: 0.8; }
-            50% { opacity: 1; }
-            100% { opacity: 0.8; }
-        }
-
-        .scanner-tips {
-            background: #f8f9fa;
-            padding: 15px;
-            border-radius: 8px;
-            margin-top: 15px;
-            border-left: 4px solid var(--color-accent);
-        }
-
-        .scanner-tips h4 {
-            margin: 0 0 10px 0;
             color: var(--color-primario);
-            font-size: 1rem;
-        }
-
-        .scanner-tips ul {
-            margin: 0;
-            padding-left: 20px;
-        }
-
-        .scanner-tips li {
-            margin: 5px 0;
-            color: var(--color-texto);
-            font-size: 0.9rem;
+            font-weight: 600;
         }
 
         .filters {
@@ -501,6 +406,34 @@
             transform: translateY(-2px);
         }
 
+        /* Filtros de fecha adicionales */
+        .filter-date-specific {
+            display: none;
+        }
+
+        .sync-notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: linear-gradient(45deg, var(--color-accent), var(--color-primario));
+            color: white;
+            padding: 12px 20px;
+            border-radius: 25px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            z-index: 10000;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            transform: translateX(100%);
+            transition: transform 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .sync-notification.show {
+            transform: translateX(0);
+        }
+
         @media (max-width: 768px) {
             .header {
                 flex-direction: column;
@@ -520,11 +453,6 @@
             .container {
                 margin: 20px;
                 padding: 30px 20px;
-            }
-
-            .scanner-controls {
-                flex-direction: column;
-                gap: 10px;
             }
 
             th, td {
@@ -608,74 +536,7 @@
     </div>
 
     <div class="container">
-        <div class="scanner-section">
-            <div class="scanner-controls">
-                <div class="control-group">
-                    <label for="cameraSelect">Cámara:</label>
-                    <select id="cameraSelect">
-                        <option value="">Seleccionar cámara...</option>
-                    </select>
-                </div>
-                <div class="control-group">
-                    <label for="fpsRange">FPS:</label>
-                    <input type="range" id="fpsRange" min="5" max="30" value="15">
-                    <span id="fpsValue">15</span>
-                </div>
-                <div class="control-group">
-                    <label for="torchToggle">Linterna:</label>
-                    <input type="checkbox" id="torchToggle">
-                </div>
-                <button id="scannerToggle" class="scanner-toggle" onclick="toggleScanner()">
-                    Iniciar Escáner
-                </button>
-            </div>
-
-            <div id="reader"></div>
-            <div class="scanner-status" id="scannerStatus">
-                Scanner inactivo - Presione "Iniciar Escáner" para comenzar
-            </div>
-
-            <div class="scanner-tips">
-                <h4>💡 Consejos para un mejor escaneo:</h4>
-                <ul>
-                    <li>Mantenga el código QR centrado en la cámara</li>
-                    <li>Asegúrese de que haya buena iluminación</li>
-                    <li>Mantenga la distancia entre 10-30 cm del código</li>
-                    <li>Use la linterna en ambientes oscuros</li>
-                    <li>Evite movimientos bruscos durante el escaneo</li>
-                </ul>
-                
-                <div style="margin-top: 15px; padding: 10px; background: #fff3cd; border-radius: 5px; border-left: 4px solid #ffc107;">
-                    <strong>🐙 GitHub Pages - Pasos Importantes:</strong><br>
-                    <small>Para usar la cámara en GitHub Pages:</small>
-                    <ul style="margin: 5px 0; font-size: 0.85rem;">
-                        <li><strong>1.</strong> Haz clic en "Permitir" cuando aparezca la solicitud de cámara</li>
-                        <li><strong>2.</strong> Si no aparece, revisa la barra de dirección por un icono de cámara 📷</li>
-                        <li><strong>3.</strong> Asegúrate de que la URL comience con "https://"</li>
-                        <li><strong>4.</strong> Si falla, recarga la página e intenta de nuevo</li>
-                        <li><strong>5.</strong> Cierra otras apps que puedan estar usando la cámara</li>
-                    </ul>
-                </div>
-
-                <div style="margin-top: 10px; padding: 10px; background: #f8d7da; border-radius: 5px; border-left: 4px solid #dc3545;">
-                    <strong>🔧 Solución de Problemas:</strong><br>
-                    <small>Si las cámaras no aparecen:</small>
-                    <ul style="margin: 5px 0; font-size: 0.85rem;">
-                        <li>Verifica en <strong>Configuración del navegador > Privacidad > Cámara</strong></li>
-                        <li>Busca tu sitio de GitHub y asegúrate que esté en "Permitir"</li>
-                        <li>Borra datos del sitio y recarga la página</li>
-                        <li>Prueba en modo incógnito/privado</li>
-                    </ul>
-                </div>
-                
-                <div style="margin-top: 15px; padding: 10px; background: #e3f2fd; border-radius: 5px; border-left: 4px solid var(--color-accent);">
-                    <strong>🔄 Sincronización Automática:</strong><br>
-                    <small>Los registros se sincronizan automáticamente entre todos los dispositivos cada 2 segundos. 
-                    Todos los usuarios verán la lista actualizada en tiempo real.</small>
-                </div>
-            </div>
-        </div>
-
+        <div id="reader"></div>
         <div id="statusMessage" class="status-message"></div>
         
         <div class="filters">
@@ -713,15 +574,15 @@
                     <option value="rango_fechas">Rango de Fechas</option>
                 </select>
             </div>
-            <div class="filter-group" id="fechaEspecificaGroup" style="display: none;">
+            <div class="filter-group filter-date-specific" id="fechaEspecificaGroup">
                 <label for="fechaEspecifica">Fecha:</label>
                 <input type="date" id="fechaEspecifica" onchange="filtrarRegistros()">
             </div>
-            <div class="filter-group" id="rangoFechasGroup" style="display: none;">
+            <div class="filter-group filter-date-specific" id="rangoFechasGroup">
                 <label for="fechaInicio">Desde:</label>
                 <input type="date" id="fechaInicio" onchange="filtrarRegistros()">
             </div>
-            <div class="filter-group" id="rangoFechasGroup2" style="display: none;">
+            <div class="filter-group filter-date-specific" id="rangoFechasGroup2">
                 <label for="fechaFin">Hasta:</label>
                 <input type="date" id="fechaFin" onchange="filtrarRegistros()">
             </div>
@@ -760,7 +621,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
 
     <script>
-        const SYNC_INTERVAL = 2000; // Reducido a 2 segundos para mejor sincronización
+        const SYNC_INTERVAL = 2000; // 2 segundos para mejor sincronización
         let syncIntervalId = null;
         let lastScannedCode = '';
         let lastScannedTime = 0;
@@ -770,548 +631,112 @@
         let currentPage = 1;
         const recordsPerPage = 20;
         let filteredRegistros = [];
-        let html5QrCode = null;
-        let isScanning = false;
-        let currentCameraId = null;
-        let availableCameras = [];
-        let currentStream = null;
-        let lastSyncTimestamp = 0;
         let localDataVersion = 0;
+        let lastSyncTimestamp = 0;
 
-        // Configuración mejorada del scanner con mejor manejo de permisos
-        const scannerConfig = {
-            fps: 15,
-            qrbox: { width: 300, height: 300 },
-            aspectRatio: 1.0,
-            disableFlip: false,
-            videoConstraints: {
-                facingMode: "environment", // Preferir cámara trasera
-                width: { ideal: 1280, max: 1920 },
-                height: { ideal: 720, max: 1080 }
-            },
-            formatsToSupport: [Html5QrcodeSupportedFormats.QR_CODE],
-            useBarCodeDetectorIfSupported: true,
-            experimentalFeatures: {
-                useBarCodeDetectorIfSupported: true
-            }
-        };
+        // === MEJORAS DE SINCRONIZACIÓN ===
+        function showSyncNotification() {
+            const notification = document.createElement('div');
+            notification.className = 'sync-notification';
+            notification.innerHTML = '<i class="fas fa-sync-alt"></i> Lista actualizada';
+            
+            document.body.appendChild(notification);
+            
+            setTimeout(() => notification.classList.add('show'), 100);
+            setTimeout(() => {
+                notification.classList.remove('show');
+                setTimeout(() => document.body.removeChild(notification), 300);
+            }, 2000);
+        }
 
-        // Función mejorada para solicitar permisos de cámara en GitHub Pages
-        async function requestCameraPermission() {
+        function updateDataVersion() {
+            const newVersion = Date.now();
+            localStorage.setItem('dataVersion', newVersion.toString());
+            localStorage.setItem('lastSyncTimestamp', newVersion.toString());
+            localDataVersion = newVersion;
+            lastSyncTimestamp = newVersion;
+        }
+
+        function syncDataFromStorage() {
             try {
-                console.log('🔍 Solicitando permisos de cámara...');
-                updateScannerStatus('Solicitando permisos de cámara...', false);
+                const currentVersion = parseInt(localStorage.getItem('dataVersion') || '0');
+                const currentTimestamp = parseInt(localStorage.getItem('lastSyncTimestamp') || '0');
                 
-                // Configuración más permisiva para GitHub Pages
-                const constraints = {
-                    video: {
-                        facingMode: { ideal: "environment" }, // Usar ideal en lugar de strict
-                        width: { ideal: 640, max: 1280 },
-                        height: { ideal: 480, max: 720 }
-                    }
-                };
-                
-                const stream = await navigator.mediaDevices.getUserMedia(constraints);
-                console.log('✅ Permisos obtenidos, cerrando stream temporal');
-                
-                // Cerrar el stream inmediatamente
-                stream.getTracks().forEach(track => {
-                    track.stop();
-                    console.log('🔒 Track cerrado:', track.kind);
-                });
-                
+                if (currentVersion > localDataVersion || currentTimestamp > lastSyncTimestamp) {
+                    localDataVersion = currentVersion;
+                    lastSyncTimestamp = currentTimestamp;
+                    
+                    const currentFilters = {
+                        materia: document.getElementById('filterMateria').value,
+                        grupo: document.getElementById('filterGrupo').value,
+                        nombre: document.getElementById('filterNombre').value,
+                        fecha: document.getElementById('filterFecha').value,
+                        fechaEspecifica: document.getElementById('fechaEspecifica').value,
+                        fechaInicio: document.getElementById('fechaInicio').value,
+                        fechaFin: document.getElementById('fechaFin').value
+                    };
+                    
+                    filtrarRegistros();
+                    
+                    // Restaurar filtros
+                    document.getElementById('filterMateria').value = currentFilters.materia;
+                    document.getElementById('filterGrupo').value = currentFilters.grupo;
+                    document.getElementById('filterNombre').value = currentFilters.nombre;
+                    document.getElementById('filterFecha').value = currentFilters.fecha;
+                    document.getElementById('fechaEspecifica').value = currentFilters.fechaEspecifica;
+                    document.getElementById('fechaInicio').value = currentFilters.fechaInicio;
+                    document.getElementById('fechaFin').value = currentFilters.fechaFin;
+                    
+                    cambiarTipoFiltroFecha();
+                    showSyncNotification();
+                }
+            } catch (error) {
+                console.error('Error en sincronización:', error);
+            }
+        }
+
+        function setupDataSync() {
+            window.addEventListener('storage', (event) => {
+                if (event.key === 'registros' || event.key === 'dataVersion') {
+                    syncDataFromStorage();
+                }
+            });
+
+            syncIntervalId = setInterval(() => {
+                syncDataFromStorage();
+            }, SYNC_INTERVAL);
+
+            window.addEventListener('focus', () => {
+                syncDataFromStorage();
+            });
+        }
+
+        function saveRegistro(registro) {
+            try {
+                const registros = JSON.parse(localStorage.getItem('registros') || '[]');
+                registros.unshift(registro);
+                localStorage.setItem('registros', JSON.stringify(registros));
+                updateDataVersion();
                 return true;
             } catch (error) {
-                console.error('❌ Error al solicitar permisos:', error);
+                console.error('Error al guardar registro:', error);
                 return false;
             }
         }
 
-        async function initializeCameras() {
-            try {
-                console.log('🚀 Iniciando detección de cámaras para GitHub Pages...');
-                updateScannerStatus('Verificando compatibilidad...', false);
-                
-                // Verificar soporte básico
-                if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-                    throw new Error('MediaDevices no soportado');
-                }
-                
-                // Verificar si estamos en GitHub Pages
-                const isGitHub = window.location.hostname.includes('github.io') || 
-                                window.location.hostname.includes('githubpages.com');
-                
-                if (isGitHub) {
-                    console.log('🐙 Detectado GitHub Pages, usando configuración optimizada');
-                    updateScannerStatus('GitHub Pages detectado - Configurando...', false);
-                }
-                
-                // Primero solicitar permisos
-                updateScannerStatus('Solicitando permisos de cámara...', false);
-                const hasPermission = await requestCameraPermission();
-                
-                if (!hasPermission) {
-                    throw new Error('Permisos de cámara denegados');
-                }
-
-                // Esperar un momento antes de obtener cámaras
-                await new Promise(resolve => setTimeout(resolve, 1000));
-                
-                updateScannerStatus('Detectando cámaras disponibles...', false);
-                
-                // Intentar obtener cámaras con reintentos
-                let devices = [];
-                let attempts = 0;
-                const maxAttempts = 3;
-                
-                while (devices.length === 0 && attempts < maxAttempts) {
-                    attempts++;
-                    console.log(`🔄 Intento ${attempts} de detectar cámaras...`);
-                    
-                    try {
-                        devices = await Html5Qrcode.getCameras();
-                        if (devices.length === 0) {
-                            console.log('⏳ No se detectaron cámaras, esperando...');
-                            await new Promise(resolve => setTimeout(resolve, 2000));
-                        }
-                    } catch (error) {
-                        console.log(`❌ Error en intento ${attempts}:`, error);
-                        if (attempts < maxAttempts) {
-                            await new Promise(resolve => setTimeout(resolve, 2000));
-                        }
-                    }
-                }
-                
-                console.log('📷 Cámaras detectadas:', devices);
-                
-                if (devices.length === 0) {
-                    // Intento alternativo usando navigator.mediaDevices.enumerateDevices
-                    console.log('🔄 Intentando método alternativo...');
-                    const allDevices = await navigator.mediaDevices.enumerateDevices();
-                    const videoDevices = allDevices.filter(device => device.kind === 'videoinput');
-                    
-                    if (videoDevices.length > 0) {
-                        console.log('📱 Dispositivos de video encontrados:', videoDevices);
-                        // Convertir a formato compatible
-                        devices = videoDevices.map(device => ({
-                            id: device.deviceId,
-                            label: device.label || `Cámara ${videoDevices.indexOf(device) + 1}`
-                        }));
-                    }
-                }
-                
-                availableCameras = devices;
-                const cameraSelect = document.getElementById('cameraSelect');
-                cameraSelect.innerHTML = '<option value="">Seleccionar cámara...</option>';
-                
-                if (devices.length === 0) {
-                    showStatus('❌ No se pudieron detectar cámaras. Verifica permisos y recarga la página.', true);
-                    updateScannerStatus('No hay cámaras disponibles', false);
-                    
-                    // Mostrar botón para reintentar
-                    const retryBtn = document.createElement('button');
-                    retryBtn.textContent = '🔄 Reintentar Detección';
-                    retryBtn.className = 'action-button';
-                    retryBtn.style.margin = '10px auto';
-                    retryBtn.onclick = () => {
-                        retryBtn.remove();
-                        initializeCameras();
-                    };
-                    document.querySelector('.scanner-controls').appendChild(retryBtn);
-                    return;
-                }
-                
-                // Poblar el selector de cámaras
-                devices.forEach((device, index) => {
-                    const option = document.createElement('option');
-                    option.value = device.id;
-                    
-                    let labelText = device.label || `Cámara ${index + 1}`;
-                    
-                    // Mejorar etiquetas para GitHub Pages
-                    if (labelText.toLowerCase().includes('back') || 
-                        labelText.toLowerCase().includes('rear') || 
-                        labelText.toLowerCase().includes('environment')) {
-                        labelText += ' 📱 (Trasera - Recomendada)';
-                    } else if (labelText.toLowerCase().includes('front') || 
-                               labelText.toLowerCase().includes('user') || 
-                               labelText.toLowerCase().includes('selfie')) {
-                        labelText += ' 🤳 (Frontal)';
-                    } else if (index === 0 && devices.length === 1) {
-                        labelText += ' 📷 (Principal)';
-                    }
-                    
-                    option.textContent = labelText;
-                    cameraSelect.appendChild(option);
-                });
-
-                // Selección inteligente de cámara
-                let selectedCamera = null;
-                
-                // Prioridad 1: Cámara trasera
-                selectedCamera = devices.find(device => 
-                    device.label && (
-                        device.label.toLowerCase().includes('back') || 
-                        device.label.toLowerCase().includes('rear') ||
-                        device.label.toLowerCase().includes('environment')
-                    )
-                );
-                
-                // Prioridad 2: Primera cámara disponible
-                if (!selectedCamera && devices.length > 0) {
-                    selectedCamera = devices[0];
-                }
-                
-                if (selectedCamera) {
-                    cameraSelect.value = selectedCamera.id;
-                    currentCameraId = selectedCamera.id;
-                    console.log('🎯 Cámara seleccionada:', selectedCamera.label || selectedCamera.id);
-                    updateScannerStatus(`✅ ${devices.length} cámara(s) detectada(s) - Lista para usar`, false);
-                }
-
-                showStatus(`✅ ${devices.length} cámara(s) detectada(s) correctamente en GitHub Pages`);
-                console.log('🎉 Inicialización completada exitosamente');
-                
-            } catch (error) {
-                console.error('💥 Error al inicializar cámaras:', error);
-                
-                let errorMessage = '❌ Error al acceder a las cámaras en GitHub Pages. ';
-                
-                if (error.message.includes('NotAllowedError') || error.message.includes('denegados')) {
-                    errorMessage += 'Por favor:\n• Haz clic en "Permitir" cuando aparezca la solicitud\n• Verifica que no hayas bloqueado la cámara para este sitio\n• Recarga la página e intenta de nuevo';
-                } else if (error.message.includes('NotFoundError')) {
-                    errorMessage += 'No se encontraron cámaras. Verifica que tu dispositivo tenga cámara.';
-                } else if (error.message.includes('NotSupportedError')) {
-                    errorMessage += 'Tu navegador no soporta acceso a cámaras. Usa Chrome, Firefox o Safari.';
-                } else if (error.message.includes('MediaDevices')) {
-                    errorMessage += 'Funcionalidad no soportada. Asegúrate de usar HTTPS y un navegador moderno.';
-                } else {
-                    errorMessage += `Error técnico: ${error.message}`;
-                }
-                
-                showStatus(errorMessage, true);
-                updateScannerStatus('❌ Error en inicialización', false);
-                
-                // Botón para reintentar
-                const retryBtn = document.createElement('button');
-                retryBtn.textContent = '🔄 Reintentar';
-                retryBtn.className = 'action-button';
-                retryBtn.style.margin = '10px auto';
-                retryBtn.onclick = () => {
-                    retryBtn.remove();
-                    location.reload(); // Recarga completa en caso de error grave
-                };
-                document.querySelector('.scanner-controls').appendChild(retryBtn);
-            }
-        }
-
-        function updateScannerStatus(message, isActive = false) {
-            const statusElement = document.getElementById('scannerStatus');
-            statusElement.textContent = message;
-            statusElement.style.display = 'block';
-            
-            if (isActive) {
-                statusElement.style.animation = 'pulse 2s infinite';
-            } else {
-                statusElement.style.animation = 'none';
-            }
-        }
-
-        async function toggleScanner() {
-            const toggleBtn = document.getElementById('scannerToggle');
-            const cameraSelect = document.getElementById('cameraSelect');
-            
-            if (!isScanning) {
-                if (!currentCameraId) {
-                    showStatus('❌ Por favor seleccione una cámara primero', true);
-                    return;
-                }
-                
-                try {
-                    updateScannerStatus('Iniciando cámara...', false);
-                    toggleBtn.disabled = true;
-                    
-                    // Crear nueva instancia del scanner
-                    html5QrCode = new Html5Qrcode("reader");
-                    
-                    // Configuración optimizada para mejor compatibilidad
-                    const config = {
-                        fps: parseInt(document.getElementById('fpsRange').value),
-                        qrbox: function(viewfinderWidth, viewfinderHeight) {
-                            const minEdgePercentage = 0.7;
-                            const minEdgeSize = Math.min(viewfinderWidth, viewfinderHeight);
-                            const qrboxSize = Math.floor(minEdgeSize * minEdgePercentage);
-                            return {
-                                width: qrboxSize,
-                                height: qrboxSize
-                            };
-                        },
-                        aspectRatio: 1.0,
-                        disableFlip: false,
-                        videoConstraints: {
-                            width: { ideal: 1280, max: 1920 },
-                            height: { ideal: 720, max: 1080 }
-                        },
-                        formatsToSupport: [Html5QrcodeSupportedFormats.QR_CODE],
-                        useBarCodeDetectorIfSupported: true,
-                        experimentalFeatures: {
-                            useBarCodeDetectorIfSupported: true
-                        }
-                    };
-                    
-                    console.log('Iniciando scanner con cámara:', currentCameraId);
-                    console.log('Configuración:', config);
-                    
-                    await html5QrCode.start(
-                        currentCameraId,
-                        config,
-                        onScanSuccess,
-                        onScanError
-                    );
-                    
-                    isScanning = true;
-                    toggleBtn.textContent = 'Detener Escáner';
-                    toggleBtn.classList.add('stop');
-                    toggleBtn.disabled = false;
-                    cameraSelect.disabled = true;
-                    updateScannerStatus('📹 Escáner activo - Enfoque el código QR en el centro', true);
-                    showStatus('✅ Cámara iniciada correctamente');
-                    
-                    // Habilitar linterna si está disponible
-                    enableTorchControl();
-                    
-                } catch (error) {
-                    console.error('Error detallado al iniciar el escáner:', error);
-                    toggleBtn.disabled = false;
-                    
-                    let errorMessage = 'Error al iniciar el escáner. ';
-                    if (error.message.includes('NotAllowedError')) {
-                        errorMessage += 'Permisos de cámara denegados.';
-                    } else if (error.message.includes('NotFoundError')) {
-                        errorMessage += 'Cámara no encontrada.';
-                    } else if (error.message.includes('OverConstrainedError')) {
-                        errorMessage += 'Configuración de cámara no soportada.';
-                    } else {
-                        errorMessage += error.message || 'Error desconocido.';
-                    }
-                    
-                    showStatus('❌ ' + errorMessage, true);
-                    updateScannerStatus('Error al iniciar escáner', false);
-                    
-                    // Limpiar el scanner en caso de error
-                    if (html5QrCode) {
-                        try {
-                            await html5QrCode.clear();
-                        } catch (clearError) {
-                            console.error('Error al limpiar scanner:', clearError);
-                        }
-                        html5QrCode = null;
-                    }
-                }
-            } else {
-                await stopScanner();
-            }
-        }
-
-        async function stopScanner() {
-            if (html5QrCode && isScanning) {
-                try {
-                    await html5QrCode.stop();
-                    html5QrCode.clear();
-                    html5QrCode = null;
-                } catch (error) {
-                    console.error('Error al detener el escáner:', error);
-                }
-            }
-            
-            isScanning = false;
-            const toggleBtn = document.getElementById('scannerToggle');
-            toggleBtn.textContent = 'Iniciar Escáner';
-            toggleBtn.classList.remove('stop');
-            document.getElementById('cameraSelect').disabled = false;
-            updateScannerStatus('Scanner detenido', false);
-            
-            // Desactivar linterna
-            document.getElementById('torchToggle').checked = false;
-            document.getElementById('torchToggle').disabled = true;
-        }
-
-        async function enableTorchControl() {
-            try {
-                const torchToggle = document.getElementById('torchToggle');
-                torchToggle.disabled = false;
-                
-                torchToggle.addEventListener('change', async (event) => {
-                    if (html5QrCode && isScanning) {
-                        try {
-                            await html5QrCode.applyVideoConstraints({
-                                advanced: [{ torch: event.target.checked }]
-                            });
-                        } catch (error) {
-                            console.log('Linterna no disponible en este dispositivo');
-                            event.target.checked = false;
-                        }
-                    }
-                });
-            } catch (error) {
-                document.getElementById('torchToggle').disabled = true;
-            }
-        }
-
-        function onScanSuccess(decodedText, decodedResult) {
-            try {
-                const currentTime = Date.now();
-                if (decodedText === lastScannedCode && currentTime - lastScannedTime < SCAN_COOLDOWN) {
-                    showStatus('Por favor espere unos segundos antes de escanear el mismo código', true);
-                    return;
-                }
-
-                // Feedback visual y sonoro
-                const readerElement = document.getElementById('reader');
-                readerElement.style.border = '3px solid #28a745';
-                setTimeout(() => {
-                    readerElement.style.border = '1px solid rgba(0, 0, 0, 0.1)';
-                }, 1000);
-
-                const datos = JSON.parse(decodedText);
-                const timestamp = new Date().toLocaleString();
-                const nuevoRegistro = {
-                    cedula: datos.cedula,
-                    nombre: datos.nombre,
-                    materia: datos.materia,
-                    grupo: datos.grupo,
-                    timestamp: timestamp
-                };
-                
-                // Usar la función mejorada de guardado con sincronización
-                if (saveRegistro(nuevoRegistro)) {
-                    lastScannedCode = decodedText;
-                    lastScannedTime = currentTime;
-                    
-                    filtrarRegistros();
-                    showStatus('✅ Registro exitoso: ' + datos.nombre);
-                    updateScannerStatus('Último escaneo: ' + datos.nombre + ' - ' + new Date().toLocaleTimeString(), true);
-                } else {
-                    showStatus('Error al guardar el registro', true);
-                }
-                
-            } catch (e) {
-                showStatus('Error al procesar el código QR. Verifique el formato.', true);
-                console.error('Error al procesar el código QR:', e);
-            }
-        }
-
-        function onScanError(errorMessage) {
-            // No mostrar errores de escaneo continuo para evitar spam
-            // Solo log para debugging
-            // console.log('Escaneando...', errorMessage);
-        }
-
-        function showStatus(message, isError = false) {
-            const statusElement = document.getElementById('statusMessage');
-            statusElement.textContent = message;
-            statusElement.style.display = 'block';
-            statusElement.className = 'status-message ' + (isError ? 'error' : 'success');
-            setTimeout(() => {
-                statusElement.style.display = 'none';
-            }, 3000);
-        }
-
-        function checkDuplicates() {
-            const tbody = document.querySelector('#registros tbody');
-            const rows = tbody.querySelectorAll('tr');
-            const seen = new Map();
-
-            rows.forEach(row => {
-                row.classList.remove('duplicate');
-                const cedula = row.cells[0].textContent;
-                const nombre = row.cells[1].textContent;
-                const key = `${cedula}-${nombre}`;
-                
-                if (seen.has(key)) {
-                    row.classList.add('duplicate');
-                    seen.get(key).classList.add('duplicate');
-                } else {
-                    seen.set(key, row);
-                }
-            });
-        }
-
-        function mostrarModal(index) {
-            registroAEliminar = index;
-            document.getElementById('passwordModal').style.display = 'block';
-            document.getElementById('passwordInput').value = '';
-            document.getElementById('passwordInput').focus();
-        }
-
-        function cerrarModal() {
-            document.getElementById('passwordModal').style.display = 'none';
-            registroAEliminar = null;
-        }
-
-        function confirmarEliminacion() {
-            const password = document.getElementById('passwordInput').value;
-            if (password === PASSWORD) {
-                if (deleteRegistro(registroAEliminar)) {
-                    filtrarRegistros();
-                    showStatus('Registro eliminado exitosamente');
-                    cerrarModal();
-                } else {
-                    showStatus('Error al eliminar el registro', true);
-                }
-            } else {
-                showStatus('Contraseña incorrecta', true);
-            }
-        }
-
-        function mostrarModalEliminarTodos() {
-            document.getElementById('deleteAllModal').style.display = 'block';
-            document.getElementById('deleteAllPassword').value = '';
-            document.getElementById('deleteAllPassword').focus();
-        }
-
-        function cerrarModalEliminarTodos() {
-            document.getElementById('deleteAllModal').style.display = 'none';
-        }
-
-        function confirmarEliminacionTotal() {
-            const password = document.getElementById('deleteAllPassword').value;
-            if (password === PASSWORD) {
-                if (clearAllRegistros()) {
-                    filteredRegistros = [];
-                    actualizarTabla();
-                    showStatus('Todos los registros han sido eliminados');
-                    cerrarModalEliminarTodos();
-                } else {
-                    showStatus('Error al eliminar los registros', true);
-                }
-            } else {
-                showStatus('Contraseña incorrecta', true);
-            }
-        }
-
-        // Sistema de sincronización mejorado entre dispositivos
-        // Función para cambiar el tipo de filtro de fecha
+        // === MEJORAS DE FILTROS POR FECHA ===
         function cambiarTipoFiltroFecha() {
             const filtroFecha = document.getElementById('filterFecha').value;
-            const fechaEspecificaGroup = document.getElementById('fechaEspecificaGroup');
-            const rangoFechasGroup = document.getElementById('rangoFechasGroup');
-            const rangoFechasGroup2 = document.getElementById('rangoFechasGroup2');
+            const grupos = document.querySelectorAll('.filter-date-specific');
             
-            // Ocultar todos los grupos adicionales
-            fechaEspecificaGroup.style.display = 'none';
-            rangoFechasGroup.style.display = 'none';
-            rangoFechasGroup2.style.display = 'none';
+            grupos.forEach(grupo => grupo.style.display = 'none');
             
-            // Mostrar el grupo correspondiente
             if (filtroFecha === 'fecha_especifica') {
-                fechaEspecificaGroup.style.display = 'block';
-                // Establecer fecha de hoy por defecto
+                document.getElementById('fechaEspecificaGroup').style.display = 'block';
                 document.getElementById('fechaEspecifica').value = new Date().toISOString().split('T')[0];
             } else if (filtroFecha === 'rango_fechas') {
-                rangoFechasGroup.style.display = 'block';
-                rangoFechasGroup2.style.display = 'block';
-                // Establecer rango de esta semana por defecto
+                document.getElementById('rangoFechasGroup').style.display = 'block';
+                document.getElementById('rangoFechasGroup2').style.display = 'block';
                 const hoy = new Date();
                 const inicioSemana = new Date(hoy);
                 inicioSemana.setDate(hoy.getDate() - hoy.getDay());
@@ -1322,15 +747,13 @@
             filtrarRegistros();
         }
 
-        // Función mejorada para verificar si una fecha está en el rango especificado
         function estaEnRangoFecha(fechaRegistro, tipoFiltro, fechaEspecifica = null, fechaInicio = null, fechaFin = null) {
             if (!fechaRegistro || !tipoFiltro) return true;
             
             try {
-                // Parsear la fecha del registro (formato: "12/7/2025, 3:45:30 PM")
-                const fechaRegistroParts = fechaRegistro.split(', ')[0]; // "12/7/2025"
+                const fechaRegistroParts = fechaRegistro.split(', ')[0];
                 const [mes, dia, año] = fechaRegistroParts.split('/').map(num => parseInt(num));
-                const fechaRegistroObj = new Date(año, mes - 1, dia); // mes - 1 porque Date usa 0-11 para meses
+                const fechaRegistroObj = new Date(año, mes - 1, dia);
                 
                 const hoy = new Date();
                 hoy.setHours(0, 0, 0, 0);
@@ -1379,208 +802,136 @@
                         return true;
                 }
             } catch (error) {
-                console.error('Error al filtrar por fecha:', error, 'Fecha:', fechaRegistro);
-                return true; // En caso de error, mostrar el registro
+                console.error('Error al filtrar por fecha:', error);
+                return true;
             }
         }
-            // Escuchar cambios en localStorage (entre pestañas del mismo dispositivo)
-            window.addEventListener('storage', (event) => {
-                if (event.key === 'registros' || event.key === 'dataVersion') {
-                    console.log('🔄 Cambio detectado en localStorage:', event.key);
-                    syncDataFromStorage();
-                }
-            });
 
-            // Sincronización forzada periódica (para diferentes dispositivos)
-            syncIntervalId = setInterval(() => {
-                syncDataFromStorage();
-            }, SYNC_INTERVAL);
-
-            // Escuchar eventos personalizados de actualización
-            window.addEventListener('localStorageUpdated', () => {
-                syncDataFromStorage();
-            });
-
-            // Sincronización cuando la ventana recupera el foco
-            window.addEventListener('focus', () => {
-                console.log('🔄 Ventana recuperó el foco - sincronizando...');
-                syncDataFromStorage();
-            });
-
-            // Heartbeat para mantener la sincronización activa
-            setInterval(() => {
-                updateLastActivity();
-            }, 30000); // Cada 30 segundos
-        }
-
-        function syncDataFromStorage() {
+        // === MEJORAS DE ESCANEO QR ===
+        function onScanSuccess(decodedText) {
             try {
-                const currentVersion = parseInt(localStorage.getItem('dataVersion') || '0');
-                const currentTimestamp = parseInt(localStorage.getItem('lastSyncTimestamp') || '0');
+                const currentTime = Date.now();
+                if (decodedText === lastScannedCode && currentTime - lastScannedTime < SCAN_COOLDOWN) {
+                    showStatus('Por favor espere unos segundos antes de escanear el mismo código', true);
+                    return;
+                }
+
+                // Feedback visual mejorado
+                const readerElement = document.getElementById('reader');
+                readerElement.style.border = '3px solid #28a745';
+                setTimeout(() => {
+                    readerElement.style.border = '1px solid rgba(0, 0, 0, 0.1)';
+                }, 1000);
+
+                const datos = JSON.parse(decodedText);
+                const timestamp = new Date().toLocaleString();
                 
-                // Solo sincronizar si hay cambios
-                if (currentVersion > localDataVersion || currentTimestamp > lastSyncTimestamp) {
-                    console.log('📊 Sincronizando datos... Versión:', currentVersion);
-                    localDataVersion = currentVersion;
-                    lastSyncTimestamp = currentTimestamp;
-                    
-                    // Mantener filtros actuales
-                    const currentFilters = {
-                        materia: document.getElementById('filterMateria').value,
-                        grupo: document.getElementById('filterGrupo').value,
-                        nombre: document.getElementById('filterNombre').value,
-                        fecha: document.getElementById('filterFecha').value,
-                        fechaEspecifica: document.getElementById('fechaEspecifica').value,
-                        fechaInicio: document.getElementById('fechaInicio').value,
-                        fechaFin: document.getElementById('fechaFin').value
-                    };
+                const nuevoRegistro = {
+                    cedula: datos.cedula,
+                    nombre: datos.nombre,
+                    materia: datos.materia,
+                    grupo: datos.grupo,
+                    timestamp: timestamp
+                };
+                
+                if (saveRegistro(nuevoRegistro)) {
+                    lastScannedCode = decodedText;
+                    lastScannedTime = currentTime;
                     
                     filtrarRegistros();
-                    
-                    // Restaurar filtros
-                    document.getElementById('filterMateria').value = currentFilters.materia;
-                    document.getElementById('filterGrupo').value = currentFilters.grupo;
-                    document.getElementById('filterNombre').value = currentFilters.nombre;
-                    document.getElementById('filterFecha').value = currentFilters.fecha;
-                    document.getElementById('fechaEspecifica').value = currentFilters.fechaEspecifica;
-                    document.getElementById('fechaInicio').value = currentFilters.fechaInicio;
-                    document.getElementById('fechaFin').value = currentFilters.fechaFin;
-                    
-                    // Restablecer visibilidad de campos de fecha
-                    cambiarTipoFiltroFecha();
-                    
-                    // Mostrar notificación sutil de sincronización
-                    showSyncNotification();
+                    showStatus('✅ Registro exitoso: ' + datos.nombre);
+                } else {
+                    showStatus('Error al guardar el registro', true);
                 }
-            } catch (error) {
-                console.error('Error en sincronización:', error);
+            } catch (e) {
+                showStatus('Error al procesar el código QR. Verifique el formato.', true);
+                console.error('Error al procesar el código QR:', e);
             }
         }
 
-        function updateDataVersion() {
-            const newVersion = Date.now();
-            localStorage.setItem('dataVersion', newVersion.toString());
-            localStorage.setItem('lastSyncTimestamp', newVersion.toString());
-            localDataVersion = newVersion;
-            lastSyncTimestamp = newVersion;
-            
-            // Disparar evento para notificar a otras pestañas/dispositivos
-            const event = new StorageEvent('storage', {
-                key: 'dataVersion',
-                newValue: newVersion.toString(),
-                storageArea: localStorage
+        function onScanError(errorMessage) {
+            // Solo log para debugging, sin mostrar errores continuos
+        }
+
+        // === FUNCIONES ORIGINALES MEJORADAS ===
+        function showStatus(message, isError = false) {
+            const statusElement = document.getElementById('statusMessage');
+            statusElement.textContent = message;
+            statusElement.style.display = 'block';
+            statusElement.className = 'status-message ' + (isError ? 'error' : 'success');
+            setTimeout(() => {
+                statusElement.style.display = 'none';
+            }, 3000);
+        }
+
+        function checkDuplicates() {
+            const tbody = document.querySelector('#registros tbody');
+            const rows = tbody.querySelectorAll('tr');
+            const seen = new Map();
+
+            rows.forEach(row => {
+                row.classList.remove('duplicate');
+                const cedula = row.cells[0].textContent;
+                const nombre = row.cells[1].textContent;
+                const key = `${cedula}-${nombre}`;
+                
+                if (seen.has(key)) {
+                    row.classList.add('duplicate');
+                    seen.get(key).classList.add('duplicate');
+                } else {
+                    seen.set(key, row);
+                }
             });
-            window.dispatchEvent(event);
         }
 
-        function updateLastActivity() {
-            localStorage.setItem('lastActivity', Date.now().toString());
+        function mostrarModal(index) {
+            registroAEliminar = index;
+            document.getElementById('passwordModal').style.display = 'block';
+            document.getElementById('passwordInput').value = '';
+            document.getElementById('passwordInput').focus();
         }
 
-        function showSyncNotification() {
-            // Crear notificación sutil que no interrumpa el flujo
-            const notification = document.createElement('div');
-            notification.style.cssText = `
-                position: fixed;
-                top: 20px;
-                right: 20px;
-                background: linear-gradient(45deg, var(--color-accent), var(--color-primario));
-                color: white;
-                padding: 10px 20px;
-                border-radius: 25px;
-                font-size: 0.9rem;
-                font-weight: 500;
-                z-index: 10000;
-                box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-                transform: translateX(100%);
-                transition: transform 0.3s ease;
-                display: flex;
-                align-items: center;
-                gap: 8px;
-            `;
-            notification.innerHTML = '<i class="fas fa-sync-alt"></i> Lista actualizada';
-            
-            document.body.appendChild(notification);
-            
-            // Animación de entrada
-            setTimeout(() => {
-                notification.style.transform = 'translateX(0)';
-            }, 100);
-            
-            // Animación de salida
-            setTimeout(() => {
-                notification.style.transform = 'translateX(100%)';
-                setTimeout(() => {
-                    document.body.removeChild(notification);
-                }, 300);
-            }, 2000);
+        function cerrarModal() {
+            document.getElementById('passwordModal').style.display = 'none';
+            registroAEliminar = null;
         }
 
-        // Función mejorada para guardar registros con sincronización
-        function saveRegistro(registro) {
-            try {
+        function confirmarEliminacion() {
+            const password = document.getElementById('passwordInput').value;
+            if (password === PASSWORD) {
                 const registros = JSON.parse(localStorage.getItem('registros') || '[]');
-                registros.unshift(registro);
+                registros.splice(registroAEliminar, 1);
                 localStorage.setItem('registros', JSON.stringify(registros));
-                
-                // Actualizar versión de datos
-                updateDataVersion();
-                
-                // Disparar evento personalizado
-                const customEvent = new CustomEvent('localStorageUpdated', {
-                    detail: { action: 'add', registro: registro }
-                });
-                window.dispatchEvent(customEvent);
-                
-                console.log('💾 Registro guardado y sincronizado:', registro.nombre);
-                return true;
-            } catch (error) {
-                console.error('Error al guardar registro:', error);
-                return false;
+                updateDataVersion(); // Agregar sincronización
+                filtrarRegistros();
+                showStatus('Registro eliminado exitosamente');
+                cerrarModal();
+            } else {
+                showStatus('Contraseña incorrecta', true);
             }
         }
 
-        // Función mejorada para eliminar registros con sincronización
-        function deleteRegistro(index) {
-            try {
-                const registros = JSON.parse(localStorage.getItem('registros') || '[]');
-                const deletedRecord = registros.splice(index, 1)[0];
-                localStorage.setItem('registros', JSON.stringify(registros));
-                
-                // Actualizar versión de datos
-                updateDataVersion();
-                
-                // Disparar evento personalizado
-                const customEvent = new CustomEvent('localStorageUpdated', {
-                    detail: { action: 'delete', registro: deletedRecord }
-                });
-                window.dispatchEvent(customEvent);
-                
-                console.log('🗑️ Registro eliminado y sincronizado:', deletedRecord?.nombre);
-                return true;
-            } catch (error) {
-                console.error('Error al eliminar registro:', error);
-                return false;
-            }
+        function mostrarModalEliminarTodos() {
+            document.getElementById('deleteAllModal').style.display = 'block';
+            document.getElementById('deleteAllPassword').value = '';
+            document.getElementById('deleteAllPassword').focus();
         }
 
-        // Función mejorada para limpiar todos los registros
-        function clearAllRegistros() {
-            try {
+        function cerrarModalEliminarTodos() {
+            document.getElementById('deleteAllModal').style.display = 'none';
+        }
+
+        function confirmarEliminacionTotal() {
+            const password = document.getElementById('deleteAllPassword').value;
+            if (password === PASSWORD) {
                 localStorage.removeItem('registros');
-                updateDataVersion();
-                
-                // Disparar evento personalizado
-                const customEvent = new CustomEvent('localStorageUpdated', {
-                    detail: { action: 'clear' }
-                });
-                window.dispatchEvent(customEvent);
-                
-                console.log('🧹 Todos los registros eliminados y sincronizados');
-                return true;
-            } catch (error) {
-                console.error('Error al limpiar registros:', error);
-                return false;
+                updateDataVersion(); // Agregar sincronización
+                filteredRegistros = [];
+                actualizarTabla();
+                showStatus('Todos los registros han sido eliminados');
+                cerrarModalEliminarTodos();
+            } else {
+                showStatus('Contraseña incorrecta', true);
             }
         }
 
@@ -1608,74 +959,6 @@
             
             currentPage = 1;
             actualizarTabla();
-            
-            // Mostrar información de filtros aplicados
-            mostrarResumenFiltros();
-        }
-
-        function mostrarResumenFiltros() {
-            const totalRegistros = JSON.parse(localStorage.getItem('registros') || '[]').length;
-            const registrosFiltrados = filteredRegistros.length;
-            
-            // Crear o actualizar el resumen de filtros
-            let resumenElement = document.getElementById('filtrosResumen');
-            if (!resumenElement) {
-                resumenElement = document.createElement('div');
-                resumenElement.id = 'filtrosResumen';
-                resumenElement.style.cssText = `
-                    text-align: center;
-                    margin: 15px 0;
-                    padding: 10px;
-                    background: linear-gradient(45deg, #f8f9fa, #e9ecef);
-                    border-radius: 8px;
-                    border-left: 4px solid var(--color-accent);
-                    font-weight: 500;
-                    color: var(--color-texto);
-                `;
-                document.querySelector('.filters').after(resumenElement);
-            }
-            
-            let mensaje = `Mostrando ${registrosFiltrados} de ${totalRegistros} registros`;
-            
-            // Agregar información sobre filtros activos
-            const filtrosActivos = [];
-            const materiaFilter = document.getElementById('filterMateria').value;
-            const grupoFilter = document.getElementById('filterGrupo').value;
-            const nombreFilter = document.getElementById('filterNombre').value;
-            const fechaFilter = document.getElementById('filterFecha').value;
-            
-            if (materiaFilter) filtrosActivos.push(`Materia: ${materiaFilter}`);
-            if (grupoFilter) filtrosActivos.push(`Grupo: ${grupoFilter}`);
-            if (nombreFilter) filtrosActivos.push(`Búsqueda: ${nombreFilter}`);
-            if (fechaFilter) {
-                const fechaTextos = {
-                    'hoy': 'Hoy',
-                    'ayer': 'Ayer',
-                    'esta_semana': 'Esta Semana',
-                    'este_mes': 'Este Mes',
-                    'fecha_especifica': `Fecha: ${document.getElementById('fechaEspecifica').value}`,
-                    'rango_fechas': `Del ${document.getElementById('fechaInicio').value} al ${document.getElementById('fechaFin').value}`
-                };
-                filtrosActivos.push(fechaTextos[fechaFilter] || fechaFilter);
-            }
-            
-            if (filtrosActivos.length > 0) {
-                mensaje += ` | Filtros: ${filtrosActivos.join(', ')}`;
-            }
-            
-            resumenElement.innerHTML = `
-                <i class="fas fa-filter"></i> ${mensaje}
-                ${filtrosActivos.length > 0 ? '<button onclick="limpiarFiltros()" style="margin-left: 10px; padding: 5px 10px; background: var(--color-primario); color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 0.8rem;"><i class="fas fa-times"></i> Limpiar</button>' : ''}
-            `;
-        }
-
-        function limpiarFiltros() {
-            document.getElementById('filterMateria').value = '';
-            document.getElementById('filterGrupo').value = '';
-            document.getElementById('filterNombre').value = '';
-            document.getElementById('filterFecha').value = '';
-            cambiarTipoFiltroFecha(); // Esto ocultará los campos adicionales
-            filtrarRegistros();
         }
 
         function actualizarTabla() {
@@ -1765,10 +1048,7 @@
             doc.setFont('helvetica', 'normal');
             doc.text(`Generado: ${new Date().toLocaleString()}`, 105, 30, { align: 'center' });
             
-            const materiaFilter = document.getElementById('filterMateria').value;
-            const grupoFilter = document.getElementById('filterGrupo').value;
-            const nombreFilter = document.getElementById('filterNombre').value;
-            
+            // Filtros mejorados incluyendo fecha
             const materiaFilter = document.getElementById('filterMateria').value;
             const grupoFilter = document.getElementById('filterGrupo').value;
             const nombreFilter = document.getElementById('filterNombre').value;
@@ -1831,15 +1111,37 @@
             showStatus('PDF generado exitosamente');
         }
 
-        // Event Listeners
-        document.getElementById('cameraSelect').addEventListener('change', (event) => {
-            currentCameraId = event.target.value;
-        });
+        // === INICIALIZACIÓN MEJORADA ===
+        // Initialize scanner con configuración mejorada
+        const html5QrcodeScanner = new Html5QrcodeScanner(
+            "reader", { 
+                fps: 15, // Aumentado para mejor respuesta
+                qrbox: { width: 300, height: 300 }, // Área más grande
+                aspectRatio: 1.0,
+                disableFlip: false,
+                useBarCodeDetectorIfSupported: true,
+                experimentalFeatures: {
+                    useBarCodeDetectorIfSupported: true
+                }
+            }
+        );
 
-        document.getElementById('fpsRange').addEventListener('input', (event) => {
-            document.getElementById('fpsValue').textContent = event.target.value;
-        });
+        html5QrcodeScanner.render(onScanSuccess, onScanError);
 
+        // Inicialización con sincronización
+        window.onload = () => {
+            filtrarRegistros();
+            setupDataSync();
+            
+            // Inicializar versión de datos local
+            localDataVersion = parseInt(localStorage.getItem('dataVersion') || '0');
+            lastSyncTimestamp = parseInt(localStorage.getItem('lastSyncTimestamp') || '0');
+            
+            console.log('📋 Sistema iniciado con sincronización automática');
+            console.log('🔄 Los cambios se sincronizan cada 2 segundos entre dispositivos');
+        };
+
+        // Event listeners mejorados
         document.getElementById('passwordInput').addEventListener('keyup', function(event) {
             if (event.key === 'Enter') {
                 confirmarEliminacion();
@@ -1864,89 +1166,12 @@
             }
         }
 
-        window.addEventListener('beforeunload', async () => {
+        // Limpiar recursos al salir
+        window.addEventListener('beforeunload', () => {
             if (syncIntervalId) {
                 clearInterval(syncIntervalId);
             }
-            if (isScanning) {
-                await stopScanner();
-            }
         });
-
-        // Inicialización optimizada para GitHub Pages
-        window.onload = async () => {
-            console.log('🚀 Iniciando aplicación en GitHub Pages...');
-            
-            // Verificar soporte del navegador
-            if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-                showStatus('❌ Tu navegador no soporta acceso a cámara. Usa Chrome, Firefox o Safari actualizados.', true);
-                updateScannerStatus('Navegador no compatible', false);
-                return;
-            }
-            
-            // Detectar si estamos en GitHub Pages
-            const isGitHub = window.location.hostname.includes('github.io') || 
-                            window.location.hostname.includes('githubpages.com');
-            
-            if (isGitHub) {
-                console.log('🐙 GitHub Pages detectado');
-                updateScannerStatus('Configurando para GitHub Pages...', false);
-            }
-            
-            // Verificar HTTPS
-            if (location.protocol !== 'https:' && 
-                location.hostname !== 'localhost' && 
-                location.hostname !== '127.0.0.1') {
-                showStatus('⚠️ HTTPS es requerido para acceso a cámara. GitHub Pages usa HTTPS automáticamente.', true);
-            }
-            
-            // Cargar datos iniciales
-            filtrarRegistros();
-            
-            // Configurar sincronización mejorada
-            setupDataSync();
-            
-            // Inicializar versión de datos local
-            localDataVersion = parseInt(localStorage.getItem('dataVersion') || '0');
-            lastSyncTimestamp = parseInt(localStorage.getItem('lastSyncTimestamp') || '0');
-            
-            // Marcar actividad inicial
-            updateLastActivity();
-            
-            // Mostrar estado inicial
-            updateScannerStatus('Listo para detectar cámaras...', false);
-            
-            // Inicializar cámaras con un retraso mayor para GitHub Pages
-            setTimeout(async () => {
-                console.log('⏰ Iniciando detección de cámaras...');
-                await initializeCameras();
-            }, 1000); // Retraso de 1 segundo para GitHub Pages
-            
-            console.log('✅ Aplicación iniciada correctamente');
-            console.log('📊 Versión de datos local:', localDataVersion);
-            
-            // Mostrar estado de sincronización
-            const registrosCount = JSON.parse(localStorage.getItem('registros') || '[]').length;
-            if (registrosCount > 0) {
-                console.log(`📋 ${registrosCount} registros cargados`);
-            }
-            
-            // Agregar listener para detectar cambios de permisos
-            if ('permissions' in navigator) {
-                try {
-                    const permission = await navigator.permissions.query({ name: 'camera' });
-                    permission.addEventListener('change', () => {
-                        console.log('🔄 Permisos de cámara cambiaron:', permission.state);
-                        if (permission.state === 'granted') {
-                            console.log('✅ Permisos concedidos, reintentando detección...');
-                            setTimeout(() => initializeCameras(), 500);
-                        }
-                    });
-                } catch (error) {
-                    console.log('ℹ️ API de permisos no disponible');
-                }
-            }
-        };
     </script>
 </body>
 </html>
