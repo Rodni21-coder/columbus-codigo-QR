@@ -645,6 +645,17 @@
                     <li>Evite movimientos bruscos durante el escaneo</li>
                 </ul>
                 
+                <div style="margin-top: 15px; padding: 10px; background: #fff3cd; border-radius: 5px; border-left: 4px solid #ffc107;">
+                    <strong>⚠️ Permisos de Cámara:</strong><br>
+                    <small>Si las cámaras no aparecen, asegúrese de:</small>
+                    <ul style="margin: 5px 0; font-size: 0.85rem;">
+                        <li>Permitir acceso a la cámara cuando el navegador lo solicite</li>
+                        <li>Verificar que no haya otras aplicaciones usando la cámara</li>
+                        <li>Recargar la página si cambió los permisos</li>
+                        <li>Usar HTTPS (requerido para acceso a cámara)</li>
+                    </ul>
+                </div>
+                
                 <div style="margin-top: 15px; padding: 10px; background: #e3f2fd; border-radius: 5px; border-left: 4px solid var(--color-accent);">
                     <strong>🔄 Sincronización Automática:</strong><br>
                     <small>Los registros se sincronizan automáticamente entre todos los dispositivos cada 2 segundos. 
@@ -755,7 +766,7 @@
         let lastSyncTimestamp = 0;
         let localDataVersion = 0;
 
-        // Configuración mejorada del scanner
+        // Configuración mejorada del scanner con mejor manejo de permisos
         const scannerConfig = {
             fps: 15,
             qrbox: { width: 300, height: 300 },
@@ -763,8 +774,8 @@
             disableFlip: false,
             videoConstraints: {
                 facingMode: "environment", // Preferir cámara trasera
-                width: { ideal: 1920, max: 1920 },
-                height: { ideal: 1080, max: 1080 }
+                width: { ideal: 1280, max: 1920 },
+                height: { ideal: 720, max: 1080 }
             },
             formatsToSupport: [Html5QrcodeSupportedFormats.QR_CODE],
             useBarCodeDetectorIfSupported: true,
@@ -773,21 +784,69 @@
             }
         };
 
+        // Función para solicitar permisos de cámara
+        async function requestCameraPermission() {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ 
+                    video: { 
+                        facingMode: "environment",
+                        width: { ideal: 1280 },
+                        height: { ideal: 720 }
+                    } 
+                });
+                
+                // Cerrar el stream inmediatamente, solo necesitábamos el permiso
+                stream.getTracks().forEach(track => track.stop());
+                return true;
+            } catch (error) {
+                console.error('Error al solicitar permisos de cámara:', error);
+                return false;
+            }
+        }
+
         async function initializeCameras() {
             try {
+                updateScannerStatus('Solicitando permisos de cámara...', false);
+                
+                // Primero solicitar permisos
+                const hasPermission = await requestCameraPermission();
+                if (!hasPermission) {
+                    showStatus('❌ Permisos de cámara denegados. Por favor, permite el acceso a la cámara y recarga la página.', true);
+                    updateScannerStatus('Permisos de cámara requeridos', false);
+                    return;
+                }
+
+                updateScannerStatus('Detectando cámaras disponibles...', false);
+                
+                // Ahora obtener la lista de cámaras
                 const devices = await Html5Qrcode.getCameras();
+                console.log('Cámaras detectadas:', devices);
+                
                 availableCameras = devices;
                 const cameraSelect = document.getElementById('cameraSelect');
                 cameraSelect.innerHTML = '<option value="">Seleccionar cámara...</option>';
                 
+                if (devices.length === 0) {
+                    showStatus('❌ No se encontraron cámaras disponibles', true);
+                    updateScannerStatus('No hay cámaras disponibles', false);
+                    return;
+                }
+                
                 devices.forEach((device, index) => {
                     const option = document.createElement('option');
                     option.value = device.id;
-                    option.textContent = device.label || `Cámara ${index + 1}`;
+                    // Mejorar la descripción de la cámara
+                    let labelText = device.label || `Cámara ${index + 1}`;
+                    if (labelText.toLowerCase().includes('back') || labelText.toLowerCase().includes('rear')) {
+                        labelText += ' (Trasera - Recomendada)';
+                    } else if (labelText.toLowerCase().includes('front')) {
+                        labelText += ' (Frontal)';
+                    }
+                    option.textContent = labelText;
                     cameraSelect.appendChild(option);
                 });
 
-                // Seleccionar automáticamente la cámara trasera si está disponible
+                // Seleccionar automáticamente la mejor cámara
                 const backCamera = devices.find(device => 
                     device.label.toLowerCase().includes('back') || 
                     device.label.toLowerCase().includes('rear') ||
@@ -797,13 +856,32 @@
                 if (backCamera) {
                     cameraSelect.value = backCamera.id;
                     currentCameraId = backCamera.id;
+                    updateScannerStatus('Cámara trasera seleccionada automáticamente', false);
                 } else if (devices.length > 0) {
                     cameraSelect.value = devices[0].id;
                     currentCameraId = devices[0].id;
+                    updateScannerStatus('Primera cámara seleccionada', false);
                 }
+
+                showStatus(`✅ ${devices.length} cámara(s) detectada(s) correctamente`);
+                console.log('Inicialización de cámaras completada');
+                
             } catch (error) {
-                console.error('Error al obtener cámaras:', error);
-                showStatus('Error al acceder a las cámaras. Verifique los permisos.', true);
+                console.error('Error al inicializar cámaras:', error);
+                let errorMessage = 'Error al acceder a las cámaras. ';
+                
+                if (error.name === 'NotAllowedError') {
+                    errorMessage += 'Permisos denegados. Por favor, permite el acceso a la cámara.';
+                } else if (error.name === 'NotFoundError') {
+                    errorMessage += 'No se encontraron cámaras en este dispositivo.';
+                } else if (error.name === 'NotSupportedError') {
+                    errorMessage += 'Tu navegador no soporta acceso a cámaras.';
+                } else {
+                    errorMessage += 'Verifica que tu dispositivo tenga cámara y que el navegador tenga permisos.';
+                }
+                
+                showStatus('❌ ' + errorMessage, true);
+                updateScannerStatus('Error al inicializar cámaras', false);
             }
         }
 
@@ -825,14 +903,18 @@
             
             if (!isScanning) {
                 if (!currentCameraId) {
-                    showStatus('Por favor seleccione una cámara', true);
+                    showStatus('❌ Por favor seleccione una cámara primero', true);
                     return;
                 }
                 
                 try {
+                    updateScannerStatus('Iniciando cámara...', false);
+                    toggleBtn.disabled = true;
+                    
+                    // Crear nueva instancia del scanner
                     html5QrCode = new Html5Qrcode("reader");
                     
-                    // Configuración avanzada para mejor detección
+                    // Configuración optimizada para mejor compatibilidad
                     const config = {
                         fps: parseInt(document.getElementById('fpsRange').value),
                         qrbox: function(viewfinderWidth, viewfinderHeight) {
@@ -847,9 +929,8 @@
                         aspectRatio: 1.0,
                         disableFlip: false,
                         videoConstraints: {
-                            width: { ideal: 1920, max: 1920 },
-                            height: { ideal: 1080, max: 1080 },
-                            facingMode: "environment"
+                            width: { ideal: 1280, max: 1920 },
+                            height: { ideal: 720, max: 1080 }
                         },
                         formatsToSupport: [Html5QrcodeSupportedFormats.QR_CODE],
                         useBarCodeDetectorIfSupported: true,
@@ -857,6 +938,9 @@
                             useBarCodeDetectorIfSupported: true
                         }
                     };
+                    
+                    console.log('Iniciando scanner con cámara:', currentCameraId);
+                    console.log('Configuración:', config);
                     
                     await html5QrCode.start(
                         currentCameraId,
@@ -868,15 +952,41 @@
                     isScanning = true;
                     toggleBtn.textContent = 'Detener Escáner';
                     toggleBtn.classList.add('stop');
+                    toggleBtn.disabled = false;
                     cameraSelect.disabled = true;
-                    updateScannerStatus('Escáner activo - Enfoque el código QR', true);
+                    updateScannerStatus('📹 Escáner activo - Enfoque el código QR en el centro', true);
+                    showStatus('✅ Cámara iniciada correctamente');
                     
                     // Habilitar linterna si está disponible
                     enableTorchControl();
                     
                 } catch (error) {
-                    console.error('Error al iniciar el escáner:', error);
-                    showStatus('Error al iniciar el escáner. Verifique los permisos de cámara.', true);
+                    console.error('Error detallado al iniciar el escáner:', error);
+                    toggleBtn.disabled = false;
+                    
+                    let errorMessage = 'Error al iniciar el escáner. ';
+                    if (error.message.includes('NotAllowedError')) {
+                        errorMessage += 'Permisos de cámara denegados.';
+                    } else if (error.message.includes('NotFoundError')) {
+                        errorMessage += 'Cámara no encontrada.';
+                    } else if (error.message.includes('OverConstrainedError')) {
+                        errorMessage += 'Configuración de cámara no soportada.';
+                    } else {
+                        errorMessage += error.message || 'Error desconocido.';
+                    }
+                    
+                    showStatus('❌ ' + errorMessage, true);
+                    updateScannerStatus('Error al iniciar escáner', false);
+                    
+                    // Limpiar el scanner en caso de error
+                    if (html5QrCode) {
+                        try {
+                            await html5QrCode.clear();
+                        } catch (clearError) {
+                            console.error('Error al limpiar scanner:', clearError);
+                        }
+                        html5QrCode = null;
+                    }
                 }
             } else {
                 await stopScanner();
@@ -1643,12 +1753,21 @@
             }
         });
 
-        // Inicialización mejorada
+        // Inicialización mejorada con mejor manejo de errores
         window.onload = async () => {
             console.log('🚀 Iniciando aplicación...');
             
-            // Inicializar cámaras
-            await initializeCameras();
+            // Verificar soporte del navegador
+            if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                showStatus('❌ Tu navegador no soporta acceso a cámara. Usa Chrome, Firefox o Safari.', true);
+                updateScannerStatus('Navegador no compatible', false);
+                return;
+            }
+            
+            // Verificar HTTPS (requerido para cámara)
+            if (location.protocol !== 'https:' && location.hostname !== 'localhost' && location.hostname !== '127.0.0.1') {
+                showStatus('⚠️ HTTPS es requerido para acceso a cámara. Algunos navegadores pueden bloquear la funcionalidad.', true);
+            }
             
             // Cargar datos iniciales
             filtrarRegistros();
@@ -1662,6 +1781,11 @@
             
             // Marcar actividad inicial
             updateLastActivity();
+            
+            // Inicializar cámaras (con retraso para asegurar que la UI esté lista)
+            setTimeout(async () => {
+                await initializeCameras();
+            }, 500);
             
             console.log('✅ Aplicación iniciada correctamente');
             console.log('📊 Versión de datos local:', localDataVersion);
