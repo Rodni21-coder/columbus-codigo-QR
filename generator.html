@@ -187,6 +187,46 @@
             background: linear-gradient(135deg, #00b4d8, #0096c7);
         }
 
+        /* === NUEVO: Vista previa del QR con información === */
+        .qr-preview {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: var(--sombra);
+            margin-top: 20px;
+        }
+
+        .qr-info {
+            margin-top: 15px;
+            padding: 15px;
+            background: linear-gradient(135deg, #f0f8ff 0%, #e6f3ff 100%);
+            border-radius: 8px;
+            border-left: 4px solid var(--color-primario);
+        }
+
+        .qr-info h3 {
+            margin: 0 0 10px 0;
+            color: var(--color-primario);
+            font-size: 1.1rem;
+        }
+
+        .qr-info-item {
+            display: flex;
+            justify-content: space-between;
+            margin: 5px 0;
+            font-size: 0.9rem;
+        }
+
+        .qr-info-label {
+            font-weight: 600;
+            color: var(--color-texto-claro);
+        }
+
+        .qr-info-value {
+            color: var(--color-texto);
+            font-weight: 500;
+        }
+
         @media (max-width: 768px) {
             .header {
                 flex-direction: column;
@@ -222,6 +262,11 @@
                 padding: 14px;
                 font-size: 1rem;
             }
+
+            .qr-info-item {
+                flex-direction: column;
+                gap: 2px;
+            }
         }
     </style>
 </head>
@@ -245,20 +290,19 @@
             <label for="materia">Materia:</label>
             <select id="materia" required>
                 <option value="">Seleccione una materia</option>
-                    <option value="">Todas las Materias</option>
-                    <option value="IPM">IPM</option>
-                    <option value="RCP">RCP</option>
-                    <option value="Propedeutica">Propedeutica</option>
-                    <option value="Obstetricia">Obstetricia</option>
-                    <option value="Medicina Interna I">Medicina Interna I</option>
-                    <option value="Medicina Interna II">Medicina Interna II</option>
-                    <option value="Medicina Interna III">Medicina Interna III</option>
-                    <option value="Urgencias">Urgencias</option>
-                    <option value="Pediatria I">Pediatría I</option>
-                    <option value="Pediatria II">Pediatría II</option>
-                    <option value="Ginecologia">Ginecología</option>
-                    <option value="Cardiologia">Cardiología</option>
-                    <option value="EKG">EKG</option>
+                <option value="IPM">IPM</option>
+                <option value="RCP">RCP</option>
+                <option value="Propedeutica">Propedeutica</option>
+                <option value="Obstetricia">Obstetricia</option>
+                <option value="Medicina Interna I">Medicina Interna I</option>
+                <option value="Medicina Interna II">Medicina Interna II</option>
+                <option value="Medicina Interna III">Medicina Interna III</option>
+                <option value="Urgencias">Urgencias</option>
+                <option value="Pediatria I">Pediatría I</option>
+                <option value="Pediatria II">Pediatría II</option>
+                <option value="Ginecologia">Ginecología</option>
+                <option value="Cardiologia">Cardiología</option>
+                <option value="EKG">EKG</option>
             </select>
         </div>
         <div class="form-group">
@@ -266,16 +310,39 @@
             <input type="text" id="grupo" required placeholder="Ingrese el grupo (ej: A1, B2, etc.)">
         </div>
         <button onclick="generarQR()">Generar QR</button>
+        
         <div id="qrcode"></div>
-        <button id="downloadQR" onclick="descargarQR()">Descargar QR</button>
+        
+        <!-- === NUEVA SECCIÓN: Información del QR === -->
+        <div id="qrInfo" class="qr-info" style="display: none;">
+            <h3>📋 Información del Código QR</h3>
+            <div class="qr-info-item">
+                <span class="qr-info-label">Cédula:</span>
+                <span class="qr-info-value" id="infoCedula">-</span>
+            </div>
+            <div class="qr-info-item">
+                <span class="qr-info-label">Nombre:</span>
+                <span class="qr-info-value" id="infoNombre">-</span>
+            </div>
+            <div class="qr-info-item">
+                <span class="qr-info-label">Materia:</span>
+                <span class="qr-info-value" id="infoMateria">-</span>
+            </div>
+            <div class="qr-info-item">
+                <span class="qr-info-label">Grupo:</span>
+                <span class="qr-info-value" id="infoGrupo">-</span>
+            </div>
+        </div>
+        
+        <button id="downloadQR" onclick="descargarQR()">📥 Descargar QR con Fondo Blanco</button>
     </div>
 
     <script>
         function generarQR() {
-            const cedula = document.getElementById('cedula').value;
-            const nombre = document.getElementById('nombre').value;
+            const cedula = document.getElementById('cedula').value.trim();
+            const nombre = document.getElementById('nombre').value.trim();
             const materia = document.getElementById('materia').value;
-            const grupo = document.getElementById('grupo').value;
+            const grupo = document.getElementById('grupo').value.trim();
 
             if (!cedula || !nombre || !materia || !grupo) {
                 alert('Por favor complete todos los campos');
@@ -292,6 +359,7 @@
             const qrCodeDiv = document.getElementById('qrcode');
             qrCodeDiv.innerHTML = '';
 
+            // Generar QR con configuración mejorada
             const qr = new QRCode(qrCodeDiv, {
                 text: JSON.stringify(datos),
                 width: 256,
@@ -300,6 +368,13 @@
                 colorLight: "#ffffff",
                 correctLevel: QRCode.CorrectLevel.H
             });
+
+            // Mostrar información del QR
+            document.getElementById('infoCedula').textContent = cedula;
+            document.getElementById('infoNombre').textContent = nombre;
+            document.getElementById('infoMateria').textContent = materia;
+            document.getElementById('infoGrupo').textContent = grupo;
+            document.getElementById('qrInfo').style.display = 'block';
 
             setTimeout(() => {
                 document.getElementById('downloadQR').style.display = 'block';
@@ -314,15 +389,92 @@
                 return;
             }
 
-            const cedula = document.getElementById('cedula').value;
-            const nombre = document.getElementById('nombre').value;
-            const nombreArchivo = `QR_${nombre.replace(/\s+/g, '_')}_${cedula}.png`;
+            // Crear un nuevo canvas con fondo blanco garantizado
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            
+            // Configurar el tamaño del canvas (agregar padding para mejor apariencia)
+            const padding = 20;
+            canvas.width = qrCanvas.width + (padding * 2);
+            canvas.height = qrCanvas.height + (padding * 2);
+            
+            // Llenar todo el canvas con color blanco sólido
+            ctx.fillStyle = '#FFFFFF';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // Dibujar el QR centrado en el canvas blanco
+            ctx.drawImage(qrCanvas, padding, padding);
+            
+            // Opcional: Agregar un borde sutil
+            ctx.strokeStyle = '#E0E0E0';
+            ctx.lineWidth = 1;
+            ctx.strokeRect(padding - 1, padding - 1, qrCanvas.width + 2, qrCanvas.height + 2);
 
+            // Generar nombre del archivo
+            const cedula = document.getElementById('cedula').value.trim();
+            const nombre = document.getElementById('nombre').value.trim();
+            const materia = document.getElementById('materia').value;
+            const fecha = new Date().toISOString().slice(0,10);
+            const nombreArchivo = `QR_${nombre.replace(/\s+/g, '_')}_${cedula}_${materia}_${fecha}.png`;
+
+            // Descargar el archivo
             const link = document.createElement('a');
-            link.href = qrCanvas.toDataURL("image/png");
+            link.href = canvas.toDataURL("image/png", 1.0); // Calidad máxima
             link.download = nombreArchivo;
             link.click();
+
+            // Mostrar confirmación
+            mostrarConfirmacion('✅ QR descargado exitosamente con fondo blanco');
         }
+
+        function mostrarConfirmacion(mensaje) {
+            // Crear notificación temporal
+            const notificacion = document.createElement('div');
+            notificacion.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: linear-gradient(45deg, #28a745, #20c997);
+                color: white;
+                padding: 15px 25px;
+                border-radius: 25px;
+                font-weight: 600;
+                z-index: 10000;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+                transform: translateX(100%);
+                transition: transform 0.3s ease;
+            `;
+            notificacion.textContent = mensaje;
+            
+            document.body.appendChild(notificacion);
+            
+            setTimeout(() => {
+                notificacion.style.transform = 'translateX(0)';
+            }, 100);
+            
+            setTimeout(() => {
+                notificacion.style.transform = 'translateX(100%)';
+                setTimeout(() => {
+                    document.body.removeChild(notificacion);
+                }, 300);
+            }, 3000);
+        }
+
+        // Mejorar la experiencia de usuario con Enter
+        document.addEventListener('DOMContentLoaded', function() {
+            const inputs = document.querySelectorAll('input, select');
+            inputs.forEach((input, index) => {
+                input.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') {
+                        if (index < inputs.length - 1) {
+                            inputs[index + 1].focus();
+                        } else {
+                            generarQR();
+                        }
+                    }
+                });
+            });
+        });
     </script>
 </body>
 </html>
