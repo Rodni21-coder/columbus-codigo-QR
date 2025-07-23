@@ -1134,31 +1134,49 @@
             renderCalendar();
         }
 
-        function onDateRangeChange() {
-            const fechaInicio = document.getElementById('fechaInicio').value;
-            const fechaFin = document.getElementById('fechaFin').value;
+ function estaEnRangoFecha(fechaRegistro) {
+        if (!fechaRegistro) return true;
+        
+        const fechaInicio = document.getElementById('fechaInicio').value;
+        const fechaFin = document.getElementById('fechaFin').value;
+        
+        if (!fechaInicio && !fechaFin) return true;
+        
+        try {
+            // Extraer la parte de la fecha (ignorando la hora)
+            const fechaPart = fechaRegistro.split(',')[0].trim();
             
-            if (fechaInicio) {
-                selectedStartDate = new Date(fechaInicio);
-            }
-            if (fechaFin) {
-                selectedEndDate = new Date(fechaFin);
+            // Parsear la fecha del registro (formato MM/DD/YYYY)
+            const [mes, dia, año] = fechaPart.split('/').map(num => parseInt(num));
+            const fechaRegistroObj = new Date(año, mes - 1, dia);
+            
+            // Resetear horas para comparación correcta
+            fechaRegistroObj.setHours(0, 0, 0, 0);
+            
+            if (fechaInicio && fechaFin) {
+                const inicio = new Date(fechaInicio);
+                inicio.setHours(0, 0, 0, 0);
+                
+                const fin = new Date(fechaFin);
+                fin.setHours(23, 59, 59, 999);
+                
+                return fechaRegistroObj >= inicio && fechaRegistroObj <= fin;
+            } else if (fechaInicio) {
+                const inicio = new Date(fechaInicio);
+                inicio.setHours(0, 0, 0, 0);
+                return fechaRegistroObj >= inicio;
+            } else if (fechaFin) {
+                const fin = new Date(fechaFin);
+                fin.setHours(23, 59, 59, 999);
+                return fechaRegistroObj <= fin;
             }
             
-            // Actualizar filtro a personalizado si se usan los inputs
-            if (fechaInicio || fechaFin) {
-                document.querySelectorAll('.quick-filter-btn').forEach(btn => btn.classList.remove('active'));
-                document.querySelector('[data-filter="personalizado"]').classList.add('active');
-                currentDateFilter = 'personalizado';
-            }
-            
-            updateDateSummary();
-            filtrarRegistros();
-            
-            if (document.getElementById('calendarContainer').classList.contains('show')) {
-                renderCalendar();
-            }
+            return true;
+        } catch (error) {
+            console.error('Error al filtrar por fecha:', error, 'Fecha registro:', fechaRegistro);
+            return true;
         }
+    }
 
         function updateDateSummary() {
             const summaryText = document.querySelector('.date-summary-text');
