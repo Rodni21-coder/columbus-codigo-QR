@@ -770,6 +770,64 @@
                 font-size: 1.1rem;
             }
         }
+         #reader {
+    width: 100%;
+    max-width: 430px;
+    margin: 38px auto 30px auto;
+    background: linear-gradient(135deg, #f7fcff 65%, #e8f1fa 100%);
+    border-radius: 22px;
+    border: 3.5px solid #0091ff;
+    box-shadow: 0 12px 32px rgba(0,145,255,0.12), 0 1.5px 8px #00b4d850;
+    padding: 40px 24px 74px 24px;
+    position: relative;
+    overflow: hidden;
+    transition: box-shadow .28s, border-color .28s;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 360px;
+}
+
+#reader::before {
+    content: "🩺";
+    position: absolute;
+    top: 18px; right: 30px;
+    font-size: 2.7rem;
+    opacity: 0.12;
+    pointer-events: none;
+    z-index: 1;
+    animation: pulseIcon 1.5s infinite alternate;
+}
+@keyframes pulseIcon {
+    from { transform: scale(1); opacity: 0.09;}
+    to { transform: scale(1.14); opacity: 0.18;}
+}
+
+#reader::after {
+    content: "Escanea el código QR del estudiante";
+    position: absolute;
+    left: 0; right: 0;
+    bottom: 18px;
+    text-align: center;
+    font-size: 1.06rem;
+    color: #0091ff;
+    font-weight: 700;
+    letter-spacing: 1.2px;
+    opacity: .90;
+    text-shadow: 0 0 2px #cde7ff;
+    z-index: 2;
+    pointer-events: none;
+}
+
+#reader video, #reader canvas {
+    border-radius: 15px;
+    border: 2px solid #6ec5ff;
+    box-shadow: 0 4px 18px #0091ff25;
+    margin: 0 auto;
+    background: #f4faff;
+    display: block;
+    z-index: 10;
+}
     </style>
 </head>
 <body>
@@ -839,62 +897,18 @@
             </div>
 
             <!-- === NUEVO FILTRO DE CALENDARIO MEJORADO === -->
-            <div class="date-filter-container">
-                <div class="date-filter-header">
-                    <div class="date-quick-filters">
-                        <button class="quick-filter-btn active" data-filter="" onclick="setQuickDateFilter('')">
-                            <i class="fas fa-calendar"></i> Todas las Fechas
-                        </button>
-                        <button class="quick-filter-btn" data-filter="hoy" onclick="setQuickDateFilter('hoy')">
-                            <i class="fas fa-sun"></i> Hoy
-                        </button>
-                        <button class="quick-filter-btn" data-filter="ayer" onclick="setQuickDateFilter('ayer')">
-                            <i class="fas fa-moon"></i> Ayer
-                        </button>
-                        <button class="quick-filter-btn" data-filter="esta_semana" onclick="setQuickDateFilter('esta_semana')">
-                            <i class="fas fa-calendar-week"></i> Esta Semana
-                        </button>
-                        <button class="quick-filter-btn" data-filter="este_mes" onclick="setQuickDateFilter('este_mes')">
-                            <i class="fas fa-calendar-alt"></i> Este Mes
-                        </button>
-                        <button class="quick-filter-btn" data-filter="personalizado" onclick="toggleCustomCalendar()">
-                            <i class="fas fa-calendar-day"></i> Personalizado
-                        </button>
-                    </div>
-                    
-                    <div class="date-range-inputs">
-                        <div class="date-input-group">
-                            <label>Desde:</label>
-                            <input type="date" id="fechaInicio" class="custom-date-input" onchange="onDateRangeChange()">
-                        </div>
-                        <div class="date-input-group">
-                            <label>Hasta:</label>
-                            <input type="date" id="fechaFin" class="custom-date-input" onchange="onDateRangeChange()">
-                        </div>
-                    </div>
-                </div>
-
-                <div class="calendar-container" id="calendarContainer">
-                    <div class="calendar-navigation">
-                        <button class="nav-btn" onclick="previousMonth()">
-                            <i class="fas fa-chevron-left"></i>
-                        </button>
-                        <div class="calendar-month-year" id="monthYear"></div>
-                        <button class="nav-btn" onclick="nextMonth()">
-                            <i class="fas fa-chevron-right"></i>
-                        </button>
-                    </div>
-                    
-                    <div class="calendar-grid" id="calendarGrid">
-                        <div class="calendar-day-header">Dom</div>
-                        <div class="calendar-day-header">Lun</div>
-                        <div class="calendar-day-header">Mar</div>
-                        <div class="calendar-day-header">Mié</div>
-                        <div class="calendar-day-header">Jue</div>
-                        <div class="calendar-day-header">Vie</div>
-                        <div class="calendar-day-header">Sáb</div>
-                    </div>
-                </div>
+           <div class="date-filter-container">
+             <div class="date-range-inputs">
+                <div class="date-input-group">
+               <label>Desde:</label>
+                <input type="date" id="fechaInicio" class="custom-date-input" onchange="filtrarRegistros()">
+           </div>
+               <div class="date-input-group">
+              <label>Hasta:</label>
+               <input type="date" id="fechaFin" class="custom-date-input" onchange="filtrarRegistros()">
+            </div>
+          </div>
+       </div>
 
                 <div class="date-summary" id="dateSummary">
                     <div class="date-summary-text">Filtro activo: Todas las fechas</div>
@@ -951,233 +965,9 @@
 
         // === VARIABLES DEL CALENDARIO ===
         let currentCalendarDate = new Date();
-        let selectedStartDate = null;
-        let selectedEndDate = null;
-        let isSelectingRange = false;
-        let currentDateFilter = '';
+        
 
         // === FUNCIONES DEL CALENDARIO MEJORADO ===
-        function setQuickDateFilter(filter) {
-            // Actualizar botones activos
-            document.querySelectorAll('.quick-filter-btn').forEach(btn => {
-                btn.classList.remove('active');
-            });
-            document.querySelector(`[data-filter="${filter}"]`).classList.add('active');
-            
-            currentDateFilter = filter;
-            selectedStartDate = null;
-            selectedEndDate = null;
-            
-            // Ocultar calendario personalizado
-            if (filter !== 'personalizado') {
-                document.getElementById('calendarContainer').classList.remove('show');
-            }
-            
-            // Configurar fechas automáticamente
-            const hoy = new Date();
-            let fechaInicio = '';
-            let fechaFin = '';
-            
-            switch (filter) {
-                case 'hoy':
-                    fechaInicio = fechaFin = hoy.toISOString().split('T')[0];
-                    break;
-                case 'ayer':
-                    const ayer = new Date(hoy);
-                    ayer.setDate(hoy.getDate() - 1);
-                    fechaInicio = fechaFin = ayer.toISOString().split('T')[0];
-                    break;
-                case 'esta_semana':
-                    const inicioSemana = new Date(hoy);
-                    inicioSemana.setDate(hoy.getDate() - hoy.getDay());
-                    fechaInicio = inicioSemana.toISOString().split('T')[0];
-                    fechaFin = hoy.toISOString().split('T')[0];
-                    break;
-                case 'este_mes':
-                    const inicioMes = new Date(hoy.getFullYear(), hoy.getMonth(), 1);
-                    fechaInicio = inicioMes.toISOString().split('T')[0];
-                    fechaFin = hoy.toISOString().split('T')[0];
-                    break;
-                default:
-                    fechaInicio = fechaFin = '';
-            }
-            
-            document.getElementById('fechaInicio').value = fechaInicio;
-            document.getElementById('fechaFin').value = fechaFin;
-            
-            updateDateSummary();
-            filtrarRegistros();
-        }
-
-        function toggleCustomCalendar() {
-            const calendar = document.getElementById('calendarContainer');
-            const isVisible = calendar.classList.contains('show');
-            
-            if (!isVisible) {
-                calendar.classList.add('show');
-                renderCalendar();
-                currentDateFilter = 'personalizado';
-            } else {
-                calendar.classList.remove('show');
-            }
-        }
-
-        function renderCalendar() {
-            const grid = document.getElementById('calendarGrid');
-            const monthYear = document.getElementById('monthYear');
-            
-            // Limpiar días anteriores (mantener headers)
-            const dayElements = grid.querySelectorAll('.calendar-day');
-            dayElements.forEach(el => el.remove());
-            
-            // Configurar mes y año
-            const monthNames = [
-                'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
-                'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
-            ];
-            monthYear.textContent = `${monthNames[currentCalendarDate.getMonth()]} ${currentCalendarDate.getFullYear()}`;
-            
-            // Primer día del mes y último día
-            const firstDay = new Date(currentCalendarDate.getFullYear(), currentCalendarDate.getMonth(), 1);
-            const lastDay = new Date(currentCalendarDate.getFullYear(), currentCalendarDate.getMonth() + 1, 0);
-            
-            // Días del mes anterior para completar la semana
-            const firstDayOfWeek = firstDay.getDay();
-            for (let i = firstDayOfWeek - 1; i >= 0; i--) {
-                const day = new Date(firstDay);
-                day.setDate(firstDay.getDate() - i - 1);
-                createCalendarDay(day, true);
-            }
-            
-            // Días del mes actual
-            for (let day = 1; day <= lastDay.getDate(); day++) {
-                const date = new Date(currentCalendarDate.getFullYear(), currentCalendarDate.getMonth(), day);
-                createCalendarDay(date, false);
-            }
-            
-            // Días del mes siguiente para completar la grilla
-            const remainingCells = 42 - (firstDayOfWeek + lastDay.getDate());
-            for (let day = 1; day <= remainingCells; day++) {
-                const date = new Date(currentCalendarDate.getFullYear(), currentCalendarDate.getMonth() + 1, day);
-                createCalendarDay(date, true);
-            }
-        }
-
-        function createCalendarDay(date, isOtherMonth) {
-            const dayElement = document.createElement('div');
-            dayElement.className = 'calendar-day';
-            dayElement.textContent = date.getDate();
-            
-            if (isOtherMonth) {
-                dayElement.classList.add('other-month');
-            }
-            
-            // Marcar día actual
-            const today = new Date();
-            if (date.toDateString() === today.toDateString()) {
-                dayElement.classList.add('today');
-            }
-            
-            // Marcar días seleccionados
-            if (selectedStartDate && date.toDateString() === selectedStartDate.toDateString()) {
-                dayElement.classList.add('range-start');
-            }
-            if (selectedEndDate && date.toDateString() === selectedEndDate.toDateString()) {
-                dayElement.classList.add('range-end');
-            }
-            
-            // Marcar rango
-            if (selectedStartDate && selectedEndDate && 
-                date >= selectedStartDate && date <= selectedEndDate) {
-                dayElement.classList.add('in-range');
-            }
-            
-            // Event listener para selección
-            dayElement.addEventListener('click', () => selectCalendarDate(date));
-            
-            document.getElementById('calendarGrid').appendChild(dayElement);
-        }
-
-        function selectCalendarDate(date) {
-            if (!selectedStartDate || (selectedStartDate && selectedEndDate)) {
-                // Iniciar nueva selección
-                selectedStartDate = new Date(date);
-                selectedEndDate = null;
-                isSelectingRange = true;
-            } else if (isSelectingRange) {
-                // Completar rango
-                if (date >= selectedStartDate) {
-                    selectedEndDate = new Date(date);
-                } else {
-                    selectedEndDate = selectedStartDate;
-                    selectedStartDate = new Date(date);
-                }
-                isSelectingRange = false;
-                
-                // Actualizar inputs
-                document.getElementById('fechaInicio').value = selectedStartDate.toISOString().split('T')[0];
-                document.getElementById('fechaFin').value = selectedEndDate.toISOString().split('T')[0];
-                
-                onDateRangeChange();
-            }
-            
-            renderCalendar();
-        }
-
-        function previousMonth() {
-            currentCalendarDate.setMonth(currentCalendarDate.getMonth() - 1);
-            renderCalendar();
-        }
-
-        function nextMonth() {
-            currentCalendarDate.setMonth(currentCalendarDate.getMonth() + 1);
-            renderCalendar();
-        }
-
- function estaEnRangoFecha(fechaRegistro) {
-        if (!fechaRegistro) return true;
-        
-        const fechaInicio = document.getElementById('fechaInicio').value;
-        const fechaFin = document.getElementById('fechaFin').value;
-        
-        if (!fechaInicio && !fechaFin) return true;
-        
-        try {
-            // Extraer la parte de la fecha (ignorando la hora)
-            const fechaPart = fechaRegistro.split(',')[0].trim();
-            
-            // Parsear la fecha del registro (formato MM/DD/YYYY)
-            const [mes, dia, año] = fechaPart.split('/').map(num => parseInt(num));
-            const fechaRegistroObj = new Date(año, mes - 1, dia);
-            
-            // Resetear horas para comparación correcta
-            fechaRegistroObj.setHours(0, 0, 0, 0);
-            
-            if (fechaInicio && fechaFin) {
-                const inicio = new Date(fechaInicio);
-                inicio.setHours(0, 0, 0, 0);
-                
-                const fin = new Date(fechaFin);
-                fin.setHours(23, 59, 59, 999);
-                
-                return fechaRegistroObj >= inicio && fechaRegistroObj <= fin;
-            } else if (fechaInicio) {
-                const inicio = new Date(fechaInicio);
-                inicio.setHours(0, 0, 0, 0);
-                return fechaRegistroObj >= inicio;
-            } else if (fechaFin) {
-                const fin = new Date(fechaFin);
-                fin.setHours(23, 59, 59, 999);
-                return fechaRegistroObj <= fin;
-            }
-            
-            return true;
-        } catch (error) {
-            console.error('Error al filtrar por fecha:', error, 'Fecha registro:', fechaRegistro);
-            return true;
-        }
-    }
-
         function updateDateSummary() {
             const summaryText = document.querySelector('.date-summary-text');
             const summaryDetails = document.querySelector('.date-summary-details');
@@ -1187,51 +977,6 @@
             
             let texto = '';
             let detalles = '';
-            
-            switch (currentDateFilter) {
-                case '':
-                    texto = 'Filtro activo: Todas las fechas';
-                    detalles = 'Mostrando todos los registros disponibles';
-                    break;
-                case 'hoy':
-                    texto = 'Filtro activo: Hoy';
-                    detalles = `Mostrando registros del ${new Date().toLocaleDateString()}`;
-                    break;
-                case 'ayer':
-                    const ayer = new Date();
-                    ayer.setDate(ayer.getDate() - 1);
-                    texto = 'Filtro activo: Ayer';
-                    detalles = `Mostrando registros del ${ayer.toLocaleDateString()}`;
-                    break;
-                case 'esta_semana':
-                    texto = 'Filtro activo: Esta Semana';
-                    detalles = 'Mostrando registros de la semana actual';
-                    break;
-                case 'este_mes':
-                    texto = 'Filtro activo: Este Mes';
-                    detalles = 'Mostrando registros del mes actual';
-                    break;
-                case 'personalizado':
-                    if (fechaInicio && fechaFin) {
-                        if (fechaInicio === fechaFin) {
-                            texto = 'Filtro activo: Fecha específica';
-                            detalles = `Mostrando registros del ${new Date(fechaInicio).toLocaleDateString()}`;
-                        } else {
-                            texto = 'Filtro activo: Rango personalizado';
-                            detalles = `Del ${new Date(fechaInicio).toLocaleDateString()} al ${new Date(fechaFin).toLocaleDateString()}`;
-                        }
-                    } else if (fechaInicio) {
-                        texto = 'Filtro activo: Desde fecha';
-                        detalles = `Desde el ${new Date(fechaInicio).toLocaleDateString()}`;
-                    } else if (fechaFin) {
-                        texto = 'Filtro activo: Hasta fecha';
-                        detalles = `Hasta el ${new Date(fechaFin).toLocaleDateString()}`;
-                    } else {
-                        texto = 'Filtro activo: Personalizado';
-                        detalles = 'Seleccione un rango de fechas';
-                    }
-                    break;
-            }
             
             summaryText.textContent = texto;
             summaryDetails.textContent = detalles;
@@ -1306,40 +1051,57 @@
             }
         }
 
-        // === FUNCIONES DE FILTRO MEJORADAS ===
-        function estaEnRangoFecha(fechaRegistro) {
-            if (!fechaRegistro) return true;
-            
-            const fechaInicio = document.getElementById('fechaInicio').value;
-            const fechaFin = document.getElementById('fechaFin').value;
-            
-            if (!fechaInicio && !fechaFin) return true;
-            
-            try {
-                const fechaRegistroParts = fechaRegistro.split(', ')[0];
-                const [mes, dia, año] = fechaRegistroParts.split('/').map(num => parseInt(num));
-                const fechaRegistroObj = new Date(año, mes - 1, dia);
-                
-                if (fechaInicio && fechaFin) {
-                    const inicio = new Date(fechaInicio);
-                    const fin = new Date(fechaFin);
-                    fin.setHours(23, 59, 59, 999);
-                    return fechaRegistroObj >= inicio && fechaRegistroObj <= fin;
-                } else if (fechaInicio) {
-                    const inicio = new Date(fechaInicio);
-                    return fechaRegistroObj >= inicio;
-                } else if (fechaFin) {
-                    const fin = new Date(fechaFin);
-                    fin.setHours(23, 59, 59, 999);
-                    return fechaRegistroObj <= fin;
-                }
-                
-                return true;
-            } catch (error) {
-                console.error('Error al filtrar por fecha:', error);
-                return true;
-            }
+  function estaEnRangoFecha(fechaRegistro) {
+    if (!fechaRegistro) return true;
+
+    // Extraer la parte de la fecha (antes de la coma si existe)
+    let fechaPart = fechaRegistro.split(',')[0].trim();
+
+    // Detectar formato y convertir a objeto Date
+    let [anio, mes, dia] = [null, null, null];
+    if (fechaPart.includes('/')) {
+        // Formato MM/DD/YYYY
+        let partes = fechaPart.split('/');
+        if (partes.length === 3) {
+            mes = parseInt(partes[0]);
+            dia = parseInt(partes[1]);
+            anio = parseInt(partes[2]);
         }
+    } else if (fechaPart.includes('-')) {
+        // Formato YYYY-MM-DD
+        let partes = fechaPart.split('-');
+        if (partes.length === 3) {
+            anio = parseInt(partes[0]);
+            mes = parseInt(partes[1]);
+            dia = parseInt(partes[2]);
+        }
+    } else {
+        return true; // Si no reconoce formato, muestra el registro
+    }
+
+    if (!anio || !mes || !dia) return true;
+
+    let fechaRegistroObj = new Date(anio, mes - 1, dia);
+    fechaRegistroObj.setHours(0,0,0,0);
+
+    let fechaInicioStr = document.getElementById('fechaInicio').value;
+    let fechaFinStr = document.getElementById('fechaFin').value;
+
+    if (!fechaInicioStr && !fechaFinStr) return true;
+
+    if (fechaInicioStr) {
+        let inicio = new Date(fechaInicioStr);
+        inicio.setHours(0,0,0,0);
+        if (fechaRegistroObj < inicio) return false;
+    }
+    if (fechaFinStr) {
+        let fin = new Date(fechaFinStr);
+        fin.setHours(23,59,59,999);
+        if (fechaRegistroObj > fin) return false;
+    }
+    return true;
+}
+
 
         // === FUNCIONES DE ESCANEO QR (MANTENIDAS) ===
         function onScanSuccess(decodedText) {
@@ -1371,6 +1133,7 @@
                     lastScannedCode = decodedText;
                     lastScannedTime = currentTime;
                     
+                    enviarDatosAGoogleSheets(nuevoRegistro); 
                     filtrarRegistros();
                     showStatus('✅ Registro exitoso: ' + datos.nombre);
                 } else {
@@ -1562,6 +1325,18 @@
             };
             paginationDiv.appendChild(nextButton);
         }
+        // Pega tu URL aquí:
+        const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz6-UP3g8PJRZr7hvrBGd35AYkUeAfev8atQVsMnBoPllyz_X9FyYxSCHlYvK5Qkz9-RQ/exec";
+
+        // Función para enviar datos a Google Sheets
+        function enviarDatosAGoogleSheets(registro) {
+       fetch(GOOGLE_SCRIPT_URL, {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(registro)
+    });
+}
 
         function generarPDF() {
             const { jsPDF } = window.jspdf;
