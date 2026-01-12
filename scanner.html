@@ -867,56 +867,6 @@
         <div id="reader"></div>
         <div id="statusMessage" class="status-message"></div>
         
-        <div class="filters">
-            <div class="filter-group">
-                <label for="filterMateria">Filtrar por Materia:</label>
-                <select id="filterMateria" onchange="filtrarRegistros()">
-                    <option value="">Todas las Materias</option>
-                    <option value="IPM">IPM</option>
-                    <option value="RCP">RCP</option>
-                    <option value="Propedeutica">Propedeutica</option>
-                    <option value="Obstetricia">Obstetricia</option>
-                    <option value="Medicina Interna I">Medicina Interna I</option>
-                    <option value="Medicina Interna II">Medicina Interna II</option>
-                    <option value="Medicina Interna III">Medicina Interna III</option>
-                    <option value="Urgencias">Urgencias</option>
-                    <option value="Pediatria I">Pediatría I</option>
-                    <option value="Pediatria II">Pediatría II</option>
-                    <option value="Ginecologia">Ginecología</option>
-                    <option value="Cardiologia">Cardiología</option>
-                    <option value="EKG">EKG</option>
-                </select>
-            </div>
-            <div class="filter-group">
-                <label for="filterGrupo">Filtrar por Grupo:</label>
-                <input type="text" id="filterGrupo" placeholder="Grupo (ej: A1)" oninput="filtrarRegistros()">
-            </div>
-            <div class="filter-group">
-                <label for="filterNombre">Buscar por Nombre:</label>
-                <input type="text" id="filterNombre" placeholder="Nombre o cédula" oninput="filtrarRegistros()">
-            </div>
-
-            <!-- === NUEVO FILTRO DE CALENDARIO MEJORADO === -->
-           <div class="date-filter-container">
-             <div class="date-range-inputs">
-                <div class="date-input-group">
-               <label>Desde:</label>
-                <input type="date" id="fechaInicio" class="custom-date-input" onchange="filtrarRegistros()">
-           </div>
-               <div class="date-input-group">
-              <label>Hasta:</label>
-               <input type="date" id="fechaFin" class="custom-date-input" onchange="filtrarRegistros()">
-            </div>
-          </div>
-       </div>
-
-                <div class="date-summary" id="dateSummary">
-                    <div class="date-summary-text">Filtro activo: Todas las fechas</div>
-                    <div class="date-summary-details">Mostrando todos los registros disponibles</div>
-                </div>
-            </div>
-        </div>
-        
         <div class="button-container">
             <button class="action-button download" onclick="generarPDF()">
                 <i class="fas fa-download"></i> Descargar PDF
@@ -936,7 +886,9 @@
                     <th>Nombre</th>
                     <th>Materia</th>
                     <th>Grupo</th>
-                    <th>Fecha y Hora</th>
+                    <th>Nivel de Semestre</th>
+                    <th>Fecha</th>
+                    <th>Hora</th>
                     <th>Acciones</th>
                 </tr>
             </thead>
@@ -962,40 +914,6 @@
         let filteredRegistros = [];
         let localDataVersion = 0;
         let lastSyncTimestamp = 0;
-
-        // === VARIABLES DEL CALENDARIO ===
-        let currentCalendarDate = new Date();
-        
-
-        // === FUNCIONES DEL CALENDARIO MEJORADO ===
-        function updateDateSummary() {
-            const summaryText = document.querySelector('.date-summary-text');
-            const summaryDetails = document.querySelector('.date-summary-details');
-            
-            const fechaInicio = document.getElementById('fechaInicio').value;
-            const fechaFin = document.getElementById('fechaFin').value;
-            
-            let texto = '';
-            let detalles = '';
-            
-            summaryText.textContent = texto;
-            summaryDetails.textContent = detalles;
-        }
-
-        // === FUNCIONES DE SINCRONIZACIÓN (MANTENIDAS) ===
-        function showSyncNotification() {
-            const notification = document.createElement('div');
-            notification.className = 'sync-notification';
-            notification.innerHTML = '<i class="fas fa-sync-alt"></i> Lista actualizada';
-            
-            document.body.appendChild(notification);
-            
-            setTimeout(() => notification.classList.add('show'), 100);
-            setTimeout(() => {
-                notification.classList.remove('show');
-                setTimeout(() => document.body.removeChild(notification), 300);
-            }, 2000);
-        }
 
         function updateDataVersion() {
             const newVersion = Date.now();
@@ -1051,59 +969,21 @@
             }
         }
 
-  function estaEnRangoFecha(fechaRegistro) {
-    if (!fechaRegistro) return true;
-
-    // Extraer la parte de la fecha (antes de la coma si existe)
-    let fechaPart = fechaRegistro.split(',')[0].trim();
-
-    // Detectar formato y convertir a objeto Date
-    let [anio, mes, dia] = [null, null, null];
-    if (fechaPart.includes('/')) {
-        // Formato MM/DD/YYYY
-        let partes = fechaPart.split('/');
-        if (partes.length === 3) {
-            mes = parseInt(partes[0]);
-            dia = parseInt(partes[1]);
-            anio = parseInt(partes[2]);
+        function showSyncNotification() {
+            const notification = document.createElement('div');
+            notification.className = 'sync-notification';
+            notification.innerHTML = '<i class="fas fa-sync-alt"></i> Lista actualizada';
+            
+            document.body.appendChild(notification);
+            
+            setTimeout(() => notification.classList.add('show'), 100);
+            setTimeout(() => {
+                notification.classList.remove('show');
+                setTimeout(() => document.body.removeChild(notification), 300);
+            }, 2000);
         }
-    } else if (fechaPart.includes('-')) {
-        // Formato YYYY-MM-DD
-        let partes = fechaPart.split('-');
-        if (partes.length === 3) {
-            anio = parseInt(partes[0]);
-            mes = parseInt(partes[1]);
-            dia = parseInt(partes[2]);
-        }
-    } else {
-        return true; // Si no reconoce formato, muestra el registro
-    }
 
-    if (!anio || !mes || !dia) return true;
-
-    let fechaRegistroObj = new Date(anio, mes - 1, dia);
-    fechaRegistroObj.setHours(0,0,0,0);
-
-    let fechaInicioStr = document.getElementById('fechaInicio').value;
-    let fechaFinStr = document.getElementById('fechaFin').value;
-
-    if (!fechaInicioStr && !fechaFinStr) return true;
-
-    if (fechaInicioStr) {
-        let inicio = new Date(fechaInicioStr);
-        inicio.setHours(0,0,0,0);
-        if (fechaRegistroObj < inicio) return false;
-    }
-    if (fechaFinStr) {
-        let fin = new Date(fechaFinStr);
-        fin.setHours(23,59,59,999);
-        if (fechaRegistroObj > fin) return false;
-    }
-    return true;
-}
-
-
-        // === FUNCIONES DE ESCANEO QR (MANTENIDAS) ===
+        // === FUNCIONES DE ESCANEO QR (MODIFICADO PARA SEMESTRE) ===
         function onScanSuccess(decodedText) {
             try {
                 const currentTime = Date.now();
@@ -1119,15 +999,23 @@
                 }, 1000);
 
                 const datos = JSON.parse(decodedText);
-                const timestamp = new Date().toLocaleString();
-                
+                const now = new Date();
+                const fecha = now.toISOString().slice(0, 10); // YYYY-MM-DD
+                const hora = now.toTimeString().slice(0, 8);  // HH:MM:SS
+                const timestamp = `${fecha} ${hora}`;
+
                 const nuevoRegistro = {
                     cedula: datos.cedula,
                     nombre: datos.nombre,
                     materia: datos.materia,
                     grupo: datos.grupo,
+                    semestre: datos.nivelSemestre || datos.nivel || datos.semestre || '', // compatibilidad
+                    nivelSemestre: datos.nivelSemestre || datos.nivel || datos.semestre || '', // nuevo campo
+                    fecha: fecha,
+                    hora: hora,
                     timestamp: timestamp
                 };
+
                 
                 if (saveRegistro(nuevoRegistro)) {
                     lastScannedCode = decodedText;
@@ -1149,7 +1037,6 @@
             // Solo log para debugging
         }
 
-        // === RESTO DE FUNCIONES ORIGINALES (MANTENIDAS) ===
         function showStatus(message, isError = false) {
             const statusElement = document.getElementById('statusMessage');
             statusElement.textContent = message;
@@ -1232,23 +1119,9 @@
         }
 
         function filtrarRegistros() {
-            const materiaFilter = document.getElementById('filterMateria').value.toLowerCase();
-            const grupoFilter = document.getElementById('filterGrupo').value.toLowerCase();
-            const nombreFilter = document.getElementById('filterNombre').value.toLowerCase();
-            
+            // Ya no hay filtros, solo mostrar todos los registros
             const registros = JSON.parse(localStorage.getItem('registros') || '[]');
-            
-            filteredRegistros = registros.filter(registro => {
-                const matchesMateria = !materiaFilter || (registro.materia && registro.materia.toLowerCase().includes(materiaFilter));
-                const matchesGrupo = !grupoFilter || (registro.grupo && registro.grupo.toLowerCase().includes(grupoFilter));
-                const matchesNombre = !nombreFilter || 
-                    (registro.nombre && registro.nombre.toLowerCase().includes(nombreFilter)) || 
-                    (registro.cedula && registro.cedula.toLowerCase().includes(nombreFilter));
-                const matchesFecha = estaEnRangoFecha(registro.timestamp);
-                
-                return matchesMateria && matchesGrupo && matchesNombre && matchesFecha;
-            });
-            
+            filteredRegistros = registros;
             currentPage = 1;
             actualizarTabla();
         }
@@ -1268,7 +1141,9 @@
                     <td>${registro.nombre}</td>
                     <td>${registro.materia || 'N/A'}</td>
                     <td>${registro.grupo || 'N/A'}</td>
-                    <td>${registro.timestamp}</td>
+                    <td>${registro.nivelSemestre || registro.semestre || 'N/A'}</td>
+                    <td>${registro.fecha || (registro.timestamp ? registro.timestamp.split(' ')[0] : 'N/A') || 'N/A'}</td>
+                    <td>${registro.hora || (registro.timestamp ? registro.timestamp.split(' ')[1] : 'N/A') || 'N/A'}</td>
                     <td>
                         <button class="delete-btn" onclick="mostrarModal(${filteredRegistros.indexOf(registro)})">
                             <i class="fas fa-trash-alt"></i> Eliminar
@@ -1325,18 +1200,19 @@
             };
             paginationDiv.appendChild(nextButton);
         }
+
         // Pega tu URL aquí:
-        const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz6-UP3g8PJRZr7hvrBGd35AYkUeAfev8atQVsMnBoPllyz_X9FyYxSCHlYvK5Qkz9-RQ/exec";
+        const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbykUHPlzjUhqe0UFj4hXuCB3BCHrJHTu4jjpgtjySSMmA3JjlXIVgmzncoeIk4YFDjLag/exec";
 
         // Función para enviar datos a Google Sheets
         function enviarDatosAGoogleSheets(registro) {
-       fetch(GOOGLE_SCRIPT_URL, {
-        method: 'POST',
-        mode: 'no-cors',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(registro)
-    });
-}
+            fetch(GOOGLE_SCRIPT_URL, {
+                method: 'POST',
+                mode: 'no-cors',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(registro)
+            });
+        }
 
         function generarPDF() {
             const { jsPDF } = window.jspdf;
@@ -1352,38 +1228,20 @@
             doc.setFont('helvetica', 'normal');
             doc.text(`Generado: ${new Date().toLocaleString()}`, 105, 30, { align: 'center' });
             
-            // Incluir información del filtro de fecha
-            const fechaInicio = document.getElementById('fechaInicio').value;
-            const fechaFin = document.getElementById('fechaFin').value;
-            
-            if (fechaInicio || fechaFin) {
-                let filtroTexto = 'Filtro de fecha: ';
-                if (fechaInicio && fechaFin) {
-                    if (fechaInicio === fechaFin) {
-                        filtroTexto += `${new Date(fechaInicio).toLocaleDateString()}`;
-                    } else {
-                        filtroTexto += `Del ${new Date(fechaInicio).toLocaleDateString()} al ${new Date(fechaFin).toLocaleDateString()}`;
-                    }
-                } else if (fechaInicio) {
-                    filtroTexto += `Desde ${new Date(fechaInicio).toLocaleDateString()}`;
-                } else {
-                    filtroTexto += `Hasta ${new Date(fechaFin).toLocaleDateString()}`;
-                }
-                doc.text(filtroTexto, 105, 40, { align: 'center' });
-            }
-            
             const datos = filteredRegistros.map(registro => [
                 registro.cedula,
                 registro.nombre,
                 registro.materia || 'N/A',
                 registro.grupo || 'N/A',
-                registro.timestamp
+                registro.nivelSemestre || registro.semestre || 'N/A',
+                registro.fecha || (registro.timestamp ? registro.timestamp.split(' ')[0] : 'N/A'),
+                registro.hora || (registro.timestamp ? registro.timestamp.split(' ')[1] : 'N/A')
             ]);
             
             doc.autoTable({
-                head: [['Cédula', 'Nombre', 'Materia', 'Grupo', 'Fecha y Hora']],
+                head: [['Cédula', 'Nombre', 'Materia', 'Grupo', 'Nivel de Semestre', 'Fecha', 'Hora']],
                 body: datos,
-                startY: fechaInicio || fechaFin ? 50 : 40,
+                startY: 40,
                 styles: {
                     fontSize: 8,
                     cellPadding: 3,
@@ -1470,3 +1328,5 @@
     </script>
 </body>
 </html>
+
+
