@@ -356,7 +356,7 @@
             </div>
         </div>
         
-        <button id="downloadQR" onclick="descargarQR()">📥 Descargar QR</button>
+              <button id="downloadQR" onclick="descargarQR()">📥 Descargar QR</button>
         </div>
 
         <script>
@@ -408,37 +408,94 @@
         }
 
         function descargarQR() {
-            const qrCanvas = document.querySelector('#qrcode canvas');
-            if (!qrCanvas) {
+            // Soporta QR renderizado como <canvas> o <img> (según el navegador)
+            const qrElement = document.querySelector('#qrcode canvas, #qrcode img');
+            if (!qrElement) {
             alert('Primero genera un código QR');
             return;
             }
+
+            // Si es <img>, lo dibujaremos desde su fuente
+            const isImg = qrElement.tagName && qrElement.tagName.toLowerCase() === 'img';
+
+            // Normalizar a un canvas fuente para mantener el resto del código igual
+            let qrCanvas = qrElement;
+            if (isImg) {
+                const temp = document.createElement('canvas');
+                const w = qrElement.naturalWidth || qrElement.width || 256;
+                const h = qrElement.naturalHeight || qrElement.height || 256;
+                temp.width = w;
+                temp.height = h;
+                const tctx = temp.getContext('2d');
+                tctx.fillStyle = '#FFFFFF';
+                tctx.fillRect(0, 0, w, h);
+                tctx.drawImage(qrElement, 0, 0, w, h);
+                qrCanvas = temp;
+            }
+
+            // Datos que se mostrarán en la descarga
+            const cedula = document.getElementById('cedula').value.trim();
+            const nombre = document.getElementById('nombre').value.trim();
+            const materia = document.getElementById('materia').value;
+            const grupo = document.getElementById('grupo').value.trim();
+            const nivel = document.getElementById('nivel').value.trim();
 
             // Crear un nuevo canvas con fondo blanco garantizado
             const canvas = document.createElement('canvas');
             const ctx = canvas.getContext('2d');
             
-            // Configurar el tamaño del canvas (agregar padding para mejor apariencia)
+            // Configurar el tamaño del canvas (agregar padding y espacio para texto)
             const padding = 20;
-            canvas.width = qrCanvas.width + (padding * 2);
-            canvas.height = qrCanvas.height + (padding * 2);
+            const gap = 18; // espacio entre QR y texto
+
+            const lineHeight = 22;
+            const lines = [
+                `Cédula: ${cedula}`,
+                `Nombre: ${nombre}`,
+                `Materia: ${materia}`,
+                `Grupo: ${grupo}`,
+                `Nivel de Semestre: ${nivel}`
+            ];
+
+            // Preparar tipografía para medir ancho de texto
+            ctx.font = '16px Segoe UI, Tahoma, Geneva, Verdana, sans-serif';
+            const maxTextWidth = Math.max(...lines.map(l => ctx.measureText(l).width));
+
+            // Ancho: el mayor entre QR y texto
+            canvas.width = Math.ceil(Math.max(qrCanvas.width, maxTextWidth) + (padding * 2));
+            // Alto: QR + espacio + texto + padding
+            canvas.height = Math.ceil((padding * 2) + qrCanvas.height + gap + (lines.length * lineHeight));
             
             // Llenar todo el canvas con color blanco sólido
             ctx.fillStyle = '#FFFFFF';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
             
-            // Dibujar el QR centrado en el canvas blanco
-            ctx.drawImage(qrCanvas, padding, padding);
+            // Dibujar el QR centrado
+            const qrX = Math.floor((canvas.width - qrCanvas.width) / 2);
+            const qrY = padding;
+            ctx.drawImage(qrCanvas, qrX, qrY);
             
-            // Opcional: Agregar un borde sutil
+            // Opcional: Agregar un borde sutil alrededor del QR
             ctx.strokeStyle = '#E0E0E0';
             ctx.lineWidth = 1;
-            ctx.strokeRect(padding - 1, padding - 1, qrCanvas.width + 2, qrCanvas.height + 2);
+            ctx.strokeRect(qrX - 1, qrY - 1, qrCanvas.width + 2, qrCanvas.height + 2);
+
+            // === NUEVO: Imprimir información debajo del QR ===
+            ctx.fillStyle = '#111827';
+            ctx.font = '16px Segoe UI, Tahoma, Geneva, Verdana, sans-serif';
+            ctx.textBaseline = 'top';
+
+            const textStartY = qrY + qrCanvas.height + gap;
+            let y = textStartY;
+            lines.forEach(line => {
+                // Centrar cada línea
+                const w = ctx.measureText(line).width;
+                const x = Math.floor((canvas.width - w) / 2);
+                ctx.fillText(line, x, y);
+                y += lineHeight;
+            });
 
             // Generar nombre del archivo
-            const cedula = document.getElementById('cedula').value.trim();
-            const nombre = document.getElementById('nombre').value.trim();
-            const materia = document.getElementById('materia').value;
             const fecha = new Date().toISOString().slice(0,10);
             const nombreArchivo = `QR_${nombre.replace(/\s+/g, '_')}_${cedula}_${materia}_${fecha}.png`;
 
@@ -449,7 +506,7 @@
             link.click();
 
             // Mostrar confirmación
-            mostrarConfirmacion('✅ QR descargado exitosamente con fondo blanco');
+            mostrarConfirmacion('✅ QR descargado (incluye la información debajo del código)');
         }
 
         function mostrarConfirmacion(mensaje) {
