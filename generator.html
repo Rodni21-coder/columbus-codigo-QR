@@ -283,8 +283,8 @@
             <input type="text" id="cedula" required placeholder="Ingrese su número de cédula">
         </div>
         <div class="form-group">
-            <label for="nombre">Nombre:</label>
-            <input type="text" id="nombre" required placeholder="Ingrese su nombre completo">
+            <label for="nombre">Nombre Completo:</label>
+            <input type="text" id="nombre" required placeholder="Ingrese su nombre sin tildes">
         </div>
         <div class="form-group">
             <label for="materia">Materia:</label>
@@ -308,7 +308,7 @@
             <div class="form-group">
             <label for="grupo">Grupo:</label>
               <select id="grupo" required>
-                <option value="">Seleccione una materia</option>
+                <option value="">Seleccione su grupo</option>
                 <option value="I">I</option>
                 <option value="II">II</option>
                 <option value="III">III</option>
@@ -320,9 +320,18 @@
                 <option value="IX">IX</option>
                 <option value="X">X</option>
                 <option value="XI">XI</option>
-                <option value="XII">XII</option>
             </select>
         </div>
+        <div class="form-group">
+            <label for="nivel">Nivel de Semestre:</label>
+            <select id="nivel" required>
+                <option value="">Seleccione su semestre</option>
+                <option value="I">I</option>
+                <option value="I Intermedio">I Intermedio</option>
+                <option value="II">II</option>
+                <option value="II Intermedio">II Intermedio</option>
+                <option value="III">III</option>
+            </select>
         </div>
         <button onclick="generarQR()">Generar QR</button>
         
@@ -332,43 +341,49 @@
         <div id="qrInfo" class="qr-info" style="display: none;">
             <h3>📋 Información del Código QR</h3>
             <div class="qr-info-item">
-                <span class="qr-info-label">Cédula:</span>
-                <span class="qr-info-value" id="infoCedula">-</span>
+            <span class="qr-info-label">Cédula:</span>
+            <span class="qr-info-value" id="infoCedula">-</span>
             </div>
             <div class="qr-info-item">
-                <span class="qr-info-label">Nombre:</span>
-                <span class="qr-info-value" id="infoNombre">-</span>
+            <span class="qr-info-label">Nombre:</span>
+            <span class="qr-info-value" id="infoNombre">-</span>
             </div>
             <div class="qr-info-item">
-                <span class="qr-info-label">Materia:</span>
-                <span class="qr-info-value" id="infoMateria">-</span>
+            <span class="qr-info-label">Materia:</span>
+            <span class="qr-info-value" id="infoMateria">-</span>
             </div>
             <div class="qr-info-item">
-                <span class="qr-info-label">Grupo:</span>
-                <span class="qr-info-value" id="infoGrupo">-</span>
+            <span class="qr-info-label">Grupo:</span>
+            <span class="qr-info-value" id="infoGrupo">-</span>
+            </div>
+            <div class="qr-info-item">
+            <span class="qr-info-label">Nivel de Semestre:</span>
+            <span class="qr-info-value" id="infoNivel">-</span>
             </div>
         </div>
         
-        <button id="downloadQR" onclick="descargarQR()">📥 Descargar QR con Fondo Blanco</button>
-    </div>
+        <button id="downloadQR" onclick="descargarQR()">📥 Descargar QR</button>
+        </div>
 
-    <script>
+        <script>
         function generarQR() {
             const cedula = document.getElementById('cedula').value.trim();
             const nombre = document.getElementById('nombre').value.trim();
             const materia = document.getElementById('materia').value;
             const grupo = document.getElementById('grupo').value.trim();
+            const nivel = document.getElementById('nivel').value.trim();
 
-            if (!cedula || !nombre || !materia || !grupo) {
-                alert('Por favor complete todos los campos');
-                return;
+            if (!cedula || !nombre || !materia || !grupo || !nivel) {
+            alert('Por favor complete todos los campos');
+            return;
             }
 
             const datos = {
-                cedula: cedula,
-                nombre: nombre,
-                materia: materia,
-                grupo: grupo
+            cedula: cedula,
+            nombre: nombre,
+            materia: materia,
+            grupo: grupo,
+            nivel: nivel, // <--- AHORA SE INCLUYE EN EL QR
             };
 
             const qrCodeDiv = document.getElementById('qrcode');
@@ -376,12 +391,12 @@
 
             // Generar QR con configuración mejorada
             const qr = new QRCode(qrCodeDiv, {
-                text: JSON.stringify(datos),
-                width: 256,
-                height: 256,
-                colorDark: "#05117e",
-                colorLight: "#ffffff",
-                correctLevel: QRCode.CorrectLevel.H
+            text: JSON.stringify(datos),
+            width: 256,
+            height: 256,
+            colorDark: "#05117e",
+            colorLight: "#ffffff",
+            correctLevel: QRCode.CorrectLevel.H
             });
 
             // Mostrar información del QR
@@ -389,19 +404,20 @@
             document.getElementById('infoNombre').textContent = nombre;
             document.getElementById('infoMateria').textContent = materia;
             document.getElementById('infoGrupo').textContent = grupo;
+            document.getElementById('infoNivel').textContent = nivel;
             document.getElementById('qrInfo').style.display = 'block';
 
             setTimeout(() => {
-                document.getElementById('downloadQR').style.display = 'block';
-                document.getElementById('downloadQR').scrollIntoView({ behavior: 'smooth' });
+            document.getElementById('downloadQR').style.display = 'block';
+            document.getElementById('downloadQR').scrollIntoView({ behavior: 'smooth' });
             }, 500);
         }
 
         function descargarQR() {
             const qrCanvas = document.querySelector('#qrcode canvas');
             if (!qrCanvas) {
-                alert('Primero genera un código QR');
-                return;
+            alert('Primero genera un código QR');
+            return;
             }
 
             // Crear un nuevo canvas con fondo blanco garantizado
@@ -493,3 +509,5 @@
     </script>
 </body>
 </html>
+
+
