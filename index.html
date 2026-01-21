@@ -244,8 +244,9 @@
             }
 
             .menu-button {
-                width: 100%;
+                width: auto;
                 padding: 15px;
+                margin: 50;
             }
         }
 
@@ -295,7 +296,7 @@
 function validarAcceso() {
     event.preventDefault();
     var clave = prompt("Ingrese la contraseña para acceder:");
-    var claveCorrecta = "HsimuladoCU2025";
+    var claveCorrecta = "123";
 
     if (clave === claveCorrecta) {
         window.location.href = event.target.href;
@@ -310,4 +311,5 @@ function validarAcceso() {
 </script>
 </body>
 </html>
+
 
