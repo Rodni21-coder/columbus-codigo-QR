@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Generador QR - Columbus Hospital</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-    <style>
+      <style>
         :root {
             --color-primario: #05117e;
             --color-secundario: #102e9b;
@@ -52,10 +52,11 @@
             justify-content: center;
             margin-left: 20px;
             transition: var(--transicion);
+            cursor: pointer;
         }
 
         .logo:hover {
-            transform: scale(1.05);
+            transform: scale(1.1);
         }
 
         .logo img {
@@ -268,12 +269,31 @@
                 gap: 2px;
             }
         }
+
+        .back-button {
+            background: linear-gradient(135deg, var(--color-secundario), var(--color-terciario));
+            color: var(--color-blanco);
+            padding: 10px 15px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: var(--transicion);
+            box-shadow: var(--sombra);
+        }
+
+        .back-button:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--sombra-hover);
+            background: linear-gradient(135deg, var(--color-terciario), var(--color-secundario));
+        }
     </style>
 </head>
 <body>
     <div class="header">
         <h1 class="title">Columbus Hospital Simulation Center</h1>
-        <div class="logo">
+        <div class="logo" onclick="window.location.href='index.html'">
             <img src="logo.png" alt="Columbus Hospital Logo">
         </div>
     </div>
@@ -284,29 +304,36 @@
         </div>
         <div class="form-group">
             <label for="nombre">Nombre Completo:</label>
-            <input type="text" id="nombre" required placeholder="Ingrese su nombre sin tildes">
+            <h3 style="font-size: 0.9rem; color: #e31b1b; margin-top: -10px; margin-bottom: 8px;">(Al no ingresar el nombre correctamente (Mayusculas cerradas) , el sistema lo detectara como no valido y puede que no reconozca su nombre!!. Sin tildes ni caracteres especiales)</h3>
+            <input type="text" id="nombre" required placeholder="Ingrese su primer nombre y primer apellido">
         </div>
         <div class="form-group">
             <label for="materia">Materia:</label>
             <select id="materia" required>
                 <option value="">Seleccione una materia</option>
-                <option value="IPM">Introducción a la Práctica Médica</option>
-                <option value="RCP">RCP y Primeros Auxilios</option>
-                <option value="Propedeutica">Propedéutica Clínica y Fisiopatología</option>
+                <option value="IPM">IPM</option>
+                <option value="RCP">RCP</option>
+                <option value="Propedeutica">Propedeutica</option>
                 <option value="Obstetricia">Obstetricia</option>
                 <option value="Medicina Interna I">Medicina Interna I</option>
+                <option value="Medicina Interna II">Medicina Interna II</option>
                 <option value="Medicina Interna III">Medicina Interna III</option>
-                <option value="Urgencias">Medicina de Urgencias</option>
+                <option value="Urgencias">Urgencias</option>
                 <option value="Pediatria I">Pediatría I</option>
+                <option value="Pediatria II">Pediatría II</option>
                 <option value="Ginecologia">Ginecología</option>
                 <option value="Cardiologia">Cardiología</option>
-                <option value="EKG">Electrocardiografía</option>
+                <option value="EKG">EKG</option>
             </select>
         </div>
             <div class="form-group">
             <label for="grupo">Grupo:</label>
               <select id="grupo" required>
                 <option value="">Seleccione su grupo</option>
+                <option value="I">I</option>
+                <option value="II">II</option>
+                <option value="III">III</option>
+                <option value="IV">IV</option>
                 <option value="V">V</option>
                 <option value="VI">VI</option>
                 <option value="VII">VII</option>
@@ -320,11 +347,11 @@
             <label for="nivel">Nivel de Semestre:</label>
             <select id="nivel" required>
                 <option value="">Seleccione su semestre</option>
-                <option value="I">I Regular</option>
+                <option value="I">I</option>
                 <option value="I Intermedio">I Intermedio</option>
-                <option value="II">II Regular</option>
+                <option value="II">II</option>
                 <option value="II Intermedio">II Intermedio</option>
-                <option value="III">III Regular</option>
+                <option value="III">III</option>
             </select>
         </div>
         <button onclick="generarQR()">Generar QR</button>
@@ -356,7 +383,7 @@
             </div>
         </div>
         
-              <button id="downloadQR" onclick="descargarQR()">📥 Descargar QR</button>
+        <button id="downloadQR" onclick="descargarQR()">📥 Descargar QR</button>
         </div>
 
         <script>
@@ -370,6 +397,14 @@
             if (!cedula || !nombre || !materia || !grupo || !nivel) {
             alert('Por favor complete todos los campos');
             return;
+            }
+
+            // Validación: Contar letras mayúsculas en el nombre
+            const mayusculas = nombre.match(/[A-Z]/g);
+            const countMayusculas = mayusculas ? mayusculas.length : 0;
+            if (countMayusculas > 4) {
+                alert('El nombre no puede tener más de 4 letras mayúsculas. Por favor, verifique el formato.');
+                return;
             }
 
             const datos = {
