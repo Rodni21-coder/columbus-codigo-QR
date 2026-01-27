@@ -304,7 +304,7 @@
         </div>
         <div class="form-group">
             <label for="nombre">Nombre Completo:</label>
-            <h3 style="font-size: 0.9rem; color: #e31b1b; margin-top: -10px; margin-bottom: 8px;">(Al no ingresar el nombre correctamente (Mayusculas cerradas) , el sistema lo detectara como no valido y puede que no reconozca su nombre!!. Sin tildes ni caracteres especiales)</h3>
+            <h3 style="font-size: 0.9rem; color: #e31b1b; margin-top: -10px; margin-bottom: 8px;">(Al no ingresar el nombre correctamente ( No Mayusculas cerradas) , el sistema lo detectara como no valido y puede que no reconozca su nombre!!. Sin tildes ni caracteres especiales)</h3>
             <input type="text" id="nombre" required placeholder="Ingrese su primer nombre y primer apellido">
         </div>
         <div class="form-group">
@@ -347,11 +347,11 @@
             <label for="nivel">Nivel de Semestre:</label>
             <select id="nivel" required>
                 <option value="">Seleccione su semestre</option>
-                <option value="I">I</option>
+                <option value="I">I Regular</option>
                 <option value="I Intermedio">I Intermedio</option>
-                <option value="II">II</option>
+                <option value="II">II Regular</option>
                 <option value="II Intermedio">II Intermedio</option>
-                <option value="III">III</option>
+                <option value="III">III Regular</option>
             </select>
         </div>
         <button onclick="generarQR()">Generar QR</button>
@@ -595,6 +595,7 @@
     </script>
 </body>
 </html>
+
 
 
 
