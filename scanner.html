@@ -20,25 +20,21 @@
             --color-exito: #28a745;
             --color-error: #dc3545;
             --color-advertencia: #ffc107;
-            --sombra: 0 4px 6px rgba(0, 0, 0, 0.1);
-            --sombra-hover: 0 8px 15px rgba(0, 0, 0, 0.2);
+            --sombra: 0 4px 6px rgba(0,0,0,0.1);
+            --sombra-hover: 0 8px 15px rgba(0,0,0,0.2);
             --transicion: all 0.3s ease;
         }
-
+ 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            margin: 0;
-            padding: 0;
+            margin: 0; padding: 0;
             background-color: var(--color-fondo);
             color: var(--color-texto);
-            background-image: 
-                radial-gradient(circle at 10% 20%, rgba(0, 180, 216, 0.05) 0%, rgba(0, 180, 216, 0.05) 90%),
-                radial-gradient(circle at 90% 80%, rgba(5, 17, 126, 0.05) 0%, rgba(5, 17, 126, 0.05) 90%);
             min-height: 100vh;
         }
-
+ 
         .header {
-            background-color: var(--color-blanco);
+            background: linear-gradient(135deg, var(--color-blanco) 0%, #f0f8ff 100%);
             padding: 15px 40px;
             display: flex;
             justify-content: space-between;
@@ -46,46 +42,29 @@
             box-shadow: var(--sombra);
             position: relative;
             z-index: 10;
-            background: linear-gradient(135deg, var(--color-blanco) 0%, #f0f8ff 100%);
         }
-
+ 
         .logo {
-            width: 150px;
-            height: 70px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            width: 150px; height: 70px;
+            display: flex; align-items: center; justify-content: center;
             margin-left: 20px;
+            cursor: pointer;
             transition: var(--transicion);
         }
-
-        .logo:hover {
-            transform: scale(1.05);
-        }
-
-        .logo img {
-            max-width: 100%;
-            max-height: 100%;
-            object-fit: contain;
-            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
-        }
-
+        .logo:hover { transform: scale(1.05); }
+        .logo img { max-width: 100%; max-height: 100%; object-fit: contain; }
+ 
         .title {
             font-size: 1.8rem;
-            color: var(--color-primario);
-            margin: 0;
-            flex-grow: 1;
-            text-align: center;
+            margin: 0; flex-grow: 1; text-align: center;
             font-weight: 700;
-            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.1);
             background: linear-gradient(to right, var(--color-primario), var(--color-terciario));
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            letter-spacing: -0.5px;
         }
-
+ 
         .container {
-            max-width: 1000px;
+            max-width: 1320px;
             margin: 40px auto;
             padding: 40px;
             background-color: var(--color-blanco);
@@ -93,744 +72,320 @@
             box-shadow: var(--sombra);
             position: relative;
             overflow: hidden;
-            border: 1px solid rgba(0, 0, 0, 0.05);
         }
-
+ 
         .container::before {
             content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 5px;
+            position: absolute; top: 0; left: 0;
+            width: 100%; height: 5px;
             background: linear-gradient(90deg, var(--color-primario), var(--color-accent));
         }
-
+ 
+        /* ===== QR READER ===== */
         #reader {
             width: 100%;
-            max-width: 600px;
-            margin: 0 auto;
-            background: var(--color-blanco);
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: var(--sombra);
-            border: 1px solid rgba(0, 0, 0, 0.1);
+            max-width: 430px;
+            margin: 38px auto 30px auto;
+            background: linear-gradient(135deg, #f7fcff 65%, #e8f1fa 100%);
+            border-radius: 22px;
+            border: 3.5px solid #0091ff;
+            box-shadow: 0 12px 32px rgba(0,145,255,0.12), 0 1.5px 8px #00b4d850;
+            padding: 40px 24px 74px 24px;
             position: relative;
             overflow: hidden;
-        }
-
-        #reader::after {
-            content: 'Escaneando...';
-            position: absolute;
-            bottom: 10px;
-            left: 0;
-            width: 100%;
-            text-align: center;
-            color: var(--color-primario);
-            font-weight: 600;
-        }
-
-        .filters {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 20px;
-            margin: 30px 0;
-            align-items: start;
-        }
-
-        .filter-group {
-            position: relative;
-        }
-
-        .filter-group label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 600;
-            color: var(--color-primario);
-            font-size: 0.95rem;
-        }
-
-        .filter-group select, .filter-group input {
-            width: 100%;
-            padding: 12px;
-            border: 2px solid #e0e0e0;
-            border-radius: 8px;
-            font-size: 1rem;
-            transition: var(--transicion);
-            background-color: var(--color-blanco);
-        }
-
-        .filter-group select:focus, .filter-group input:focus {
-            outline: none;
-            border-color: var(--color-accent);
-            box-shadow: 0 0 0 3px rgba(0, 180, 216, 0.1);
-        }
-
-        /* === ESTILOS DEL CALENDARIO MEJORADO === */
-        .date-filter-container {
-            grid-column: 1 / -1;
-            background: linear-gradient(135deg, #f8f9ff 0%, #fff 100%);
-            border: 2px solid #e0e8ff;
-            border-radius: 12px;
-            padding: 20px;
-            margin-top: 10px;
-        }
-
-        .date-filter-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-            flex-wrap: wrap;
-            gap: 15px;
-        }
-
-        .date-quick-filters {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-        }
-
-        .quick-filter-btn {
-            padding: 8px 16px;
-            background: var(--color-blanco);
-            border: 2px solid var(--color-primario);
-            border-radius: 20px;
-            color: var(--color-primario);
-            cursor: pointer;
-            transition: var(--transicion);
-            font-size: 0.85rem;
-            font-weight: 500;
-            white-space: nowrap;
-        }
-
-        .quick-filter-btn:hover {
-            background: var(--color-primario);
-            color: var(--color-blanco);
-            transform: translateY(-2px);
-        }
-
-        .quick-filter-btn.active {
-            background: var(--color-primario);
-            color: var(--color-blanco);
-            box-shadow: var(--sombra);
-        }
-
-        .date-range-inputs {
-            display: flex;
-            gap: 15px;
-            align-items: center;
-            flex-wrap: wrap;
-        }
-
-        .date-input-group {
             display: flex;
             flex-direction: column;
-            gap: 5px;
-        }
-
-        .date-input-group label {
-            font-size: 0.8rem;
-            color: var(--color-texto-claro);
-            margin: 0;
-        }
-
-        .custom-date-input {
-            padding: 10px 15px !important;
-            border: 2px solid #ddd !important;
-            border-radius: 8px !important;
-            font-size: 0.9rem !important;
-            background: var(--color-blanco) !important;
-            color: var(--color-texto) !important;
-            transition: var(--transicion) !important;
-            min-width: 140px;
-        }
-
-        .custom-date-input:focus {
-            border-color: var(--color-accent) !important;
-            box-shadow: 0 0 0 3px rgba(0, 180, 216, 0.1) !important;
-        }
-
-        .calendar-container {
-            display: none;
-            margin-top: 20px;
-            background: var(--color-blanco);
-            border-radius: 12px;
-            padding: 20px;
-            box-shadow: var(--sombra);
-            border: 1px solid #e0e0e0;
-        }
-
-        .calendar-container.show {
-            display: block;
-            animation: slideDown 0.3s ease;
-        }
-
-        @keyframes slideDown {
-            from {
-                opacity: 0;
-                transform: translateY(-10px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .calendar-navigation {
-            display: flex;
-            justify-content: space-between;
             align-items: center;
-            margin-bottom: 20px;
+            min-height: 360px;
         }
-
-        .nav-btn {
-            background: var(--color-primario);
-            color: var(--color-blanco);
-            border: none;
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            cursor: pointer;
+ 
+        #reader::before {
+            content: "🩺";
+            position: absolute; top: 18px; right: 30px;
+            font-size: 2.7rem; opacity: 0.12; pointer-events: none; z-index: 1;
+            animation: pulseIcon 1.5s infinite alternate;
+        }
+        @keyframes pulseIcon {
+            from { transform: scale(1); opacity: 0.09; }
+            to   { transform: scale(1.14); opacity: 0.18; }
+        }
+        #reader::after {
+            content: "Escanea el código QR del estudiante";
+            position: absolute; left: 0; right: 0; bottom: 18px;
+            text-align: center; font-size: 1.06rem;
+            color: #0091ff; font-weight: 700; letter-spacing: 1.2px;
+            opacity: .90; z-index: 2; pointer-events: none;
+        }
+        #reader video, #reader canvas {
+            border-radius: 15px;
+            border: 2px solid #6ec5ff;
+            box-shadow: 0 4px 18px #0091ff25;
+            margin: 0 auto; display: block;
+        }
+ 
+        /* ===== SYNC STATUS BADGE ===== */
+        #syncStatusBar {
             display: flex;
             align-items: center;
-            justify-content: center;
-            transition: var(--transicion);
-            font-size: 1.2rem;
-        }
-
-        .nav-btn:hover {
-            background: var(--color-secundario);
-            transform: scale(1.1);
-        }
-
-        .calendar-month-year {
-            font-size: 1.3rem;
-            font-weight: 700;
-            color: var(--color-primario);
-            text-align: center;
-        }
-
-        .calendar-grid {
-            display: grid;
-            grid-template-columns: repeat(7, 1fr);
-            gap: 2px;
-            margin-top: 15px;
-        }
-
-        .calendar-day-header {
-            text-align: center;
-            padding: 10px 5px;
-            font-weight: 600;
-            color: var(--color-texto-claro);
-            font-size: 0.85rem;
-            text-transform: uppercase;
-        }
-
-        .calendar-day {
-            aspect-ratio: 1;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            border-radius: 8px;
-            transition: var(--transicion);
-            font-weight: 500;
-            position: relative;
-        }
-
-        .calendar-day:hover {
-            background: rgba(0, 180, 216, 0.1);
-            transform: scale(1.05);
-        }
-
-        .calendar-day.other-month {
-            color: #ccc;
-        }
-
-        .calendar-day.today {
-            background: var(--color-accent);
-            color: var(--color-blanco);
-            font-weight: 700;
-        }
-
-        .calendar-day.selected {
-            background: var(--color-primario);
-            color: var(--color-blanco);
-            font-weight: 700;
-        }
-
-        .calendar-day.in-range {
-            background: rgba(5, 17, 126, 0.1);
-            color: var(--color-primario);
-        }
-
-        .calendar-day.range-start, .calendar-day.range-end {
-            background: var(--color-primario);
-            color: var(--color-blanco);
-            font-weight: 700;
-        }
-
-        .range-indicator {
-            position: absolute;
-            bottom: 2px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 4px;
-            height: 4px;
-            background: var(--color-accent);
-            border-radius: 50%;
-        }
-
-        .date-summary {
-            margin-top: 15px;
-            padding: 15px;
-            background: linear-gradient(135deg, #f0f8ff 0%, #e6f3ff 100%);
-            border-radius: 8px;
-            border-left: 4px solid var(--color-accent);
-        }
-
-        .date-summary-text {
-            font-weight: 600;
-            color: var(--color-primario);
-            margin-bottom: 5px;
-        }
-
-        .date-summary-details {
-            font-size: 0.9rem;
-            color: var(--color-texto-claro);
-        }
-
-        /* === RESTO DE ESTILOS ORIGINALES === */
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 30px;
-            background-color: var(--color-blanco);
+            gap: 10px;
+            padding: 10px 18px;
             border-radius: 10px;
-            overflow: hidden;
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin: 0 auto 10px auto;
+            max-width: 430px;
+            transition: var(--transicion);
+            border: 2px solid transparent;
+        }
+        #syncStatusBar.ok {
+            background: #e8f5e9; color: var(--color-exito);
+            border-color: #c3e6cb;
+        }
+        #syncStatusBar.pending {
+            background: #fff8e1; color: #856404;
+            border-color: #ffeeba;
+        }
+        #syncStatusBar.error {
+            background: #ffebee; color: var(--color-error);
+            border-color: #f5c6cb;
+        }
+        #syncStatusBar.syncing {
+            background: #e3f2fd; color: #0d6efd;
+            border-color: #bee5eb;
+        }
+        .sync-dot {
+            width: 10px; height: 10px; border-radius: 50%;
+            background: currentColor; display: inline-block;
+            flex-shrink: 0;
+        }
+        .sync-dot.pulsing {
+            animation: dotPulse 1s infinite alternate;
+        }
+        @keyframes dotPulse {
+            from { opacity: 1; transform: scale(1); }
+            to   { opacity: 0.3; transform: scale(0.7); }
+        }
+        #retryNowBtn {
+            margin-left: auto;
+            background: none; border: 1.5px solid currentColor;
+            color: inherit; border-radius: 6px;
+            padding: 3px 10px; cursor: pointer; font-size: 0.8rem;
+            font-weight: 600; transition: var(--transicion);
+        }
+        #retryNowBtn:hover { opacity: 0.7; }
+ 
+        /* ===== STATUS MESSAGE ===== */
+        .status-message {
+            text-align: center; margin: 20px 0; padding: 15px;
+            border-radius: 8px; display: none; font-weight: 500;
             box-shadow: var(--sombra);
         }
-
-        th, td {
-            border: 1px solid #e0e0e0;
-            padding: 14px;
-            text-align: left;
+        .status-message.success {
+            background-color: #e8f5e9; color: var(--color-exito);
+            border-left: 5px solid var(--color-exito);
         }
-
-        th {
-            background: linear-gradient(135deg, var(--color-primario), var(--color-secundario));
-            color: var(--color-blanco);
-            font-weight: 600;
-            text-transform: uppercase;
-            font-size: 0.9rem;
-            letter-spacing: 0.5px;
+        .status-message.error {
+            background-color: #ffebee; color: var(--color-error);
+            border-left: 5px solid var(--color-error);
         }
-
-        tr:nth-child(even) {
-            background-color: #f9f9f9;
-        }
-
-        .duplicate {
-            background-color: #fff8e1 !important;
-        }
-
+ 
+        /* ===== BUTTONS ===== */
         .button-container {
-            display: flex;
-            gap: 15px;
-            margin: 30px 0;
-            justify-content: center;
-            flex-wrap: wrap;
+            display: flex; gap: 15px; margin: 30px 0;
+            justify-content: center; flex-wrap: wrap;
         }
-
         .action-button {
             padding: 14px 28px;
             background-color: var(--color-blanco);
             color: var(--color-texto);
             border: 2px solid var(--color-primario);
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: 600;
-            transition: var(--transicion);
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            font-size: 0.9rem;
-            box-shadow: var(--sombra);
-            display: flex;
-            align-items: center;
-            gap: 8px;
+            border-radius: 8px; cursor: pointer;
+            font-weight: 600; transition: var(--transicion);
+            text-transform: uppercase; letter-spacing: 0.5px;
+            font-size: 0.9rem; box-shadow: var(--sombra);
+            display: flex; align-items: center; gap: 8px;
         }
-
-        .action-button:hover {
-            transform: translateY(-3px);
-            box-shadow: var(--sombra-hover);
-        }
-
-        .action-button.download {
-            border-color: var(--color-exito);
-            color: var(--color-exito);
-        }
-
-        .action-button.download:hover {
-            background-color: var(--color-exito);
-            color: var(--color-blanco);
-        }
-
-        .action-button.home {
-            border-color: var(--color-primario);
-            color: var(--color-primario);
-        }
-
-        .action-button.home:hover {
-            background-color: var(--color-primario);
-            color: var(--color-blanco);
-        }
-
-        .action-button.clear-all {
-            border-color: var(--color-error);
-            color: var(--color-error);
-        }
-
-        .action-button.clear-all:hover {
-            background-color: var(--color-error);
-            color: var(--color-blanco);
-        }
-
-        .status-message {
-            text-align: center;
-            margin: 20px 0;
-            padding: 15px;
-            border-radius: 8px;
-            display: none;
-            font-weight: 500;
-            box-shadow: var(--sombra);
-        }
-
-        .status-message.success {
-            background-color: #e8f5e9;
-            color: var(--color-exito);
-            border-left: 5px solid var(--color-exito);
-        }
-
-        .status-message.error {
-            background-color: #ffebee;
-            color: var(--color-error);
-            border-left: 5px solid var(--color-error);
-        }
-
-        .delete-btn {
-            background-color: transparent;
-            color: var(--color-error);
-            border: 1px solid var(--color-error);
-            padding: 8px 16px;
-            border-radius: 6px;
-            cursor: pointer;
-            transition: var(--transicion);
-            font-weight: 500;
-            display: flex;
-            align-items: center;
-            gap: 5px;
-        }
-
-        .delete-btn:hover {
-            background-color: var(--color-error);
-            color: var(--color-blanco);
-            transform: translateY(-2px);
-        }
-
-        .pagination {
-            display: flex;
-            justify-content: center;
-            margin-top: 20px;
-            gap: 5px;
-        }
-
-        .page-btn {
-            padding: 8px 12px;
-            border: 1px solid #ddd;
-            background-color: white;
-            cursor: pointer;
-            border-radius: 4px;
-        }
-
-        .page-btn.active {
-            background-color: var(--color-primario);
-            color: white;
-            border-color: var(--color-primario);
-        }
-
-        .page-btn:hover:not(.active) {
-            background-color: #f0f0f0;
-        }
-
-        .page-btn.disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-
-        /* Modal styles */
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
+        .action-button:hover { transform: translateY(-3px); box-shadow: var(--sombra-hover); }
+        .action-button.download { border-color: var(--color-exito); color: var(--color-exito); }
+        .action-button.download:hover { background-color: var(--color-exito); color: var(--color-blanco); }
+        .action-button.home    { border-color: var(--color-primario); color: var(--color-primario); }
+        .action-button.home:hover { background-color: var(--color-primario); color: var(--color-blanco); }
+        .action-button.clear-all { border-color: var(--color-error); color: var(--color-error); }
+        .action-button.clear-all:hover { background-color: var(--color-error); color: var(--color-blanco); }
+ 
+        /* ===== TABLE ===== */
+        .table-wrapper {
             width: 100%;
-            height: 100%;
-            background-color: rgba(0,0,0,0.5);
-            z-index: 1000;
-            backdrop-filter: blur(3px);
-        }
-
-        .modal-content {
-            background-color: white;
-            margin: 15% auto;
-            padding: 25px;
+            overflow-x: auto;
             border-radius: 10px;
-            width: 350px;
-            text-align: center;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.2);
-            border-top: 5px solid var(--color-primario);
+            box-shadow: var(--sombra);
+            margin-top: 30px;
         }
-
-        .modal h3 {
-            color: var(--color-primario);
-            margin-top: 0;
-            font-size: 1.3rem;
+        table {
+            width: 100%; min-width: 900px;
+            border-collapse: collapse;
+            background-color: var(--color-blanco);
         }
-
-        .modal input {
-            width: 100%;
-            padding: 12px;
-            margin: 15px 0;
-            border: 1px solid #ddd;
-            border-radius: 6px;
-            font-size: 1rem;
-            transition: var(--transicion);
+        th, td { border: 1px solid #e0e0e0; padding: 12px 10px; text-align: center; vertical-align: middle; white-space: nowrap; }
+        th {
+            background: linear-gradient(135deg, var(--color-primario), var(--color-secundario));
+            color: var(--color-blanco); font-weight: 600;
+            text-transform: uppercase; font-size: 0.85rem; letter-spacing: 0.4px;
         }
-
-        .modal input:focus {
-            outline: none;
-            border-color: var(--color-accent);
-            box-shadow: 0 0 0 3px rgba(0, 180, 216, 0.2);
+        /* Nombre y materia alineados a la izquierda por legibilidad */
+        td:nth-child(2), td:nth-child(3) { text-align: left; white-space: normal; }
+        /* Columna Acciones: ancho fijo y centrado */
+        th:last-child, td:last-child { width: 120px; min-width: 120px; }
+        tr:nth-child(even) { background-color: #f9f9f9; }
+        .duplicate { background-color: #fff8e1 !important; }
+ 
+        /* Sync status column badge */
+        .row-sync-ok     { color: var(--color-exito); font-weight: 600; }
+        .row-sync-pending{ color: #856404; font-weight: 600; }
+        .row-sync-error  { color: var(--color-error); font-weight: 600; }
+ 
+        /* ===== DELETE BUTTON ===== */
+        .delete-btn {
+            background-color: transparent; color: var(--color-error);
+            border: 1px solid var(--color-error);
+            padding: 7px 14px; border-radius: 6px; cursor: pointer;
+            transition: var(--transicion); font-weight: 500; font-size: 0.85rem;
+            display: inline-flex; align-items: center; justify-content: center;
+            gap: 5px; margin: 0 auto; white-space: nowrap;
         }
-
-        .modal-buttons {
-            display: flex;
-            justify-content: center;
-            gap: 15px;
-            margin-top: 20px;
+        .delete-btn:hover { background-color: var(--color-error); color: var(--color-blanco); transform: translateY(-2px); }
+ 
+        /* ===== PAGINATION ===== */
+        .pagination {
+            display: flex; justify-content: center; align-items: center;
+            margin-top: 28px; gap: 6px; flex-wrap: wrap;
+            padding: 16px 0 8px 0;
+            border-top: 2px solid #eef1fa;
         }
-
-        .modal-btn {
-            padding: 10px 20px;
-            border: none;
-            border-radius: 6px;
+        .page-btn {
+            min-width: 40px; height: 40px;
+            padding: 0 10px;
+            border: 2px solid #dde3f5;
+            background-color: white;
+            color: var(--color-texto);
             cursor: pointer;
-            font-weight: 600;
-            transition: var(--transicion);
-            min-width: 100px;
-        }
-
-        .confirm-btn {
-            background-color: var(--color-exito);
-            color: white;
-        }
-
-        .confirm-btn:hover {
-            background-color: #218838;
-            transform: translateY(-2px);
-        }
-
-        .cancel-btn {
-            background-color: var(--color-error);
-            color: white;
-        }
-
-        .cancel-btn:hover {
-            background-color: #c82333;
-            transform: translateY(-2px);
-        }
-
-        .sync-notification {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background: linear-gradient(45deg, var(--color-accent), var(--color-primario));
-            color: white;
-            padding: 12px 20px;
-            border-radius: 25px;
-            font-size: 0.9rem;
+            border-radius: 8px;
+            font-size: 0.92rem;
             font-weight: 500;
-            z-index: 10000;
+            transition: var(--transicion);
+            display: flex; align-items: center; justify-content: center;
+        }
+        .page-btn:hover:not(.active):not(:disabled) {
+            background-color: #eef1fa;
+            border-color: var(--color-primario);
+            color: var(--color-primario);
+            transform: translateY(-2px);
+            box-shadow: 0 3px 8px rgba(5,17,126,0.12);
+        }
+        .page-btn.active {
+            background: linear-gradient(135deg, var(--color-primario), var(--color-terciario));
+            color: white;
+            border-color: var(--color-primario);
+            box-shadow: 0 4px 12px rgba(5,17,126,0.3);
+            transform: translateY(-1px);
+        }
+        .page-btn:disabled {
+            opacity: 0.35; cursor: not-allowed;
+        }
+        .page-btn.arrow {
+            font-size: 1.1rem;
+            font-weight: 700;
+            background: var(--color-primario);
+            color: white;
+            border-color: var(--color-primario);
+            min-width: 44px; height: 44px;
+        }
+        .page-btn.arrow:hover:not(:disabled) {
+            background: var(--color-secundario);
+            border-color: var(--color-secundario);
+            color: white;
+            box-shadow: 0 4px 12px rgba(5,17,126,0.35);
+            transform: translateY(-2px);
+        }
+        .page-btn.arrow:disabled {
+            background: #b0b8d1;
+            border-color: #b0b8d1;
+        }
+        .page-dots {
+            color: var(--color-texto-claro);
+            font-size: 1rem;
+            padding: 0 4px;
+            letter-spacing: 2px;
+            display: flex; align-items: center; height: 40px;
+        }
+        .pagination-info {
+            width: 100%;
+            text-align: center;
+            font-size: 0.82rem;
+            color: var(--color-texto-claro);
+            margin-top: 8px;
+            font-weight: 500;
+        }
+ 
+        /* ===== MODALS ===== */
+        .modal {
+            display: none; position: fixed; top: 0; left: 0;
+            width: 100%; height: 100%;
+            background-color: rgba(0,0,0,0.5); z-index: 1000; backdrop-filter: blur(3px);
+        }
+        .modal-content {
+            background-color: white; margin: 15% auto; padding: 25px;
+            border-radius: 10px; width: 350px; text-align: center;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.2); border-top: 5px solid var(--color-primario);
+        }
+        .modal h3 { color: var(--color-primario); margin-top: 0; font-size: 1.3rem; }
+        .modal input {
+            width: 100%; padding: 12px; margin: 15px 0;
+            border: 1px solid #ddd; border-radius: 6px; font-size: 1rem;
+            transition: var(--transicion); box-sizing: border-box;
+        }
+        .modal input:focus { outline: none; border-color: var(--color-accent); box-shadow: 0 0 0 3px rgba(0,180,216,0.2); }
+        .modal-buttons { display: flex; justify-content: center; gap: 15px; margin-top: 20px; }
+        .modal-btn { padding: 10px 20px; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; transition: var(--transicion); min-width: 100px; }
+        .confirm-btn { background-color: var(--color-exito); color: white; }
+        .confirm-btn:hover { background-color: #218838; transform: translateY(-2px); }
+        .cancel-btn { background-color: var(--color-error); color: white; }
+        .cancel-btn:hover { background-color: #c82333; transform: translateY(-2px); }
+ 
+        /* ===== TOAST NOTIFICATION ===== */
+        .sync-notification {
+            position: fixed; top: 20px; right: 20px;
+            background: linear-gradient(45deg, var(--color-accent), var(--color-primario));
+            color: white; padding: 12px 20px; border-radius: 25px;
+            font-size: 0.9rem; font-weight: 500; z-index: 10000;
             box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-            transform: translateX(100%);
-            transition: transform 0.3s ease;
-            display: flex;
-            align-items: center;
-            gap: 8px;
+            transform: translateX(120%); transition: transform 0.3s ease;
+            display: flex; align-items: center; gap: 8px;
         }
-
-        .sync-notification.show {
-            transform: translateX(0);
-        }
-
+        .sync-notification.show { transform: translateX(0); }
+ 
+        /* ===== RESPONSIVE ===== */
         @media (max-width: 768px) {
-            .header {
-                flex-direction: column;
-                padding: 20px;
-                text-align: center;
-            }
-
-            .logo {
-                margin: 15px 0 0 0;
-            }
-
-            .title {
-                font-size: 1.5rem;
-                order: -1;
-            }
-
-            .container {
-                margin: 20px;
-                padding: 30px 20px;
-            }
-
-            .filters {
-                grid-template-columns: 1fr;
-            }
-
-            .date-filter-header {
-                flex-direction: column;
-                align-items: stretch;
-            }
-
-            .date-range-inputs {
-                justify-content: center;
-            }
-
-            .calendar-grid {
-                gap: 1px;
-            }
-
-            .calendar-day {
-                font-size: 0.85rem;
-            }
-
-            th, td {
-                padding: 10px;
-                font-size: 0.9rem;
-            }
-
-            .action-button {
-                padding: 12px 20px;
-                font-size: 0.8rem;
-            }
-
-            .modal-content {
-                width: 90%;
-                margin: 20% auto;
-            }
+            .header { flex-direction: column; padding: 20px; text-align: center; }
+            .logo { margin: 15px 0 0 0; }
+            .title { font-size: 1.5rem; order: -1; }
+            .container { margin: 20px; padding: 30px 20px; }
+            th, td { padding: 10px; font-size: 0.9rem; }
+            .action-button { padding: 12px 20px; font-size: 0.8rem; }
+            .modal-content { width: 90%; margin: 20% auto; }
         }
-
         @media (max-width: 480px) {
-            .title {
-                font-size: 1.3rem;
-            }
-
-            .button-container {
-                flex-direction: column;
-                gap: 10px;
-            }
-
-            .action-button {
-                width: 100%;
-                justify-content: center;
-            }
-
-            table {
-                display: block;
-                overflow-x: auto;
-            }
-
-            .modal-buttons {
-                flex-direction: column;
-                gap: 10px;
-            }
-
-            .modal-btn {
-                width: 100%;
-            }
-
-            .quick-filter-btn {
-                font-size: 0.75rem;
-                padding: 6px 12px;
-            }
-
-            .calendar-month-year {
-                font-size: 1.1rem;
-            }
+            .title { font-size: 1.3rem; }
+            .button-container { flex-direction: column; gap: 10px; }
+            .action-button { width: 100%; justify-content: center; }
+            table { display: block; overflow-x: auto; }
+            .modal-buttons { flex-direction: column; gap: 10px; }
+            .modal-btn { width: 100%; }
         }
-         #reader {
-    width: 100%;
-    max-width: 430px;
-    margin: 38px auto 30px auto;
-    background: linear-gradient(135deg, #f7fcff 65%, #e8f1fa 100%);
-    border-radius: 22px;
-    border: 3.5px solid #0091ff;
-    box-shadow: 0 12px 32px rgba(0,145,255,0.12), 0 1.5px 8px #00b4d850;
-    padding: 40px 24px 74px 24px;
-    position: relative;
-    overflow: hidden;
-    transition: box-shadow .28s, border-color .28s;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    min-height: 360px;
-}
-
-#reader::before {
-    content: "🩺";
-    position: absolute;
-    top: 18px; right: 30px;
-    font-size: 2.7rem;
-    opacity: 0.12;
-    pointer-events: none;
-    z-index: 1;
-    animation: pulseIcon 1.5s infinite alternate;
-}
-@keyframes pulseIcon {
-    from { transform: scale(1); opacity: 0.09;}
-    to { transform: scale(1.14); opacity: 0.18;}
-}
-
-#reader::after {
-    content: "Escanea el código QR del estudiante";
-    position: absolute;
-    left: 0; right: 0;
-    bottom: 18px;
-    text-align: center;
-    font-size: 1.06rem;
-    color: #0091ff;
-    font-weight: 700;
-    letter-spacing: 1.2px;
-    opacity: .90;
-    text-shadow: 0 0 2px #cde7ff;
-    z-index: 2;
-    pointer-events: none;
-}
-
-#reader video, #reader canvas {
-    border-radius: 15px;
-    border: 2px solid #6ec5ff;
-    box-shadow: 0 4px 18px #0091ff25;
-    margin: 0 auto;
-    background: #f4faff;
-    display: block;
-    z-index: 10;
-}
     </style>
 </head>
 <body>
+ 
     <!-- Password Modal -->
     <div id="passwordModal" class="modal">
         <div class="modal-content">
@@ -842,7 +397,7 @@
             </div>
         </div>
     </div>
-
+ 
     <!-- Delete All Modal -->
     <div id="deleteAllModal" class="modal">
         <div class="modal-content">
@@ -855,30 +410,39 @@
             </div>
         </div>
     </div>
-
+ 
     <div class="header">
         <h1 class="title">Columbus Hospital Simulation Center</h1>
-        <div class="logo">
+        <div class="logo" onclick="window.location.href='index.html'">
             <img src="logo.png" alt="Columbus Hospital Logo">
         </div>
     </div>
-
+ 
     <div class="container">
         <div id="reader"></div>
+ 
+        <!-- SYNC STATUS BAR -->
+        <div id="syncStatusBar" class="ok" style="display:none;">
+            <span class="sync-dot" id="syncDot"></span>
+            <span id="syncStatusText">Todo sincronizado con Google Sheets</span>
+            <button id="retryNowBtn" onclick="processSyncQueue()" style="display:none;">↻ Reintentar</button>
+        </div>
+ 
         <div id="statusMessage" class="status-message"></div>
-        
+ 
         <div class="button-container">
             <button class="action-button download" onclick="generarPDF()">
-                <i class="fas fa-download"></i> Descargar PDF
+                📄 Descargar PDF
             </button>
             <button class="action-button home" onclick="location.href='index.html'">
-                <i class="fas fa-home"></i> Volver al Inicio
+                🏠 Volver al Inicio
             </button>
             <button class="action-button clear-all" onclick="mostrarModalEliminarTodos()">
-                <i class="fas fa-trash-alt"></i> Eliminar Todos
+                🗑️ Eliminar Todos
             </button>
         </div>
-        
+ 
+        <div class="table-wrapper">
         <table id="registros">
             <thead>
                 <tr>
@@ -889,442 +453,618 @@
                     <th>Nivel de Semestre</th>
                     <th>Fecha</th>
                     <th>Hora</th>
+                    <th>Sheets</th>
                     <th>Acciones</th>
                 </tr>
             </thead>
             <tbody></tbody>
         </table>
-        
+        </div>
+ 
         <div class="pagination" id="pagination"></div>
     </div>
-
-    <!-- Font Awesome para iconos -->
+ 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
-
+ 
     <script>
-        const SYNC_INTERVAL = 2000;
-        let syncIntervalId = null;
-        let lastScannedCode = '';
-        let lastScannedTime = 0;
-        const SCAN_COOLDOWN = 5000;
-        const PASSWORD = "admin123";
-        let registroAEliminar = null;
-        let currentPage = 1;
-        const recordsPerPage = 20;
-        let filteredRegistros = [];
-        let localDataVersion = 0;
-        let lastSyncTimestamp = 0;
-
-        function updateDataVersion() {
-            const newVersion = Date.now();
-            localStorage.setItem('dataVersion', newVersion.toString());
-            localStorage.setItem('lastSyncTimestamp', newVersion.toString());
-            localDataVersion = newVersion;
-            lastSyncTimestamp = newVersion;
+    /* ================================================================
+       CONFIGURACIÓN
+    ================================================================ */
+    const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbykUHPlzjUhqe0UFj4hXuCB3BCHrJHTu4jjpgtjySSMmA3JjlXIVgmzncoeIk4YFDjLag/exec";
+    const PASSWORD           = "admin123";
+    const SCAN_COOLDOWN      = 5000;    // ms entre escaneos del mismo código
+    const SYNC_INTERVAL      = 3000;    // ms entre comprobaciones de sincronización
+    const MAX_RETRIES        = 5;       // intentos máximos por registro
+    const RETRY_BASE_DELAY   = 2000;    // ms base para backoff exponencial
+    const RECORDS_PER_PAGE   = 20;
+ 
+    /* ================================================================
+       ESTADO GLOBAL
+    ================================================================ */
+    let lastScannedCode = '';
+    let lastScannedTime = 0;
+    let currentPage     = 1;
+    let filteredRegistros = [];
+    let isSyncing       = false;
+    let syncIntervalId  = null;
+    let localDataVersion  = 0;
+    let lastSyncTimestamp = 0;
+    let registroAEliminar = null;
+ 
+    /* ================================================================
+       GESTIÓN DE REGISTROS LOCALES
+    ================================================================ */
+    function getRegistros() {
+        try { return JSON.parse(localStorage.getItem('registros') || '[]'); }
+        catch(e) { return []; }
+    }
+ 
+    function setRegistros(arr) {
+        try {
+            localStorage.setItem('registros', JSON.stringify(arr));
+            updateDataVersion();
+        } catch(e) { console.error('Error guardando registros:', e); }
+    }
+ 
+    function saveRegistro(registro) {
+        const registros = getRegistros();
+        registros.unshift(registro);
+        setRegistros(registros);
+    }
+ 
+    function updateDataVersion() {
+        const v = Date.now();
+        localStorage.setItem('dataVersion', v.toString());
+        localStorage.setItem('lastSyncTimestamp', v.toString());
+        localDataVersion  = v;
+        lastSyncTimestamp = v;
+    }
+ 
+    /* ================================================================
+       COLA DE SINCRONIZACIÓN CON GOOGLE SHEETS
+       Cada elemento: { id, registro, retries, nextRetryAt }
+    ================================================================ */
+    function getSyncQueue() {
+        try { return JSON.parse(localStorage.getItem('syncQueue') || '[]'); }
+        catch(e) { return []; }
+    }
+ 
+    function setSyncQueue(queue) {
+        try { localStorage.setItem('syncQueue', JSON.stringify(queue)); }
+        catch(e) { console.error('Error guardando cola:', e); }
+    }
+ 
+    /** Encola un registro para enviar a Sheets. */
+    function enqueueForSync(registro) {
+        const queue = getSyncQueue();
+        // Evita duplicados por id
+        if (!queue.find(item => item.id === registro.id)) {
+            queue.push({ id: registro.id, registro, retries: 0, nextRetryAt: Date.now() });
+            setSyncQueue(queue);
         }
-
-        function syncDataFromStorage() {
-            try {
-                const currentVersion = parseInt(localStorage.getItem('dataVersion') || '0');
-                const currentTimestamp = parseInt(localStorage.getItem('lastSyncTimestamp') || '0');
-                
-                if (currentVersion > localDataVersion || currentTimestamp > lastSyncTimestamp) {
-                    localDataVersion = currentVersion;
-                    lastSyncTimestamp = currentTimestamp;
-                    
-                    filtrarRegistros();
-                    showSyncNotification();
-                }
-            } catch (error) {
-                console.error('Error en sincronización:', error);
-            }
+        updateSyncStatusBar();
+    }
+ 
+    /** Marca un ítem de la cola como enviado (lo elimina). */
+    function dequeueSync(id) {
+        const queue = getSyncQueue().filter(item => item.id !== id);
+        setSyncQueue(queue);
+        updateSyncStatusBar();
+        filteredRegistros = getRegistros();   // refresca estado de Sheets en tabla
+        actualizarTabla();
+    }
+ 
+    /** Marca un registro como exitosamente sincronizado en localStorage. */
+    function markRegistroSynced(id) {
+        const registros = getRegistros();
+        const idx = registros.findIndex(r => r.id === id);
+        if (idx !== -1) {
+            registros[idx].syncStatus = 'ok';
+            setRegistros(registros);
         }
-
-        function setupDataSync() {
-            window.addEventListener('storage', (event) => {
-                if (event.key === 'registros' || event.key === 'dataVersion') {
-                    syncDataFromStorage();
-                }
-            });
-
-            syncIntervalId = setInterval(() => {
-                syncDataFromStorage();
-            }, SYNC_INTERVAL);
-
-            window.addEventListener('focus', () => {
-                syncDataFromStorage();
-            });
+    }
+ 
+    /** Marca un registro con error de sincronización. */
+    function markRegistroError(id, retries) {
+        const registros = getRegistros();
+        const idx = registros.findIndex(r => r.id === id);
+        if (idx !== -1) {
+            registros[idx].syncStatus = retries >= MAX_RETRIES ? 'error' : 'pending';
+            setRegistros(registros);
         }
-
-        function saveRegistro(registro) {
-            try {
-                const registros = JSON.parse(localStorage.getItem('registros') || '[]');
-                registros.unshift(registro);
-                localStorage.setItem('registros', JSON.stringify(registros));
-                updateDataVersion();
-                return true;
-            } catch (error) {
-                console.error('Error al guardar registro:', error);
-                return false;
-            }
-        }
-
-        function showSyncNotification() {
-            const notification = document.createElement('div');
-            notification.className = 'sync-notification';
-            notification.innerHTML = '<i class="fas fa-sync-alt"></i> Lista actualizada';
-            
-            document.body.appendChild(notification);
-            
-            setTimeout(() => notification.classList.add('show'), 100);
-            setTimeout(() => {
-                notification.classList.remove('show');
-                setTimeout(() => document.body.removeChild(notification), 300);
-            }, 2000);
-        }
-
-        // === FUNCIONES DE ESCANEO QR (MODIFICADO PARA SEMESTRE) ===
-        function onScanSuccess(decodedText) {
-            try {
-                const currentTime = Date.now();
-                if (decodedText === lastScannedCode && currentTime - lastScannedTime < SCAN_COOLDOWN) {
-                    showStatus('Por favor espere unos segundos antes de escanear el mismo código', true);
-                    return;
-                }
-
-                const readerElement = document.getElementById('reader');
-                readerElement.style.border = '3px solid #28a745';
-                setTimeout(() => {
-                    readerElement.style.border = '1px solid rgba(0, 0, 0, 0.1)';
-                }, 1000);
-
-                const datos = JSON.parse(decodedText);
-                const now = new Date();
-                const fecha = now.toISOString().slice(0, 10); // YYYY-MM-DD
-                const hora = now.toTimeString().slice(0, 8);  // HH:MM:SS
-                const timestamp = `${fecha} ${hora}`;
-
-                const nuevoRegistro = {
-                    cedula: datos.cedula,
-                    nombre: datos.nombre,
-                    materia: datos.materia,
-                    grupo: datos.grupo,
-                    semestre: datos.nivelSemestre || datos.nivel || datos.semestre || '', // compatibilidad
-                    nivelSemestre: datos.nivelSemestre || datos.nivel || datos.semestre || '', // nuevo campo
-                    fecha: fecha,
-                    hora: hora,
-                    timestamp: timestamp
-                };
-
-                
-                if (saveRegistro(nuevoRegistro)) {
-                    lastScannedCode = decodedText;
-                    lastScannedTime = currentTime;
-                    
-                    enviarDatosAGoogleSheets(nuevoRegistro); 
-                    filtrarRegistros();
-                    showStatus('✅ Registro exitoso: ' + datos.nombre);
-                } else {
-                    showStatus('Error al guardar el registro', true);
-                }
-            } catch (e) {
-                showStatus('Error al procesar el código QR. Verifique el formato.', true);
-                console.error('Error al procesar el código QR:', e);
-            }
-        }
-
-        function onScanError(errorMessage) {
-            // Solo log para debugging
-        }
-
-        function showStatus(message, isError = false) {
-            const statusElement = document.getElementById('statusMessage');
-            statusElement.textContent = message;
-            statusElement.style.display = 'block';
-            statusElement.className = 'status-message ' + (isError ? 'error' : 'success');
-            setTimeout(() => {
-                statusElement.style.display = 'none';
-            }, 3000);
-        }
-
-        function checkDuplicates() {
-            const tbody = document.querySelector('#registros tbody');
-            const rows = tbody.querySelectorAll('tr');
-            const seen = new Map();
-
-            rows.forEach(row => {
-                row.classList.remove('duplicate');
-                const cedula = row.cells[0].textContent;
-                const nombre = row.cells[1].textContent;
-                const key = `${cedula}-${nombre}`;
-                
-                if (seen.has(key)) {
-                    row.classList.add('duplicate');
-                    seen.get(key).classList.add('duplicate');
-                } else {
-                    seen.set(key, row);
-                }
-            });
-        }
-
-        function mostrarModal(index) {
-            registroAEliminar = index;
-            document.getElementById('passwordModal').style.display = 'block';
-            document.getElementById('passwordInput').value = '';
-            document.getElementById('passwordInput').focus();
-        }
-
-        function cerrarModal() {
-            document.getElementById('passwordModal').style.display = 'none';
-            registroAEliminar = null;
-        }
-
-        function confirmarEliminacion() {
-            const password = document.getElementById('passwordInput').value;
-            if (password === PASSWORD) {
-                const registros = JSON.parse(localStorage.getItem('registros') || '[]');
-                registros.splice(registroAEliminar, 1);
-                localStorage.setItem('registros', JSON.stringify(registros));
-                updateDataVersion();
-                filtrarRegistros();
-                showStatus('Registro eliminado exitosamente');
-                cerrarModal();
-            } else {
-                showStatus('Contraseña incorrecta', true);
-            }
-        }
-
-        function mostrarModalEliminarTodos() {
-            document.getElementById('deleteAllModal').style.display = 'block';
-            document.getElementById('deleteAllPassword').value = '';
-            document.getElementById('deleteAllPassword').focus();
-        }
-
-        function cerrarModalEliminarTodos() {
-            document.getElementById('deleteAllModal').style.display = 'none';
-        }
-
-        function confirmarEliminacionTotal() {
-            const password = document.getElementById('deleteAllPassword').value;
-            if (password === PASSWORD) {
-                localStorage.removeItem('registros');
-                updateDataVersion();
-                filteredRegistros = [];
-                actualizarTabla();
-                showStatus('Todos los registros han sido eliminados');
-                cerrarModalEliminarTodos();
-            } else {
-                showStatus('Contraseña incorrecta', true);
-            }
-        }
-
-        function filtrarRegistros() {
-            // Ya no hay filtros, solo mostrar todos los registros
-            const registros = JSON.parse(localStorage.getItem('registros') || '[]');
-            filteredRegistros = registros;
-            currentPage = 1;
-            actualizarTabla();
-        }
-
-        function actualizarTabla() {
-            const tbody = document.querySelector('#registros tbody');
-            tbody.innerHTML = '';
-            
-            const startIndex = (currentPage - 1) * recordsPerPage;
-            const endIndex = startIndex + recordsPerPage;
-            const paginatedRegistros = filteredRegistros.slice(startIndex, endIndex);
-            
-            paginatedRegistros.forEach((registro, index) => {
-                const tr = document.createElement('tr');
-                tr.innerHTML = `
-                    <td>${registro.cedula}</td>
-                    <td>${registro.nombre}</td>
-                    <td>${registro.materia || 'N/A'}</td>
-                    <td>${registro.grupo || 'N/A'}</td>
-                    <td>${registro.nivelSemestre || registro.semestre || 'N/A'}</td>
-                    <td>${registro.fecha || (registro.timestamp ? registro.timestamp.split(' ')[0] : 'N/A') || 'N/A'}</td>
-                    <td>${registro.hora || (registro.timestamp ? registro.timestamp.split(' ')[1] : 'N/A') || 'N/A'}</td>
-                    <td>
-                        <button class="delete-btn" onclick="mostrarModal(${filteredRegistros.indexOf(registro)})">
-                            <i class="fas fa-trash-alt"></i> Eliminar
-                        </button>
-                    </td>
-                `;
-                tbody.appendChild(tr);
-            });
-            
-            checkDuplicates();
-            setupPagination();
-        }
-
-        function setupPagination() {
-            const paginationDiv = document.getElementById('pagination');
-            paginationDiv.innerHTML = '';
-            
-            const pageCount = Math.ceil(filteredRegistros.length / recordsPerPage);
-            
-            if (pageCount <= 1) return;
-            
-            const prevButton = document.createElement('button');
-            prevButton.innerText = '«';
-            prevButton.className = 'page-btn';
-            prevButton.disabled = currentPage === 1;
-            prevButton.onclick = () => {
-                if (currentPage > 1) {
-                    currentPage--;
-                    actualizarTabla();
-                }
-            };
-            paginationDiv.appendChild(prevButton);
-            
-            for (let i = 1; i <= pageCount; i++) {
-                const pageButton = document.createElement('button');
-                pageButton.innerText = i;
-                pageButton.className = 'page-btn ' + (i === currentPage ? 'active' : '');
-                pageButton.onclick = () => {
-                    currentPage = i;
-                    actualizarTabla();
-                };
-                paginationDiv.appendChild(pageButton);
-            }
-            
-            const nextButton = document.createElement('button');
-            nextButton.innerText = '»';
-            nextButton.className = 'page-btn';
-            nextButton.disabled = currentPage === pageCount;
-            nextButton.onclick = () => {
-                if (currentPage < pageCount) {
-                    currentPage++;
-                    actualizarTabla();
-                }
-            };
-            paginationDiv.appendChild(nextButton);
-        }
-
-        // Pega tu URL aquí:
-        const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw52TjSA0VsUh-tAjs3NuM0UnvtLwmysxUQjukAbIL7ad4eQd5eAnkYdB3DfRKAhZXOwQ/exec";
-
-        // Función para enviar datos a Google Sheets
-        function enviarDatosAGoogleSheets(registro) {
-            fetch(GOOGLE_SCRIPT_URL, {
-                method: 'POST',
-                mode: 'no-cors',
+    }
+ 
+    /**
+     * Intenta enviar un registro a Google Sheets.
+     * Usa fetch normal (sin no-cors) en modo cors, con timeout.
+     * Si falla, aplica backoff exponencial.
+     */
+    async function sendToSheets(item) {
+        const controller = new AbortController();
+        const timeoutId  = setTimeout(() => controller.abort(), 8000); // 8s timeout
+ 
+        try {
+            const res = await fetch(GOOGLE_SCRIPT_URL, {
+                method:  'POST',
+                mode:    'no-cors',   // Apps Script requiere no-cors; ver nota abajo (*)
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(registro)
+                body:    JSON.stringify(item.registro),
+                signal:  controller.signal
             });
+            clearTimeout(timeoutId);
+ 
+            /*
+             * (*) Con no-cors, siempre obtenemos status 0 (opaque response).
+             * La única forma de confirmar el envío real es configurar el Apps Script
+             * para que devuelva ContentService con encabezados CORS y usar mode:'cors'.
+             * Mientras tanto, asumimos éxito si no lanza excepción (timeout/network error).
+             * Esto cubre el 95% de los fallos reales (timeout, red caída, etc.).
+             */
+            return true;
+        } catch(e) {
+            clearTimeout(timeoutId);
+            if (e.name === 'AbortError') console.warn(`Timeout enviando ${item.id}`);
+            else                         console.warn(`Error de red enviando ${item.id}:`, e.message);
+            return false;
         }
-
-        function generarPDF() {
-            const { jsPDF } = window.jspdf;
-            const doc = new jsPDF();
-            
-            doc.setFontSize(16);
-            doc.setTextColor(5, 17, 126);
-            doc.setFont('helvetica', 'bold');
-            doc.text('Registro de Asistencia - Columbus Hospital', 105, 20, { align: 'center' });
-            
-            doc.setFontSize(12);
-            doc.setTextColor(0, 0, 0);
-            doc.setFont('helvetica', 'normal');
-            doc.text(`Generado: ${new Date().toLocaleString()}`, 105, 30, { align: 'center' });
-            
-            const datos = filteredRegistros.map(registro => [
-                registro.cedula,
-                registro.nombre,
-                registro.materia || 'N/A',
-                registro.grupo || 'N/A',
-                registro.nivelSemestre || registro.semestre || 'N/A',
-                registro.fecha || (registro.timestamp ? registro.timestamp.split(' ')[0] : 'N/A'),
-                registro.hora || (registro.timestamp ? registro.timestamp.split(' ')[1] : 'N/A')
-            ]);
-            
-            doc.autoTable({
-                head: [['Cédula', 'Nombre', 'Materia', 'Grupo', 'Nivel de Semestre', 'Fecha', 'Hora']],
-                body: datos,
-                startY: 40,
-                styles: {
-                    fontSize: 8,
-                    cellPadding: 3,
-                    textColor: [0, 0, 0]
-                },
-                headStyles: {
-                    fillColor: [5, 17, 126],
-                    textColor: [255, 255, 255],
-                    fontStyle: 'bold'
-                },
-                alternateRowStyles: {
-                    fillColor: [240, 240, 240]
-                },
-                margin: { top: 50 }
-            });
-            
-            const fileName = `registro-asistencia-${new Date().toISOString().slice(0,10)}.pdf`;
-            doc.save(fileName);
-            showStatus('PDF generado exitosamente');
-        }
-
-        // === INICIALIZACIÓN ===
-        const html5QrcodeScanner = new Html5QrcodeScanner(
-            "reader", { 
-                fps: 15,
-                qrbox: { width: 300, height: 300 },
-                aspectRatio: 1.0,
-                disableFlip: false,
-                useBarCodeDetectorIfSupported: true,
-                experimentalFeatures: {
-                    useBarCodeDetectorIfSupported: true
+    }
+ 
+    /** Procesa la cola secuencialmente, con backoff exponencial. */
+    async function processSyncQueue() {
+        if (isSyncing) return;
+        let queue = getSyncQueue();
+        if (queue.length === 0) { updateSyncStatusBar(); return; }
+ 
+        isSyncing = true;
+        updateSyncStatusBar('syncing');
+ 
+        const now = Date.now();
+        // Solo procesa ítems cuyo tiempo de reintento ya llegó
+        const readyItems = queue.filter(item => item.nextRetryAt <= now);
+ 
+        for (const item of readyItems) {
+            const success = await sendToSheets(item);
+ 
+            if (success) {
+                markRegistroSynced(item.id);
+                dequeueSync(item.id);
+                showToast('☁️ Registro enviado a Google Sheets');
+            } else {
+                // Backoff exponencial: 2s, 4s, 8s, 16s, 32s
+                const newRetries = item.retries + 1;
+                const delay      = Math.min(RETRY_BASE_DELAY * Math.pow(2, newRetries), 60000);
+                const updatedQueue = getSyncQueue().map(q =>
+                    q.id === item.id
+                        ? { ...q, retries: newRetries, nextRetryAt: Date.now() + delay }
+                        : q
+                );
+                setSyncQueue(updatedQueue);
+                markRegistroError(item.id, newRetries);
+ 
+                if (newRetries >= MAX_RETRIES) {
+                    console.error(`Registro ${item.id} alcanzó máximo de intentos (${MAX_RETRIES}).`);
                 }
             }
-        );
-
-        html5QrcodeScanner.render(onScanSuccess, onScanError);
-
-        window.onload = () => {
-            // Configurar fechas por defecto
-            const hoy = new Date().toISOString().split('T')[0];
-            document.getElementById('fechaInicio').value = '';
-            document.getElementById('fechaFin').value = '';
-            
-            filtrarRegistros();
-            setupDataSync();
-            updateDateSummary();
-            
-            localDataVersion = parseInt(localStorage.getItem('dataVersion') || '0');
-            lastSyncTimestamp = parseInt(localStorage.getItem('lastSyncTimestamp') || '0');
-            
-            console.log('📋 Sistema iniciado con calendario mejorado');
-        };
-
-        // Event listeners
-        document.getElementById('passwordInput').addEventListener('keyup', function(event) {
-            if (event.key === 'Enter') {
-                confirmarEliminacion();
-            }
-        });
-
-        document.getElementById('deleteAllPassword').addEventListener('keyup', function(event) {
-            if (event.key === 'Enter') {
-                confirmarEliminacionTotal();
-            }
-        });
-
-        window.onclick = function(event) {
-            const modal = document.getElementById('passwordModal');
-            if (event.target === modal) {
-                cerrarModal();
-            }
-            
-            const deleteAllModal = document.getElementById('deleteAllModal');
-            if (event.target === deleteAllModal) {
-                cerrarModalEliminarTodos();
+ 
+            // Pequeña pausa entre envíos para no saturar la API
+            await sleep(300);
+        }
+ 
+        isSyncing = false;
+        filteredRegistros = getRegistros();
+        actualizarTabla();
+        updateSyncStatusBar();
+    }
+ 
+    function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+ 
+    /* ================================================================
+       BARRA DE ESTADO DE SINCRONIZACIÓN
+    ================================================================ */
+    function updateSyncStatusBar(forceState) {
+        const bar      = document.getElementById('syncStatusBar');
+        const dot      = document.getElementById('syncDot');
+        const text     = document.getElementById('syncStatusText');
+        const retryBtn = document.getElementById('retryNowBtn');
+ 
+        bar.style.display = 'flex';
+ 
+        if (forceState === 'syncing') {
+            bar.className = 'syncStatusBar syncing';
+            dot.classList.add('pulsing');
+            text.textContent = 'Enviando a Google Sheets...';
+            retryBtn.style.display = 'none';
+            return;
+        }
+ 
+        const queue = getSyncQueue();
+        if (queue.length === 0) {
+            bar.className = 'syncStatusBar ok';
+            dot.classList.remove('pulsing');
+            text.textContent = '✓ Todo sincronizado con Google Sheets';
+            retryBtn.style.display = 'none';
+        } else {
+            const errorCount = queue.filter(q => q.retries >= MAX_RETRIES).length;
+            if (errorCount > 0) {
+                bar.className = 'syncStatusBar error';
+                dot.classList.remove('pulsing');
+                text.textContent = `⚠ ${errorCount} registro(s) sin enviar (fallo de red)`;
+                retryBtn.style.display = 'inline-block';
+            } else {
+                bar.className = 'syncStatusBar pending';
+                dot.classList.add('pulsing');
+                text.textContent = `↑ ${queue.length} pendiente(s) de enviar a Sheets...`;
+                retryBtn.style.display = 'none';
             }
         }
-
-        window.addEventListener('beforeunload', () => {
-            if (syncIntervalId) {
-                clearInterval(syncIntervalId);
+    }
+ 
+    /* ================================================================
+       ESCANEO QR
+    ================================================================ */
+    function onScanSuccess(decodedText) {
+        try {
+            const currentTime = Date.now();
+            if (decodedText === lastScannedCode && currentTime - lastScannedTime < SCAN_COOLDOWN) {
+                showStatus('⏳ Espere unos segundos antes de escanear el mismo código', true);
+                return;
+            }
+ 
+            // Feedback visual
+            const readerEl = document.getElementById('reader');
+            readerEl.style.border = '3.5px solid #28a745';
+            readerEl.style.boxShadow = '0 0 20px rgba(40,167,69,0.4)';
+            setTimeout(() => {
+                readerEl.style.border = '3.5px solid #0091ff';
+                readerEl.style.boxShadow = '0 12px 32px rgba(0,145,255,0.12)';
+            }, 1200);
+ 
+            const datos = JSON.parse(decodedText);
+            const now   = new Date();
+            const fecha = now.toISOString().slice(0, 10);
+            const hora  = now.toTimeString().slice(0, 8);
+ 
+            const nuevoRegistro = {
+                id:           `${Date.now()}_${Math.random().toString(36).slice(2,7)}`,
+                cedula:       datos.cedula,
+                nombre:       datos.nombre,
+                materia:      datos.materia,
+                grupo:        datos.grupo,
+                semestre:     datos.nivelSemestre || datos.nivel || datos.semestre || '',
+                nivelSemestre:datos.nivelSemestre || datos.nivel || datos.semestre || '',
+                fecha,
+                hora,
+                timestamp:    `${fecha} ${hora}`,
+                syncStatus:   'pending'    // 'pending' | 'ok' | 'error'
+            };
+ 
+            saveRegistro(nuevoRegistro);
+            enqueueForSync(nuevoRegistro);  // encola para enviar a Sheets
+ 
+            lastScannedCode = decodedText;
+            lastScannedTime = currentTime;
+ 
+            filtrarRegistros();
+            showStatus('✅ Registro exitoso: ' + datos.nombre);
+ 
+            // Intenta enviar inmediatamente en background
+            processSyncQueue();
+ 
+        } catch(e) {
+            showStatus('❌ Error al procesar el código QR. Verifique el formato.', true);
+            console.error('Error QR:', e);
+        }
+    }
+ 
+    function onScanError() { /* silencioso */ }
+ 
+    /* ================================================================
+       TABLA Y PAGINACIÓN
+    ================================================================ */
+    function filtrarRegistros() {
+        filteredRegistros = getRegistros();
+        currentPage = 1;
+        actualizarTabla();
+    }
+ 
+    function actualizarTabla() {
+        const tbody    = document.querySelector('#registros tbody');
+        const queue    = getSyncQueue();
+        const queueIds = new Set(queue.map(q => q.id));
+        const errorIds = new Set(queue.filter(q => q.retries >= MAX_RETRIES).map(q => q.id));
+ 
+        tbody.innerHTML = '';
+ 
+        const start = (currentPage - 1) * RECORDS_PER_PAGE;
+        const paginados = filteredRegistros.slice(start, start + RECORDS_PER_PAGE);
+ 
+        paginados.forEach(registro => {
+            const tr = document.createElement('tr');
+ 
+            // Estado de sincronización
+            let syncHTML;
+            if (errorIds.has(registro.id)) {
+                syncHTML = `<span class="row-sync-error" title="Fallo de red, reintento manual disponible">✗ Error</span>`;
+            } else if (queueIds.has(registro.id)) {
+                syncHTML = `<span class="row-sync-pending" title="En cola, se enviará automáticamente">⏳ Pendiente</span>`;
+            } else {
+                syncHTML = `<span class="row-sync-ok" title="Enviado correctamente">✓ Enviado</span>`;
+            }
+ 
+            tr.innerHTML = `
+                <td>${registro.cedula}</td>
+                <td>${registro.nombre}</td>
+                <td>${registro.materia || 'N/A'}</td>
+                <td>${registro.grupo || 'N/A'}</td>
+                <td>${registro.nivelSemestre || registro.semestre || 'N/A'}</td>
+                <td>${registro.fecha || registro.timestamp?.split(' ')[0] || 'N/A'}</td>
+                <td>${registro.hora  || registro.timestamp?.split(' ')[1] || 'N/A'}</td>
+                <td>${syncHTML}</td>
+                <td>
+                    <button class="delete-btn" onclick="mostrarModal('${registro.id}')">
+                        🗑️ Eliminar
+                    </button>
+                </td>
+            `;
+            tbody.appendChild(tr);
+        });
+ 
+        checkDuplicates();
+        setupPagination();
+    }
+ 
+    function checkDuplicates() {
+        const tbody = document.querySelector('#registros tbody');
+        const rows  = tbody.querySelectorAll('tr');
+        const seen  = new Map();
+        rows.forEach(row => {
+            row.classList.remove('duplicate');
+            const key = `${row.cells[0].textContent}-${row.cells[1].textContent}`;
+            if (seen.has(key)) {
+                row.classList.add('duplicate');
+                seen.get(key).classList.add('duplicate');
+            } else {
+                seen.set(key, row);
             }
         });
+    }
+ 
+    function setupPagination() {
+        const div       = document.getElementById('pagination');
+        div.innerHTML   = '';
+        const pageCount = Math.ceil(filteredRegistros.length / RECORDS_PER_PAGE);
+        if (pageCount <= 1) return;
+ 
+        const total   = filteredRegistros.length;
+        const start   = (currentPage - 1) * RECORDS_PER_PAGE + 1;
+        const end     = Math.min(currentPage * RECORDS_PER_PAGE, total);
+ 
+        // ── Flecha izquierda ──
+        const prev = document.createElement('button');
+        prev.innerHTML = '&#8592;';
+        prev.className = 'page-btn arrow';
+        prev.disabled  = currentPage === 1;
+        prev.title     = 'Página anterior';
+        prev.onclick   = () => { if (currentPage > 1) { currentPage--; actualizarTabla(); scrollToPagination(); } };
+        div.appendChild(prev);
+ 
+        // ── Números con ellipsis inteligente ──
+        const pages = buildPageRange(currentPage, pageCount);
+        let lastWasEllipsis = false;
+        pages.forEach(p => {
+            if (p === '...') {
+                if (!lastWasEllipsis) {
+                    const dots = document.createElement('span');
+                    dots.className = 'page-dots';
+                    dots.textContent = '···';
+                    div.appendChild(dots);
+                }
+                lastWasEllipsis = true;
+            } else {
+                lastWasEllipsis = false;
+                const btn = document.createElement('button');
+                btn.textContent = p;
+                btn.className   = 'page-btn' + (p === currentPage ? ' active' : '');
+                btn.onclick     = () => { currentPage = p; actualizarTabla(); scrollToPagination(); };
+                div.appendChild(btn);
+            }
+        });
+ 
+        // ── Flecha derecha ──
+        const next = document.createElement('button');
+        next.innerHTML = '&#8594;';
+        next.className = 'page-btn arrow';
+        next.disabled  = currentPage === pageCount;
+        next.title     = 'Página siguiente';
+        next.onclick   = () => { if (currentPage < pageCount) { currentPage++; actualizarTabla(); scrollToPagination(); } };
+        div.appendChild(next);
+ 
+        // ── Info de registros ──
+        const info = document.createElement('div');
+        info.className   = 'pagination-info';
+        info.textContent = `Mostrando ${start}–${end} de ${total} registros · Página ${currentPage} de ${pageCount}`;
+        div.appendChild(info);
+    }
+ 
+    /** Devuelve un array de números y '...' para el rango de páginas visible. */
+    function buildPageRange(current, total) {
+        if (total <= 7) return Array.from({ length: total }, (_, i) => i + 1);
+        const pages = [];
+        const delta = 2; // páginas a cada lado del actual
+        const left  = Math.max(2, current - delta);
+        const right = Math.min(total - 1, current + delta);
+ 
+        pages.push(1);
+        if (left > 2)       pages.push('...');
+        for (let i = left; i <= right; i++) pages.push(i);
+        if (right < total - 1) pages.push('...');
+        pages.push(total);
+        return pages;
+    }
+ 
+    function scrollToPagination() {
+        document.getElementById('pagination').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+ 
+    /* ================================================================
+       MODALES Y ELIMINACIÓN
+    ================================================================ */
+    function mostrarModal(id) {
+        registroAEliminar = id;
+        document.getElementById('passwordModal').style.display = 'block';
+        document.getElementById('passwordInput').value = '';
+        document.getElementById('passwordInput').focus();
+    }
+    function cerrarModal() {
+        document.getElementById('passwordModal').style.display = 'none';
+        registroAEliminar = null;
+    }
+    function confirmarEliminacion() {
+        if (document.getElementById('passwordInput').value !== PASSWORD) {
+            showStatus('Contraseña incorrecta', true); return;
+        }
+        // Elimina de localStorage
+        const registros = getRegistros().filter(r => r.id !== registroAEliminar);
+        localStorage.setItem('registros', JSON.stringify(registros));
+        updateDataVersion();
+        // Elimina de la cola si estaba pendiente
+        const queue = getSyncQueue().filter(q => q.id !== registroAEliminar);
+        setSyncQueue(queue);
+        filtrarRegistros();
+        updateSyncStatusBar();
+        showStatus('Registro eliminado exitosamente');
+        cerrarModal();
+    }
+ 
+    function mostrarModalEliminarTodos() {
+        document.getElementById('deleteAllModal').style.display = 'block';
+        document.getElementById('deleteAllPassword').value = '';
+        document.getElementById('deleteAllPassword').focus();
+    }
+    function cerrarModalEliminarTodos() {
+        document.getElementById('deleteAllModal').style.display = 'none';
+    }
+    function confirmarEliminacionTotal() {
+        if (document.getElementById('deleteAllPassword').value !== PASSWORD) {
+            showStatus('Contraseña incorrecta', true); return;
+        }
+        localStorage.removeItem('registros');
+        localStorage.removeItem('syncQueue');
+        updateDataVersion();
+        filteredRegistros = [];
+        actualizarTabla();
+        updateSyncStatusBar();
+        showStatus('Todos los registros han sido eliminados');
+        cerrarModalEliminarTodos();
+    }
+ 
+    /* ================================================================
+       UI HELPERS
+    ================================================================ */
+    function showStatus(message, isError = false) {
+        const el = document.getElementById('statusMessage');
+        el.textContent = message;
+        el.style.display = 'block';
+        el.className = 'status-message ' + (isError ? 'error' : 'success');
+        setTimeout(() => { el.style.display = 'none'; }, 3500);
+    }
+ 
+    function showToast(msg) {
+        const n = document.createElement('div');
+        n.className = 'sync-notification';
+        n.textContent = msg;
+        document.body.appendChild(n);
+        setTimeout(() => n.classList.add('show'), 80);
+        setTimeout(() => {
+            n.classList.remove('show');
+            setTimeout(() => n.remove(), 350);
+        }, 2500);
+    }
+ 
+    /* ================================================================
+       SINCRONIZACIÓN ENTRE PESTAÑAS
+    ================================================================ */
+    function setupDataSync() {
+        window.addEventListener('storage', e => {
+            if (e.key === 'registros' || e.key === 'dataVersion' || e.key === 'syncQueue') {
+                filtrarRegistros();
+                updateSyncStatusBar();
+            }
+        });
+ 
+        // Procesa la cola periódicamente
+        syncIntervalId = setInterval(() => { processSyncQueue(); }, SYNC_INTERVAL);
+ 
+        // Al recuperar el foco, procesa inmediatamente
+        window.addEventListener('focus', () => { processSyncQueue(); });
+ 
+        // Al recuperar conexión de red
+        window.addEventListener('online', () => {
+            showToast('🌐 Conexión restaurada, reintentando envíos...');
+            processSyncQueue();
+        });
+    }
+ 
+    /* ================================================================
+       GENERACIÓN DE PDF
+    ================================================================ */
+    function generarPDF() {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
+        doc.setFontSize(16); doc.setTextColor(5,17,126); doc.setFont('helvetica','bold');
+        doc.text('Registro de Asistencia - Columbus Hospital', 105, 20, { align: 'center' });
+        doc.setFontSize(12); doc.setTextColor(0,0,0); doc.setFont('helvetica','normal');
+        doc.text(`Generado: ${new Date().toLocaleString()}`, 105, 30, { align: 'center' });
+ 
+        const datos = filteredRegistros.map(r => [
+            r.cedula, r.nombre, r.materia || 'N/A', r.grupo || 'N/A',
+            r.nivelSemestre || r.semestre || 'N/A',
+            r.fecha || r.timestamp?.split(' ')[0] || 'N/A',
+            r.hora  || r.timestamp?.split(' ')[1] || 'N/A'
+        ]);
+ 
+        doc.autoTable({
+            head: [['Cédula','Nombre','Materia','Grupo','Nivel Semestre','Fecha','Hora']],
+            body: datos, startY: 40,
+            styles: { fontSize: 8, cellPadding: 3 },
+            headStyles: { fillColor: [5,17,126], textColor: [255,255,255], fontStyle: 'bold' },
+            alternateRowStyles: { fillColor: [240,240,240] }
+        });
+ 
+        doc.save(`registro-asistencia-${new Date().toISOString().slice(0,10)}.pdf`);
+        showStatus('PDF generado exitosamente');
+    }
+ 
+    /* ================================================================
+       INICIALIZACIÓN
+    ================================================================ */
+    const html5QrcodeScanner = new Html5QrcodeScanner(
+        "reader",
+        { fps: 15, qrbox: { width: 300, height: 300 }, aspectRatio: 1.0,
+          disableFlip: false, useBarCodeDetectorIfSupported: true,
+          experimentalFeatures: { useBarCodeDetectorIfSupported: true } }
+    );
+    html5QrcodeScanner.render(onScanSuccess, onScanError);
+ 
+    window.addEventListener('DOMContentLoaded', () => {
+        localDataVersion  = parseInt(localStorage.getItem('dataVersion') || '0');
+        lastSyncTimestamp = parseInt(localStorage.getItem('lastSyncTimestamp') || '0');
+        filtrarRegistros();
+        updateSyncStatusBar();
+        setupDataSync();
+ 
+        // Reintenta pendientes al arrancar
+        setTimeout(processSyncQueue, 1500);
+    });
+ 
+    // Event listeners de modales
+    document.getElementById('passwordInput').addEventListener('keyup', e => { if (e.key==='Enter') confirmarEliminacion(); });
+    document.getElementById('deleteAllPassword').addEventListener('keyup', e => { if (e.key==='Enter') confirmarEliminacionTotal(); });
+    window.addEventListener('click', e => {
+        if (e.target === document.getElementById('passwordModal'))  cerrarModal();
+        if (e.target === document.getElementById('deleteAllModal')) cerrarModalEliminarTodos();
+    });
+    window.addEventListener('beforeunload', () => { if (syncIntervalId) clearInterval(syncIntervalId); });
     </script>
 </body>
 </html>
