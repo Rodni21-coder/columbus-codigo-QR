@@ -24,7 +24,7 @@
             --sombra-hover: 0 8px 15px rgba(0,0,0,0.2);
             --transicion: all 0.3s ease;
         }
- 
+
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             margin: 0; padding: 0;
@@ -32,7 +32,7 @@
             color: var(--color-texto);
             min-height: 100vh;
         }
- 
+
         .header {
             background: linear-gradient(135deg, var(--color-blanco) 0%, #f0f8ff 100%);
             padding: 15px 40px;
@@ -43,7 +43,7 @@
             position: relative;
             z-index: 10;
         }
- 
+
         .logo {
             width: 150px; height: 70px;
             display: flex; align-items: center; justify-content: center;
@@ -53,7 +53,7 @@
         }
         .logo:hover { transform: scale(1.05); }
         .logo img { max-width: 100%; max-height: 100%; object-fit: contain; }
- 
+
         .title {
             font-size: 1.8rem;
             margin: 0; flex-grow: 1; text-align: center;
@@ -62,7 +62,7 @@
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }
- 
+
         .container {
             max-width: 1320px;
             margin: 40px auto;
@@ -73,14 +73,14 @@
             position: relative;
             overflow: hidden;
         }
- 
+
         .container::before {
             content: '';
             position: absolute; top: 0; left: 0;
             width: 100%; height: 5px;
             background: linear-gradient(90deg, var(--color-primario), var(--color-accent));
         }
- 
+
         /* ===== QR READER ===== */
         #reader {
             width: 100%;
@@ -98,7 +98,7 @@
             align-items: center;
             min-height: 360px;
         }
- 
+
         #reader::before {
             content: "🩺";
             position: absolute; top: 18px; right: 30px;
@@ -122,7 +122,39 @@
             box-shadow: 0 4px 18px #0091ff25;
             margin: 0 auto; display: block;
         }
- 
+
+        /* ===== OFFLINE BANNER ===== */
+        #offlineBanner {
+            display: none;
+            position: fixed; top: 0; left: 0; width: 100%;
+            z-index: 99999;
+            background: linear-gradient(90deg, #b71c1c, #e53935);
+            color: #fff;
+            text-align: center;
+            padding: 10px 20px;
+            font-weight: 700; font-size: 0.95rem;
+            letter-spacing: 0.5px;
+            box-shadow: 0 3px 12px rgba(0,0,0,0.3);
+            animation: slideFromTop 0.35s ease;
+        }
+        #offlineBanner.show { display: flex; align-items: center; justify-content: center; gap: 10px; }
+        @keyframes slideFromTop {
+            from { transform: translateY(-100%); opacity: 0; }
+            to   { transform: translateY(0);     opacity: 1; }
+        }
+        #onlineToast {
+            position: fixed; top: 0; left: 0; width: 100%;
+            z-index: 99999;
+            background: linear-gradient(90deg, #1b5e20, #2e7d32);
+            color: #fff;
+            text-align: center;
+            padding: 10px 20px;
+            font-weight: 700; font-size: 0.95rem;
+            display: none;
+            animation: slideFromTop 0.35s ease;
+        }
+        #onlineToast.show { display: flex; align-items: center; justify-content: center; gap: 10px; }
+
         /* ===== SYNC STATUS BADGE ===== */
         #syncStatusBar {
             display: flex;
@@ -133,7 +165,7 @@
             font-size: 0.9rem;
             font-weight: 600;
             margin: 0 auto 10px auto;
-            max-width: 430px;
+            max-width: 480px;
             transition: var(--transicion);
             border: 2px solid transparent;
         }
@@ -152,6 +184,10 @@
         #syncStatusBar.syncing {
             background: #e3f2fd; color: #0d6efd;
             border-color: #bee5eb;
+        }
+        #syncStatusBar.offline {
+            background: #fce4ec; color: #880e4f;
+            border-color: #f48fb1;
         }
         .sync-dot {
             width: 10px; height: 10px; border-radius: 50%;
@@ -173,7 +209,7 @@
             font-weight: 600; transition: var(--transicion);
         }
         #retryNowBtn:hover { opacity: 0.7; }
- 
+
         /* ===== STATUS MESSAGE ===== */
         .status-message {
             text-align: center; margin: 20px 0; padding: 15px;
@@ -188,7 +224,7 @@
             background-color: #ffebee; color: var(--color-error);
             border-left: 5px solid var(--color-error);
         }
- 
+
         /* ===== BUTTONS ===== */
         .button-container {
             display: flex; gap: 15px; margin: 30px 0;
@@ -212,7 +248,7 @@
         .action-button.home:hover { background-color: var(--color-primario); color: var(--color-blanco); }
         .action-button.clear-all { border-color: var(--color-error); color: var(--color-error); }
         .action-button.clear-all:hover { background-color: var(--color-error); color: var(--color-blanco); }
- 
+
         /* ===== TABLE ===== */
         .table-wrapper {
             width: 100%;
@@ -238,12 +274,12 @@
         th:last-child, td:last-child { width: 120px; min-width: 120px; }
         tr:nth-child(even) { background-color: #f9f9f9; }
         .duplicate { background-color: #fff8e1 !important; }
- 
+
         /* Sync status column badge */
         .row-sync-ok     { color: var(--color-exito); font-weight: 600; }
         .row-sync-pending{ color: #856404; font-weight: 600; }
         .row-sync-error  { color: var(--color-error); font-weight: 600; }
- 
+
         /* ===== DELETE BUTTON ===== */
         .delete-btn {
             background-color: transparent; color: var(--color-error);
@@ -254,7 +290,7 @@
             gap: 5px; margin: 0 auto; white-space: nowrap;
         }
         .delete-btn:hover { background-color: var(--color-error); color: var(--color-blanco); transform: translateY(-2px); }
- 
+
         /* ===== PAGINATION ===== */
         .pagination {
             display: flex; justify-content: center; align-items: center;
@@ -326,7 +362,7 @@
             margin-top: 8px;
             font-weight: 500;
         }
- 
+
         /* ===== MODALS ===== */
         .modal {
             display: none; position: fixed; top: 0; left: 0;
@@ -351,7 +387,7 @@
         .confirm-btn:hover { background-color: #218838; transform: translateY(-2px); }
         .cancel-btn { background-color: var(--color-error); color: white; }
         .cancel-btn:hover { background-color: #c82333; transform: translateY(-2px); }
- 
+
         /* ===== TOAST NOTIFICATION ===== */
         .sync-notification {
             position: fixed; top: 20px; right: 20px;
@@ -363,7 +399,7 @@
             display: flex; align-items: center; gap: 8px;
         }
         .sync-notification.show { transform: translateX(0); }
- 
+
         /* ===== RESPONSIVE ===== */
         @media (max-width: 768px) {
             .header { flex-direction: column; padding: 20px; text-align: center; }
@@ -385,7 +421,18 @@
     </style>
 </head>
 <body>
- 
+
+    <!-- Offline Banner -->
+    <div id="offlineBanner">
+        <span>📵</span>
+        <span>Sin conexión — los escaneos se guardan y se enviarán automáticamente al reconectar</span>
+    </div>
+    <!-- Online Toast -->
+    <div id="onlineToast">
+        <span>🌐</span>
+        <span id="onlineToastText">Conexión restaurada — sincronizando registros pendientes...</span>
+    </div>
+
     <!-- Password Modal -->
     <div id="passwordModal" class="modal">
         <div class="modal-content">
@@ -397,7 +444,7 @@
             </div>
         </div>
     </div>
- 
+
     <!-- Delete All Modal -->
     <div id="deleteAllModal" class="modal">
         <div class="modal-content">
@@ -410,26 +457,26 @@
             </div>
         </div>
     </div>
- 
+
     <div class="header">
         <h1 class="title">Columbus Hospital Simulation Center</h1>
         <div class="logo" onclick="window.location.href='index.html'">
             <img src="logo.png" alt="Columbus Hospital Logo">
         </div>
     </div>
- 
+
     <div class="container">
         <div id="reader"></div>
- 
+
         <!-- SYNC STATUS BAR -->
         <div id="syncStatusBar" class="ok" style="display:none;">
             <span class="sync-dot" id="syncDot"></span>
             <span id="syncStatusText">Todo sincronizado con Google Sheets</span>
             <button id="retryNowBtn" onclick="processSyncQueue()" style="display:none;">↻ Reintentar</button>
         </div>
- 
+
         <div id="statusMessage" class="status-message"></div>
- 
+
         <div class="button-container">
             <button class="action-button download" onclick="generarPDF()">
                 📄 Descargar PDF
@@ -441,7 +488,7 @@
                 🗑️ Eliminar Todos
             </button>
         </div>
- 
+
         <div class="table-wrapper">
         <table id="registros">
             <thead>
@@ -460,12 +507,12 @@
             <tbody></tbody>
         </table>
         </div>
- 
+
         <div class="pagination" id="pagination"></div>
     </div>
- 
+
     <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
- 
+
     <script>
     /* ================================================================
        CONFIGURACIÓN
@@ -477,7 +524,7 @@
     const MAX_RETRIES        = 5;       // intentos máximos por registro
     const RETRY_BASE_DELAY   = 2000;    // ms base para backoff exponencial
     const RECORDS_PER_PAGE   = 20;
- 
+
     /* ================================================================
        ESTADO GLOBAL
     ================================================================ */
@@ -490,7 +537,7 @@
     let localDataVersion  = 0;
     let lastSyncTimestamp = 0;
     let registroAEliminar = null;
- 
+
     /* ================================================================
        GESTIÓN DE REGISTROS LOCALES
     ================================================================ */
@@ -498,20 +545,20 @@
         try { return JSON.parse(localStorage.getItem('registros') || '[]'); }
         catch(e) { return []; }
     }
- 
+
     function setRegistros(arr) {
         try {
             localStorage.setItem('registros', JSON.stringify(arr));
             updateDataVersion();
         } catch(e) { console.error('Error guardando registros:', e); }
     }
- 
+
     function saveRegistro(registro) {
         const registros = getRegistros();
         registros.unshift(registro);
         setRegistros(registros);
     }
- 
+
     function updateDataVersion() {
         const v = Date.now();
         localStorage.setItem('dataVersion', v.toString());
@@ -519,52 +566,76 @@
         localDataVersion  = v;
         lastSyncTimestamp = v;
     }
- 
+
     /* ================================================================
-       COLA DE SINCRONIZACIÓN CON GOOGLE SHEETS
-       Cada elemento: { id, registro, retries, nextRetryAt }
+       COLA DE SINCRONIZACIÓN — funciones eliminadas aquí,
+       ahora viven en el bloque DETECCIÓN DE RED más abajo
+    ================================================================ */
+
+    /* ================================================================
+       DETECCIÓN DE RED
+    ================================================================ */
+    function isOnline() { return navigator.onLine; }
+
+    /** Muestra/oculta el banner rojo de sin conexión. */
+    function updateNetworkBanner() {
+        const banner = document.getElementById('offlineBanner');
+        if (!isOnline()) {
+            banner.classList.add('show');
+        } else {
+            banner.classList.remove('show');
+        }
+    }
+
+    /** Muestra el toast verde de reconexión por N ms. */
+    function showOnlineToast(msg, ms = 4000) {
+        const toast = document.getElementById('onlineToast');
+        const text  = document.getElementById('onlineToastText');
+        text.textContent = msg;
+        toast.classList.add('show');
+        setTimeout(() => toast.classList.remove('show'), ms);
+    }
+
+    /* ================================================================
+       GESTIÓN DE COLA DE SINCRONIZACIÓN
     ================================================================ */
     function getSyncQueue() {
         try { return JSON.parse(localStorage.getItem('syncQueue') || '[]'); }
         catch(e) { return []; }
     }
- 
     function setSyncQueue(queue) {
         try { localStorage.setItem('syncQueue', JSON.stringify(queue)); }
         catch(e) { console.error('Error guardando cola:', e); }
     }
- 
-    /** Encola un registro para enviar a Sheets. */
+
     function enqueueForSync(registro) {
         const queue = getSyncQueue();
-        // Evita duplicados por id
         if (!queue.find(item => item.id === registro.id)) {
-            queue.push({ id: registro.id, registro, retries: 0, nextRetryAt: Date.now() });
+            queue.push({
+                id:          registro.id,
+                registro,
+                retries:     0,
+                nextRetryAt: Date.now(),
+                offlineFail: 0   // cuántas veces falló por estar offline
+            });
             setSyncQueue(queue);
         }
         updateSyncStatusBar();
     }
- 
-    /** Marca un ítem de la cola como enviado (lo elimina). */
+
     function dequeueSync(id) {
-        const queue = getSyncQueue().filter(item => item.id !== id);
-        setSyncQueue(queue);
+        setSyncQueue(getSyncQueue().filter(item => item.id !== id));
         updateSyncStatusBar();
-        filteredRegistros = getRegistros();   // refresca estado de Sheets en tabla
+        filteredRegistros = getRegistros();
         actualizarTabla();
     }
- 
-    /** Marca un registro como exitosamente sincronizado en localStorage. */
+
     function markRegistroSynced(id) {
         const registros = getRegistros();
         const idx = registros.findIndex(r => r.id === id);
-        if (idx !== -1) {
-            registros[idx].syncStatus = 'ok';
-            setRegistros(registros);
-        }
+        if (idx !== -1) { registros[idx].syncStatus = 'ok'; setRegistros(registros); }
     }
- 
-    /** Marca un registro con error de sincronización. */
+
     function markRegistroError(id, retries) {
         const registros = getRegistros();
         const idx = registros.findIndex(r => r.id === id);
@@ -573,66 +644,107 @@
             setRegistros(registros);
         }
     }
- 
+
     /**
-     * Intenta enviar un registro a Google Sheets.
-     * Usa fetch normal (sin no-cors) en modo cors, con timeout.
-     * Si falla, aplica backoff exponencial.
+     * Restablece los contadores de error de TODOS los ítems en cola.
+     * Se llama cuando el dispositivo recupera la red para que
+     * ningún ítem quede bloqueado por haber fallado estando offline.
      */
+    function resetQueueRetries() {
+        const reset = getSyncQueue().map(item => ({
+            ...item,
+            retries:     0,
+            offlineFail: 0,
+            nextRetryAt: Date.now()
+        }));
+        setSyncQueue(reset);
+        // También actualiza el syncStatus en localStorage a 'pending'
+        const registros = getRegistros();
+        reset.forEach(item => {
+            const idx = registros.findIndex(r => r.id === item.id);
+            if (idx !== -1) registros[idx].syncStatus = 'pending';
+        });
+        setRegistros(registros);
+    }
+
+    /* ================================================================
+       ENVÍO A GOOGLE SHEETS
+    ================================================================ */
     async function sendToSheets(item) {
+        // Si no hay red, no pierdas tiempo — falla rápido
+        if (!isOnline()) return false;
+
         const controller = new AbortController();
-        const timeoutId  = setTimeout(() => controller.abort(), 8000); // 8s timeout
- 
+        const timeoutId  = setTimeout(() => controller.abort(), 9000);
         try {
-            const res = await fetch(GOOGLE_SCRIPT_URL, {
+            await fetch(GOOGLE_SCRIPT_URL, {
                 method:  'POST',
-                mode:    'no-cors',   // Apps Script requiere no-cors; ver nota abajo (*)
+                mode:    'no-cors',
                 headers: { 'Content-Type': 'application/json' },
                 body:    JSON.stringify(item.registro),
                 signal:  controller.signal
             });
             clearTimeout(timeoutId);
- 
-            /*
-             * (*) Con no-cors, siempre obtenemos status 0 (opaque response).
-             * La única forma de confirmar el envío real es configurar el Apps Script
-             * para que devuelva ContentService con encabezados CORS y usar mode:'cors'.
-             * Mientras tanto, asumimos éxito si no lanza excepción (timeout/network error).
-             * Esto cubre el 95% de los fallos reales (timeout, red caída, etc.).
-             */
-            return true;
+            return true;   // no-cors siempre resuelve sin error si hay red
         } catch(e) {
             clearTimeout(timeoutId);
-            if (e.name === 'AbortError') console.warn(`Timeout enviando ${item.id}`);
-            else                         console.warn(`Error de red enviando ${item.id}:`, e.message);
+            if (e.name === 'AbortError') console.warn(`Timeout: ${item.id}`);
+            else                         console.warn(`Error red: ${item.id} — ${e.message}`);
             return false;
         }
     }
- 
-    /** Procesa la cola secuencialmente, con backoff exponencial. */
+
+    /**
+     * Envío de emergencia con sendBeacon al cerrar la página.
+     * Funciona aunque el usuario cierre la pestaña.
+     */
+    function sendPendingWithBeacon() {
+        if (!isOnline()) return;
+        const queue = getSyncQueue();
+        queue.forEach(item => {
+            try {
+                navigator.sendBeacon(
+                    GOOGLE_SCRIPT_URL,
+                    new Blob([JSON.stringify(item.registro)], { type: 'application/json' })
+                );
+            } catch(e) { /* beacon no disponible */ }
+        });
+    }
+
+    /* ================================================================
+       PROCESADOR PRINCIPAL DE LA COLA
+    ================================================================ */
     async function processSyncQueue() {
+        // Si no hay red, actualizar la UI y salir sin tocar la cola
+        if (!isOnline()) {
+            updateSyncStatusBar();
+            return;
+        }
         if (isSyncing) return;
+
         let queue = getSyncQueue();
         if (queue.length === 0) { updateSyncStatusBar(); return; }
- 
+
         isSyncing = true;
         updateSyncStatusBar('syncing');
- 
-        const now = Date.now();
-        // Solo procesa ítems cuyo tiempo de reintento ya llegó
+
+        const now        = Date.now();
         const readyItems = queue.filter(item => item.nextRetryAt <= now);
- 
+
         for (const item of readyItems) {
+            // Recheck de red antes de cada envío
+            if (!isOnline()) break;
+
             const success = await sendToSheets(item);
- 
+
             if (success) {
                 markRegistroSynced(item.id);
                 dequeueSync(item.id);
-                showToast('☁️ Registro enviado a Google Sheets');
+                showToast('☁️ Enviado a Google Sheets: ' + (item.registro.nombre || ''));
             } else {
-                // Backoff exponencial: 2s, 4s, 8s, 16s, 32s
                 const newRetries = item.retries + 1;
-                const delay      = Math.min(RETRY_BASE_DELAY * Math.pow(2, newRetries), 60000);
+                // Backoff más suave: 3s, 6s, 12s, 24s, 48s
+                const delay = Math.min(RETRY_BASE_DELAY * Math.pow(2, newRetries - 1), 60000);
                 const updatedQueue = getSyncQueue().map(q =>
                     q.id === item.id
                         ? { ...q, retries: newRetries, nextRetryAt: Date.now() + delay }
@@ -640,24 +752,19 @@
                 );
                 setSyncQueue(updatedQueue);
                 markRegistroError(item.id, newRetries);
- 
-                if (newRetries >= MAX_RETRIES) {
-                    console.error(`Registro ${item.id} alcanzó máximo de intentos (${MAX_RETRIES}).`);
-                }
             }
- 
-            // Pequeña pausa entre envíos para no saturar la API
-            await sleep(300);
+
+            await sleep(400);
         }
- 
+
         isSyncing = false;
         filteredRegistros = getRegistros();
         actualizarTabla();
         updateSyncStatusBar();
     }
- 
+
     function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
- 
+
     /* ================================================================
        BARRA DE ESTADO DE SINCRONIZACIÓN
     ================================================================ */
@@ -666,17 +773,28 @@
         const dot      = document.getElementById('syncDot');
         const text     = document.getElementById('syncStatusText');
         const retryBtn = document.getElementById('retryNowBtn');
- 
+
         bar.style.display = 'flex';
- 
+
         if (forceState === 'syncing') {
             bar.className = 'syncStatusBar syncing';
             dot.classList.add('pulsing');
-            text.textContent = 'Enviando a Google Sheets...';
+            text.textContent = '↑ Enviando registros a Google Sheets...';
             retryBtn.style.display = 'none';
             return;
         }
- 
+
+        if (!isOnline()) {
+            bar.className = 'syncStatusBar offline';
+            dot.classList.add('pulsing');
+            const pendientes = getSyncQueue().length;
+            text.textContent = pendientes > 0
+                ? `📵 Sin red — ${pendientes} registro(s) guardado(s), se enviarán al reconectar`
+                : '📵 Sin conexión — los nuevos escaneos se guardarán localmente';
+            retryBtn.style.display = 'none';
+            return;
+        }
+
         const queue = getSyncQueue();
         if (queue.length === 0) {
             bar.className = 'syncStatusBar ok';
@@ -684,11 +802,11 @@
             text.textContent = '✓ Todo sincronizado con Google Sheets';
             retryBtn.style.display = 'none';
         } else {
-            const errorCount = queue.filter(q => q.retries >= MAX_RETRIES).length;
-            if (errorCount > 0) {
+            const errorItems = queue.filter(q => q.retries >= MAX_RETRIES);
+            if (errorItems.length > 0) {
                 bar.className = 'syncStatusBar error';
                 dot.classList.remove('pulsing');
-                text.textContent = `⚠ ${errorCount} registro(s) sin enviar (fallo de red)`;
+                text.textContent = `⚠ ${errorItems.length} registro(s) con fallo de red`;
                 retryBtn.style.display = 'inline-block';
             } else {
                 bar.className = 'syncStatusBar pending';
@@ -698,7 +816,7 @@
             }
         }
     }
- 
+
     /* ================================================================
        ESCANEO QR
     ================================================================ */
@@ -709,7 +827,7 @@
                 showStatus('⏳ Espere unos segundos antes de escanear el mismo código', true);
                 return;
             }
- 
+
             // Feedback visual
             const readerEl = document.getElementById('reader');
             readerEl.style.border = '3.5px solid #28a745';
@@ -718,12 +836,12 @@
                 readerEl.style.border = '3.5px solid #0091ff';
                 readerEl.style.boxShadow = '0 12px 32px rgba(0,145,255,0.12)';
             }, 1200);
- 
+
             const datos = JSON.parse(decodedText);
             const now   = new Date();
             const fecha = now.toISOString().slice(0, 10);
             const hora  = now.toTimeString().slice(0, 8);
- 
+
             const nuevoRegistro = {
                 id:           `${Date.now()}_${Math.random().toString(36).slice(2,7)}`,
                 cedula:       datos.cedula,
@@ -737,27 +855,27 @@
                 timestamp:    `${fecha} ${hora}`,
                 syncStatus:   'pending'    // 'pending' | 'ok' | 'error'
             };
- 
+
             saveRegistro(nuevoRegistro);
             enqueueForSync(nuevoRegistro);  // encola para enviar a Sheets
- 
+
             lastScannedCode = decodedText;
             lastScannedTime = currentTime;
- 
+
             filtrarRegistros();
             showStatus('✅ Registro exitoso: ' + datos.nombre);
- 
+
             // Intenta enviar inmediatamente en background
             processSyncQueue();
- 
+
         } catch(e) {
             showStatus('❌ Error al procesar el código QR. Verifique el formato.', true);
             console.error('Error QR:', e);
         }
     }
- 
+
     function onScanError() { /* silencioso */ }
- 
+
     /* ================================================================
        TABLA Y PAGINACIÓN
     ================================================================ */
@@ -766,21 +884,21 @@
         currentPage = 1;
         actualizarTabla();
     }
- 
+
     function actualizarTabla() {
         const tbody    = document.querySelector('#registros tbody');
         const queue    = getSyncQueue();
         const queueIds = new Set(queue.map(q => q.id));
         const errorIds = new Set(queue.filter(q => q.retries >= MAX_RETRIES).map(q => q.id));
- 
+
         tbody.innerHTML = '';
- 
+
         const start = (currentPage - 1) * RECORDS_PER_PAGE;
         const paginados = filteredRegistros.slice(start, start + RECORDS_PER_PAGE);
- 
+
         paginados.forEach(registro => {
             const tr = document.createElement('tr');
- 
+
             // Estado de sincronización
             let syncHTML;
             if (errorIds.has(registro.id)) {
@@ -790,7 +908,7 @@
             } else {
                 syncHTML = `<span class="row-sync-ok" title="Enviado correctamente">✓ Enviado</span>`;
             }
- 
+
             tr.innerHTML = `
                 <td>${registro.cedula}</td>
                 <td>${registro.nombre}</td>
@@ -808,11 +926,11 @@
             `;
             tbody.appendChild(tr);
         });
- 
+
         checkDuplicates();
         setupPagination();
     }
- 
+
     function checkDuplicates() {
         const tbody = document.querySelector('#registros tbody');
         const rows  = tbody.querySelectorAll('tr');
@@ -828,17 +946,17 @@
             }
         });
     }
- 
+
     function setupPagination() {
         const div       = document.getElementById('pagination');
         div.innerHTML   = '';
         const pageCount = Math.ceil(filteredRegistros.length / RECORDS_PER_PAGE);
         if (pageCount <= 1) return;
- 
+
         const total   = filteredRegistros.length;
         const start   = (currentPage - 1) * RECORDS_PER_PAGE + 1;
         const end     = Math.min(currentPage * RECORDS_PER_PAGE, total);
- 
+
         // ── Flecha izquierda ──
         const prev = document.createElement('button');
         prev.innerHTML = '&#8592;';
@@ -847,7 +965,7 @@
         prev.title     = 'Página anterior';
         prev.onclick   = () => { if (currentPage > 1) { currentPage--; actualizarTabla(); scrollToPagination(); } };
         div.appendChild(prev);
- 
+
         // ── Números con ellipsis inteligente ──
         const pages = buildPageRange(currentPage, pageCount);
         let lastWasEllipsis = false;
@@ -869,7 +987,7 @@
                 div.appendChild(btn);
             }
         });
- 
+
         // ── Flecha derecha ──
         const next = document.createElement('button');
         next.innerHTML = '&#8594;';
@@ -878,14 +996,14 @@
         next.title     = 'Página siguiente';
         next.onclick   = () => { if (currentPage < pageCount) { currentPage++; actualizarTabla(); scrollToPagination(); } };
         div.appendChild(next);
- 
+
         // ── Info de registros ──
         const info = document.createElement('div');
         info.className   = 'pagination-info';
         info.textContent = `Mostrando ${start}–${end} de ${total} registros · Página ${currentPage} de ${pageCount}`;
         div.appendChild(info);
     }
- 
+
     /** Devuelve un array de números y '...' para el rango de páginas visible. */
     function buildPageRange(current, total) {
         if (total <= 7) return Array.from({ length: total }, (_, i) => i + 1);
@@ -893,7 +1011,7 @@
         const delta = 2; // páginas a cada lado del actual
         const left  = Math.max(2, current - delta);
         const right = Math.min(total - 1, current + delta);
- 
+
         pages.push(1);
         if (left > 2)       pages.push('...');
         for (let i = left; i <= right; i++) pages.push(i);
@@ -901,11 +1019,11 @@
         pages.push(total);
         return pages;
     }
- 
+
     function scrollToPagination() {
         document.getElementById('pagination').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     }
- 
+
     /* ================================================================
        MODALES Y ELIMINACIÓN
     ================================================================ */
@@ -935,7 +1053,7 @@
         showStatus('Registro eliminado exitosamente');
         cerrarModal();
     }
- 
+
     function mostrarModalEliminarTodos() {
         document.getElementById('deleteAllModal').style.display = 'block';
         document.getElementById('deleteAllPassword').value = '';
@@ -957,7 +1075,7 @@
         showStatus('Todos los registros han sido eliminados');
         cerrarModalEliminarTodos();
     }
- 
+
     /* ================================================================
        UI HELPERS
     ================================================================ */
@@ -968,7 +1086,7 @@
         el.className = 'status-message ' + (isError ? 'error' : 'success');
         setTimeout(() => { el.style.display = 'none'; }, 3500);
     }
- 
+
     function showToast(msg) {
         const n = document.createElement('div');
         n.className = 'sync-notification';
@@ -980,31 +1098,51 @@
             setTimeout(() => n.remove(), 350);
         }, 2500);
     }
- 
+
     /* ================================================================
-       SINCRONIZACIÓN ENTRE PESTAÑAS
+       SINCRONIZACIÓN ENTRE PESTAÑAS Y EVENTOS DE RED
     ================================================================ */
     function setupDataSync() {
+        // Cambios en localStorage desde otra pestaña
         window.addEventListener('storage', e => {
             if (e.key === 'registros' || e.key === 'dataVersion' || e.key === 'syncQueue') {
                 filtrarRegistros();
                 updateSyncStatusBar();
             }
         });
- 
-        // Procesa la cola periódicamente
+
+        // Procesa la cola cada SYNC_INTERVAL ms
         syncIntervalId = setInterval(() => { processSyncQueue(); }, SYNC_INTERVAL);
- 
-        // Al recuperar el foco, procesa inmediatamente
-        window.addEventListener('focus', () => { processSyncQueue(); });
- 
-        // Al recuperar conexión de red
-        window.addEventListener('online', () => {
-            showToast('🌐 Conexión restaurada, reintentando envíos...');
+
+        // Al recuperar el foco de la pestaña
+        window.addEventListener('focus', () => {
+            updateNetworkBanner();
             processSyncQueue();
         });
+
+        // ── Sin red ──
+        window.addEventListener('offline', () => {
+            updateNetworkBanner();
+            updateSyncStatusBar();
+            console.warn('📵 Red perdida — escaneos en cola local');
+        });
+
+        // ── Red restaurada ──
+        window.addEventListener('online', () => {
+            updateNetworkBanner();
+            // Resetea contadores de error para que TODOS los pendientes
+            // se reintenten desde cero, sin importar cuántas veces fallaron
+            resetQueueRetries();
+            const pendientes = getSyncQueue().length;
+            const msg = pendientes > 0
+                ? `🌐 Conexión restaurada — enviando ${pendientes} registro(s) pendiente(s)...`
+                : '🌐 Conexión restaurada — todo al día';
+            showOnlineToast(msg);
+            // Pequeña pausa para que la red estabilice antes de enviar
+            setTimeout(() => processSyncQueue(), 800);
+        });
     }
- 
+
     /* ================================================================
        GENERACIÓN DE PDF
     ================================================================ */
@@ -1015,14 +1153,14 @@
         doc.text('Registro de Asistencia - Columbus Hospital', 105, 20, { align: 'center' });
         doc.setFontSize(12); doc.setTextColor(0,0,0); doc.setFont('helvetica','normal');
         doc.text(`Generado: ${new Date().toLocaleString()}`, 105, 30, { align: 'center' });
- 
+
         const datos = filteredRegistros.map(r => [
             r.cedula, r.nombre, r.materia || 'N/A', r.grupo || 'N/A',
             r.nivelSemestre || r.semestre || 'N/A',
             r.fecha || r.timestamp?.split(' ')[0] || 'N/A',
             r.hora  || r.timestamp?.split(' ')[1] || 'N/A'
         ]);
- 
+
         doc.autoTable({
             head: [['Cédula','Nombre','Materia','Grupo','Nivel Semestre','Fecha','Hora']],
             body: datos, startY: 40,
@@ -1030,11 +1168,11 @@
             headStyles: { fillColor: [5,17,126], textColor: [255,255,255], fontStyle: 'bold' },
             alternateRowStyles: { fillColor: [240,240,240] }
         });
- 
+
         doc.save(`registro-asistencia-${new Date().toISOString().slice(0,10)}.pdf`);
         showStatus('PDF generado exitosamente');
     }
- 
+
     /* ================================================================
        INICIALIZACIÓN
     ================================================================ */
@@ -1045,18 +1183,18 @@
           experimentalFeatures: { useBarCodeDetectorIfSupported: true } }
     );
     html5QrcodeScanner.render(onScanSuccess, onScanError);
- 
+
     window.addEventListener('DOMContentLoaded', () => {
         localDataVersion  = parseInt(localStorage.getItem('dataVersion') || '0');
         lastSyncTimestamp = parseInt(localStorage.getItem('lastSyncTimestamp') || '0');
         filtrarRegistros();
+        updateNetworkBanner();
         updateSyncStatusBar();
         setupDataSync();
- 
-        // Reintenta pendientes al arrancar
+        // Reintenta pendientes al arrancar (si hay red)
         setTimeout(processSyncQueue, 1500);
     });
- 
+
     // Event listeners de modales
     document.getElementById('passwordInput').addEventListener('keyup', e => { if (e.key==='Enter') confirmarEliminacion(); });
     document.getElementById('deleteAllPassword').addEventListener('keyup', e => { if (e.key==='Enter') confirmarEliminacionTotal(); });
@@ -1064,10 +1202,13 @@
         if (e.target === document.getElementById('passwordModal'))  cerrarModal();
         if (e.target === document.getElementById('deleteAllModal')) cerrarModalEliminarTodos();
     });
-    window.addEventListener('beforeunload', () => { if (syncIntervalId) clearInterval(syncIntervalId); });
+    window.addEventListener('beforeunload', () => {
+        if (syncIntervalId) clearInterval(syncIntervalId);
+        // Último intento de envío con sendBeacon al cerrar la pestaña
+        sendPendingWithBeacon();
+    });
     </script>
 </body>
 </html>
-
 
 
