@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Escáner QR - Visitas | Columbus Hospital</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.4/html5-qrcode.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.29/jspdf.plugin.autotable.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --azul:      #05117e;
+            --azul-med:  #102e9b;
+            --cian:      #00b4d8;
+            --cian-osc:  #0891b2;
+            --gris-txt:  #6b7280;
+            --texto:     #1e293b;
+            --exito:     #059669;
+            --error:     #dc2626;
+            --advert:    #d97706;
+            --sombra:    0 4px 20px rgba(5,17,126,0.10);
+            --sombra-lg: 0 12px 40px rgba(5,17,126,0.20);
+            --trans:     all 0.28s cubic-bezier(.22,.68,0,1.1);
+        }
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'DM Sans', sans-serif; background: var(--azul); min-height: 100vh; color: var(--texto); }
+
+        .bg-layer { position: fixed; inset: 0; z-index: 0; background: linear-gradient(140deg, #05117e 0%, #0d2590 45%, #102e9b 75%, #071466 100%); overflow: hidden; }
+        .bg-layer::before { content: ''; position: absolute; width: 650px; height: 650px; border-radius: 50%; background: radial-gradient(circle, rgba(26,86,214,0.12) 0%, transparent 70%); top: -240px; right: -160px; animation: blobFloat 14s ease-in-out infinite alternate; }
+        @keyframes blobFloat { from { transform: scale(1); } to { transform: scale(1.15) translate(20px,15px); } }
+
+        /* Banners */
+        #offlineBanner { display: none; position: fixed; top: 0; left: 0; width: 100%; z-index: 99999; background: linear-gradient(90deg, #b91c1c, #dc2626); color: #fff; text-align: center; padding: 10px 20px; font-family: 'Outfit', sans-serif; font-weight: 700; font-size: 0.9rem; box-shadow: 0 3px 12px rgba(0,0,0,0.3); }
+        #offlineBanner.show { display: flex; align-items: center; justify-content: center; gap: 10px; }
+        #onlineToast { display: none; position: fixed; top: 0; left: 0; width: 100%; z-index: 99999; background: linear-gradient(90deg, #065f46, #059669); color: #fff; text-align: center; padding: 10px 20px; font-family: 'Outfit', sans-serif; font-weight: 700; font-size: 0.9rem; }
+        #onlineToast.show { display: flex; align-items: center; justify-content: center; gap: 10px; }
+
+        /* Modals */
+        .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.55); z-index: 1000; backdrop-filter: blur(4px); }
+        .modal-content { background: white; margin: 12% auto; padding: 30px; border-radius: 18px; width: 360px; max-width: 92vw; text-align: center; box-shadow: 0 8px 40px rgba(0,0,0,0.25); border-top: 5px solid var(--cian); }
+        .modal-content h3 { font-family: 'Outfit', sans-serif; font-size: 1.2rem; font-weight: 700; color: var(--cian-osc); margin-bottom: 10px; }
+        .modal-content p { font-size: 0.88rem; color: var(--gris-txt); margin-bottom: 14px; }
+        .modal input { width: 100%; padding: 12px 16px; margin: 10px 0; border: 2px solid #e2e8f0; border-radius: 10px; font-size: 0.95rem; font-family: 'DM Sans', sans-serif; transition: var(--trans); }
+        .modal input:focus { outline: none; border-color: var(--cian); box-shadow: 0 0 0 3px rgba(0,180,216,0.18); }
+        .modal-buttons { display: flex; gap: 12px; margin-top: 18px; }
+        .modal-btn { flex: 1; padding: 11px; border: none; border-radius: 10px; cursor: pointer; font-family: 'Outfit', sans-serif; font-weight: 700; font-size: 0.9rem; transition: var(--trans); }
+        .confirm-btn { background: var(--exito); color: white; }
+        .confirm-btn:hover { background: #047857; transform: translateY(-2px); }
+        .cancel-btn  { background: var(--error); color: white; }
+        .cancel-btn:hover  { background: #b91c1c; transform: translateY(-2px); }
+
+        /* Header */
+        .header { position: relative; z-index: 10; background: rgba(255,255,255,0.97); padding: 14px 44px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 2px 20px rgba(5,17,126,0.15); border-bottom: 4px solid var(--cian); }
+        .logo { width: 130px; height: 58px; display: flex; align-items: center; cursor: pointer; transition: var(--trans); }
+        .logo:hover { transform: scale(1.07); }
+        .logo img { max-width: 100%; max-height: 100%; object-fit: contain; }
+        .header-center { flex: 1; text-align: center; }
+        .header-center h1 { font-family: 'Outfit', sans-serif; font-size: 1.45rem; font-weight: 800; background: linear-gradient(90deg, var(--azul), var(--cian-osc)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .header-center small { display: block; font-size: 0.75rem; font-weight: 600; color: var(--cian-osc); letter-spacing: 1.5px; text-transform: uppercase; margin-top: 2px; }
+        .back-btn { display: flex; align-items: center; gap: 6px; background: linear-gradient(135deg, var(--cian-osc), var(--cian)); color: white; padding: 9px 18px; border: none; border-radius: 50px; cursor: pointer; font-family: 'Outfit', sans-serif; font-size: 0.82rem; font-weight: 600; transition: var(--trans); box-shadow: 0 3px 12px rgba(8,145,178,0.28); white-space: nowrap; }
+        .back-btn:hover { transform: translateY(-2px); }
+
+        /* Container */
+        .container { position: relative; z-index: 5; max-width: 1340px; margin: 32px auto; padding: 38px; background: white; border-radius: 22px; box-shadow: var(--sombra); overflow: hidden; }
+        .container::before { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 5px; background: linear-gradient(90deg, var(--cian-osc), var(--cian)); }
+
+        /*
+         * ─── READER ───────────────────────────────────────────────
+         * SIN display:flex  → la librería maneja su propio layout
+         * SIN overflow:hidden → no corta los elementos internos
+         * Solo borde, fondo y redondeo para apariencia
+         * ─────────────────────────────────────────────────────────
+         */
+        #reader {
+            width: 100%;
+            max-width: 440px;
+            margin: 30px auto 8px;
+            background: linear-gradient(135deg, #f0f9ff 60%, #e0f5fc 100%);
+            border-radius: 16px;
+            border: 3px solid var(--cian);
+            box-shadow: 0 8px 28px rgba(8,145,178,0.15);
+            padding: 12px;
+        }
+        /* Estilos internos de la librería */
+        #reader video  { border-radius: 10px; width: 100% !important; }
+        #reader canvas { border-radius: 10px; }
+        #reader img    { border-radius: 8px; max-width: 100%; }
+
+        /* Texto de ayuda debajo del lector */
+        .reader-hint { text-align: center; margin: 6px 0 20px; font-family: 'Outfit', sans-serif; font-size: 0.9rem; font-weight: 700; color: var(--cian-osc); letter-spacing: 0.5px; }
+
+        /* Sync bar */
+        #syncStatusBar { display: flex; align-items: center; gap: 10px; padding: 10px 18px; border-radius: 10px; font-size: 0.88rem; font-weight: 600; margin: 0 auto 10px; max-width: 500px; border: 2px solid transparent; transition: var(--trans); }
+        #syncStatusBar.ok      { background: #ecfdf5; color: var(--exito); border-color: #a7f3d0; }
+        #syncStatusBar.pending { background: #fffbeb; color: var(--advert); border-color: #fde68a; }
+        #syncStatusBar.error   { background: #fef2f2; color: var(--error);  border-color: #fca5a5; }
+        #syncStatusBar.syncing { background: #eff6ff; color: #2563eb;       border-color: #bfdbfe; }
+        #syncStatusBar.offline { background: #fdf2f8; color: #9d174d;       border-color: #f9a8d4; }
+        .sync-dot { width: 10px; height: 10px; border-radius: 50%; background: currentColor; flex-shrink: 0; }
+        .sync-dot.pulsing { animation: dotPulse 1s infinite alternate; }
+        @keyframes dotPulse { from { opacity:1; transform:scale(1); } to { opacity:0.3; transform:scale(0.7); } }
+        #retryNowBtn { margin-left: auto; background: none; border: 1.5px solid currentColor; color: inherit; border-radius: 6px; padding: 3px 10px; cursor: pointer; font-size: 0.78rem; font-weight: 700; transition: var(--trans); }
+        #retryNowBtn:hover { opacity: 0.7; }
+
+        /* Status msg */
+        .status-message { text-align: center; margin: 16px 0; padding: 14px; border-radius: 10px; display: none; font-weight: 500; font-size: 0.92rem; }
+        .status-message.success { background: #ecfdf5; color: var(--exito); border-left: 5px solid var(--exito); }
+        .status-message.error   { background: #fef2f2; color: var(--error);  border-left: 5px solid var(--error); }
+
+        /* Buttons */
+        .button-container { display: flex; gap: 14px; margin: 24px 0; justify-content: center; flex-wrap: wrap; }
+        .action-button { padding: 13px 26px; background: white; border: 2px solid transparent; border-radius: 10px; cursor: pointer; font-family: 'Outfit', sans-serif; font-weight: 700; font-size: 0.88rem; transition: var(--trans); box-shadow: var(--sombra); display: flex; align-items: center; gap: 8px; letter-spacing: 0.3px; text-transform: uppercase; }
+        .action-button:hover { transform: translateY(-3px); box-shadow: var(--sombra-lg); }
+        .action-button.download  { border-color: var(--exito);   color: var(--exito); }
+        .action-button.download:hover  { background: var(--exito);   color: white; }
+        .action-button.home      { border-color: var(--cian-osc); color: var(--cian-osc); }
+        .action-button.home:hover      { background: var(--cian-osc); color: white; }
+        .action-button.clear-all { border-color: var(--error);   color: var(--error); }
+        .action-button.clear-all:hover { background: var(--error);   color: white; }
+
+        /* Table */
+        .table-wrapper { width: 100%; overflow-x: auto; border-radius: 12px; box-shadow: var(--sombra); margin-top: 24px; }
+        table { width: 100%; min-width: 1020px; border-collapse: collapse; background: white; }
+        th, td { border: 1px solid #e2e8f0; padding: 11px 10px; text-align: center; vertical-align: middle; white-space: nowrap; }
+        th { background: linear-gradient(135deg, var(--cian-osc), #0e7490); color: white; font-family: 'Outfit', sans-serif; font-size: 0.78rem; font-weight: 700; letter-spacing: 0.8px; text-transform: uppercase; }
+        td:nth-child(2), td:nth-child(3) { text-align: left; white-space: normal; }
+        th:last-child, td:last-child { width: 120px; min-width: 120px; }
+        tr:nth-child(even) { background: #f0f9ff; }
+        .duplicate { background: #fffbeb !important; }
+
+        .badge-visita { display: inline-flex; align-items: center; gap: 4px; padding: 3px 10px; border-radius: 50px; font-size: 0.75rem; font-weight: 700; font-family: 'Outfit', sans-serif; }
+        .badge-chiriqui { background: #fef3c7; color: #92400e; }
+        .badge-veraguas { background: #d1fae5; color: #065f46; }
+        .badge-panama   { background: #dbeafe; color: #1e40af; }
+        .badge-otro     { background: #ede9fe; color: #5b21b6; }
+
+        .row-sync-ok      { color: var(--exito); font-weight: 700; font-size: 0.82rem; }
+        .row-sync-pending { color: var(--advert); font-weight: 700; font-size: 0.82rem; }
+        .row-sync-error   { color: var(--error);  font-weight: 700; font-size: 0.82rem; }
+
+        .delete-btn { background: transparent; color: var(--error); border: 1.5px solid var(--error); padding: 6px 14px; border-radius: 8px; cursor: pointer; transition: var(--trans); font-size: 0.8rem; font-weight: 600; display: inline-flex; align-items: center; gap: 4px; white-space: nowrap; }
+        .delete-btn:hover { background: var(--error); color: white; transform: translateY(-2px); }
+
+        /* Pagination */
+        .pagination { display: flex; justify-content: center; align-items: center; margin-top: 24px; gap: 6px; flex-wrap: wrap; padding: 14px 0 6px; border-top: 2px solid #d0f4ff; }
+        .page-btn { min-width: 38px; height: 38px; padding: 0 8px; border: 2px solid #c0e8f5; background: white; color: var(--texto); cursor: pointer; border-radius: 8px; font-size: 0.88rem; font-weight: 500; transition: var(--trans); display: flex; align-items: center; justify-content: center; }
+        .page-btn:hover:not(.active):not(:disabled) { background: #e0f5fc; border-color: var(--cian); color: var(--cian-osc); transform: translateY(-2px); }
+        .page-btn.active { background: linear-gradient(135deg, var(--cian-osc), var(--cian)); color: white; border-color: var(--cian-osc); box-shadow: 0 4px 12px rgba(8,145,178,0.35); transform: translateY(-1px); }
+        .page-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+        .page-btn.arrow { font-weight: 700; background: var(--cian-osc); color: white; border-color: var(--cian-osc); min-width: 42px; height: 42px; }
+        .page-btn.arrow:hover:not(:disabled) { background: #0e7490; }
+        .page-btn.arrow:disabled { background: #a0c8d8; border-color: #a0c8d8; }
+        .page-dots { color: var(--gris-txt); padding: 0 4px; display: flex; align-items: center; height: 38px; letter-spacing: 2px; }
+        .pagination-info { width: 100%; text-align: center; font-size: 0.78rem; color: var(--gris-txt); margin-top: 8px; }
+
+        .sync-notification { position: fixed; top: 20px; right: 20px; background: linear-gradient(135deg, var(--cian), var(--cian-osc)); color: white; padding: 12px 20px; border-radius: 50px; font-family: 'Outfit', sans-serif; font-size: 0.88rem; font-weight: 600; z-index: 10000; box-shadow: 0 4px 16px rgba(0,0,0,0.18); transform: translateX(120%); transition: transform 0.3s ease; display: flex; align-items: center; gap: 8px; }
+        .sync-notification.show { transform: translateX(0); }
+
+        @media (max-width: 768px) {
+            .header { padding: 12px 16px; flex-wrap: wrap; gap: 10px; }
+            .header-center h1 { font-size: 1.05rem; }
+            .container { margin: 16px; padding: 24px 16px; }
+            .button-container { flex-direction: column; gap: 10px; }
+            .action-button { width: 100%; justify-content: center; }
+            .modal-content { width: 90%; margin: 18% auto; }
+            .modal-buttons { flex-direction: column; }
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-layer"></div>
+
+    <div id="offlineBanner"><span>📵</span><span>Sin conexión — los escaneos se guardan y se enviarán al reconectar</span></div>
+    <div id="onlineToast"><span>🌐</span><span id="onlineToastText">Conexión restaurada...</span></div>
+
+    <div id="passwordModal" class="modal">
+        <div class="modal-content">
+            <h3>🔒 Verificar Contraseña</h3>
+            <p>Ingrese la contraseña para eliminar este registro.</p>
+            <input type="password" id="passwordInput" placeholder="Contraseña de administrador">
+            <div class="modal-buttons">
+                <button class="modal-btn confirm-btn" onclick="confirmarEliminacion()">Confirmar</button>
+                <button class="modal-btn cancel-btn"  onclick="cerrarModal()">Cancelar</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="deleteAllModal" class="modal">
+        <div class="modal-content">
+            <h3>⚠️ Eliminar Todos los Registros</h3>
+            <p>¿Eliminar todos los registros de visitas? Esta acción no se puede deshacer.</p>
+            <input type="password" id="deleteAllPassword" placeholder="Contraseña de administrador">
+            <div class="modal-buttons">
+                <button class="modal-btn confirm-btn" onclick="confirmarEliminacionTotal()">Confirmar</button>
+                <button class="modal-btn cancel-btn"  onclick="cerrarModalEliminarTodos()">Cancelar</button>
+            </div>
+        </div>
+    </div>
+
+    <header class="header">
+        <div class="logo" onclick="window.location.href='index.html'"><img src="logo.png" alt="Logo"></div>
+        <div class="header-center">
+            <h1>Columbus Hospital Simulation Center</h1>
+            <small>🔍 Escáner de Visitas Externas</small>
+        </div>
+        <button class="back-btn" onclick="window.location.href='index.html'">← Inicio</button>
+    </header>
+
+    <div class="container">
+
+        <!-- ─── READER: div limpio, sin flex ni overflow ─── -->
+        <div id="reader"></div>
+        <p class="reader-hint">🩺 Apunta la cámara al código QR del visitante</p>
+
+        <div id="syncStatusBar" class="ok" style="display:none;">
+            <span class="sync-dot" id="syncDot"></span>
+            <span id="syncStatusText">Todo sincronizado con Google Sheets (Visitas)</span>
+            <button id="retryNowBtn" onclick="processSyncQueue()" style="display:none;">↻ Reintentar</button>
+        </div>
+
+        <div id="statusMessage" class="status-message"></div>
+
+        <div class="button-container">
+            <button class="action-button download"  onclick="generarPDF()">📄 Descargar PDF</button>
+            <button class="action-button home"      onclick="location.href='index.html'">🏠 Volver al Inicio</button>
+            <button class="action-button clear-all" onclick="mostrarModalEliminarTodos()">🗑️ Eliminar Todos</button>
+        </div>
+
+        <div class="table-wrapper">
+            <table id="registros">
+                <thead>
+                    <tr>
+                        <th>Cédula</th>
+                        <th>Nombre</th>
+                        <th>Materia / Área</th>
+                        <th>Grupo</th>
+                        <th>Semestre</th>
+                        <th>Tipo de Visita</th>
+                        <th>Fecha</th>
+                        <th>Hora</th>
+                        <th>Sheets</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+
+        <div class="pagination" id="pagination"></div>
+    </div>
+
+    <script>
+    const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwTEpEJVhtUXSUqnwbQvGd-vJjpc_nIyXEitBFcfS4eS2dNU8J4kvYOLVtjBha8QU6gxg/exec";
+    const PASSWORD           = "admin123";
+    const SCAN_COOLDOWN      = 5000;
+    const SYNC_INTERVAL      = 3000;
+    const MAX_RETRIES        = 5;
+    const RETRY_BASE_DELAY   = 2000;
+    const RECORDS_PER_PAGE   = 20;
+    const LS_KEY             = 'visitas';
+    const LS_QUEUE_KEY       = 'syncQueue_vis';
+
+    let lastScannedCode   = '';
+    let lastScannedTime   = 0;
+    let currentPage       = 1;
+    let filteredRegistros = [];
+    let isSyncing         = false;
+    let syncIntervalId    = null;
+    let registroAEliminar = null;
+
+    function getRegistros() { try { return JSON.parse(localStorage.getItem(LS_KEY) || '[]'); } catch { return []; } }
+    function setRegistros(arr) { try { localStorage.setItem(LS_KEY, JSON.stringify(arr)); } catch(e) { console.error(e); } }
+    function saveRegistro(r) { const a = getRegistros(); a.unshift(r); setRegistros(a); }
+
+    function getSyncQueue() { try { return JSON.parse(localStorage.getItem(LS_QUEUE_KEY) || '[]'); } catch { return []; } }
+    function setSyncQueue(q) { try { localStorage.setItem(LS_QUEUE_KEY, JSON.stringify(q)); } catch {} }
+
+    function enqueueForSync(registro) {
+        const q = getSyncQueue();
+        if (!q.find(i => i.id === registro.id)) {
+            q.push({ id: registro.id, registro, retries: 0, nextRetryAt: Date.now(), offlineFail: 0 });
+            setSyncQueue(q);
+        }
+        updateSyncStatusBar();
+    }
+    function dequeueSync(id) {
+        setSyncQueue(getSyncQueue().filter(i => i.id !== id));
+        updateSyncStatusBar();
+        filteredRegistros = getRegistros();
+        actualizarTabla();
+    }
+    function markRegistroSynced(id) {
+        const a = getRegistros(), idx = a.findIndex(r => r.id === id);
+        if (idx !== -1) { a[idx].syncStatus = 'ok'; setRegistros(a); }
+    }
+    function markRegistroError(id, retries) {
+        const a = getRegistros(), idx = a.findIndex(r => r.id === id);
+        if (idx !== -1) { a[idx].syncStatus = retries >= MAX_RETRIES ? 'error' : 'pending'; setRegistros(a); }
+    }
+    function resetQueueRetries() {
+        const reset = getSyncQueue().map(i => ({ ...i, retries: 0, offlineFail: 0, nextRetryAt: Date.now() }));
+        setSyncQueue(reset);
+        const a = getRegistros();
+        reset.forEach(i => { const idx = a.findIndex(r => r.id === i.id); if (idx !== -1) a[idx].syncStatus = 'pending'; });
+        setRegistros(a);
+    }
+
+    const isOnline = () => navigator.onLine;
+    function updateNetworkBanner() {
+        const b = document.getElementById('offlineBanner');
+        isOnline() ? b.classList.remove('show') : b.classList.add('show');
+    }
+    function showOnlineToast(msg, ms = 4000) {
+        const t = document.getElementById('onlineToast');
+        document.getElementById('onlineToastText').textContent = msg;
+        t.classList.add('show'); setTimeout(() => t.classList.remove('show'), ms);
+    }
+
+    async function sendToSheets(item) {
+        if (!isOnline()) return false;
+        const ctrl = new AbortController();
+        const tid  = setTimeout(() => ctrl.abort(), 9000);
+        try {
+            await fetch(GOOGLE_SCRIPT_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(item.registro), signal: ctrl.signal });
+            clearTimeout(tid); return true;
+        } catch(e) { clearTimeout(tid); return false; }
+    }
+    function sendPendingWithBeacon() {
+        if (!isOnline()) return;
+        getSyncQueue().forEach(item => { try { navigator.sendBeacon(GOOGLE_SCRIPT_URL, new Blob([JSON.stringify(item.registro)], { type: 'application/json' })); } catch {} });
+    }
+
+    async function processSyncQueue() {
+        if (!isOnline()) { updateSyncStatusBar(); return; }
+        if (isSyncing) return;
+        const q = getSyncQueue();
+        if (!q.length) { updateSyncStatusBar(); return; }
+        isSyncing = true; updateSyncStatusBar('syncing');
+        const now = Date.now();
+        for (const item of q.filter(i => i.nextRetryAt <= now)) {
+            if (!isOnline()) break;
+            const ok = await sendToSheets(item);
+            if (ok) { markRegistroSynced(item.id); dequeueSync(item.id); showToast('☁️ Visita enviada: ' + (item.registro.nombre || '')); }
+            else {
+                const nr = item.retries + 1;
+                const delay = Math.min(RETRY_BASE_DELAY * Math.pow(2, nr - 1), 60000);
+                setSyncQueue(getSyncQueue().map(q => q.id === item.id ? { ...q, retries: nr, nextRetryAt: Date.now() + delay } : q));
+                markRegistroError(item.id, nr);
+            }
+            await new Promise(r => setTimeout(r, 400));
+        }
+        isSyncing = false; filteredRegistros = getRegistros(); actualizarTabla(); updateSyncStatusBar();
+    }
+
+    function updateSyncStatusBar(forceState) {
+        const bar = document.getElementById('syncStatusBar');
+        const dot = document.getElementById('syncDot');
+        const text = document.getElementById('syncStatusText');
+        const btn  = document.getElementById('retryNowBtn');
+        bar.style.display = 'flex';
+        if (forceState === 'syncing') { bar.className = 'syncing'; dot.classList.add('pulsing'); text.textContent = '↑ Enviando visitas a Google Sheets...'; btn.style.display = 'none'; return; }
+        if (!isOnline()) { bar.className = 'offline'; dot.classList.add('pulsing'); const p = getSyncQueue().length; text.textContent = p > 0 ? `📵 Sin red — ${p} visita(s) guardada(s)` : '📵 Sin conexión'; btn.style.display = 'none'; return; }
+        const q = getSyncQueue();
+        if (!q.length) { bar.className = 'ok'; dot.classList.remove('pulsing'); text.textContent = '✓ Todo sincronizado con Google Sheets (Visitas)'; btn.style.display = 'none'; }
+        else {
+            const err = q.filter(i => i.retries >= MAX_RETRIES);
+            if (err.length) { bar.className = 'error'; dot.classList.remove('pulsing'); text.textContent = `⚠ ${err.length} visita(s) con fallo de red`; btn.style.display = 'inline-block'; }
+            else { bar.className = 'pending'; dot.classList.add('pulsing'); text.textContent = `↑ ${q.length} visita(s) pendiente(s)...`; btn.style.display = 'none'; }
+        }
+    }
+
+    function onScanSuccess(decodedText) {
+        try {
+            const currentTime = Date.now();
+            if (decodedText === lastScannedCode && currentTime - lastScannedTime < SCAN_COOLDOWN) {
+                showStatus('⏳ Espere unos segundos antes de escanear el mismo código', true); return;
+            }
+
+            // Feedback visual en el borde del reader
+            const readerEl = document.getElementById('reader');
+            readerEl.style.border = '3px solid #059669';
+            readerEl.style.boxShadow = '0 0 20px rgba(5,150,105,0.4)';
+            setTimeout(() => {
+                readerEl.style.border = '3px solid #00b4d8';
+                readerEl.style.boxShadow = '0 8px 28px rgba(8,145,178,0.15)';
+            }, 1200);
+
+            const datos = JSON.parse(decodedText);
+            const now   = new Date();
+            const fecha = now.toISOString().slice(0, 10);
+            const hora  = now.toTimeString().slice(0, 8);
+
+            const nuevoRegistro = {
+                id:         `vis_${Date.now()}_${Math.random().toString(36).slice(2,7)}`,
+                cedula:     datos.cedula     || '',
+                nombre:     datos.nombre     || '',
+                materia:    datos.materia    || '',
+                grupo:      datos.grupo      || '',
+                semestre:   datos.semestre   || datos.nivel || '',
+                tipoVisita: datos.tipoVisita || 'General',
+                fecha, hora,
+                timestamp:  `${fecha} ${hora}`,
+                syncStatus: 'pending'
+            };
+
+            saveRegistro(nuevoRegistro);
+            enqueueForSync(nuevoRegistro);
+            lastScannedCode = decodedText; lastScannedTime = currentTime;
+            filtrarRegistros();
+            showStatus('✅ Visita registrada: ' + nuevoRegistro.nombre + ' — ' + nuevoRegistro.tipoVisita);
+            processSyncQueue();
+        } catch(e) {
+            showStatus('❌ Error al procesar el código QR. Verifique el formato.', true);
+            console.error('Error QR:', e);
+        }
+    }
+    function onScanError() {}
+
+    function filtrarRegistros() { filteredRegistros = getRegistros(); currentPage = 1; actualizarTabla(); }
+
+    function actualizarTabla() {
+        const tbody    = document.querySelector('#registros tbody');
+        const queue    = getSyncQueue();
+        const queueIds = new Set(queue.map(q => q.id));
+        const errorIds = new Set(queue.filter(q => q.retries >= MAX_RETRIES).map(q => q.id));
+        tbody.innerHTML = '';
+        const start     = (currentPage - 1) * RECORDS_PER_PAGE;
+        const paginados = filteredRegistros.slice(start, start + RECORDS_PER_PAGE);
+        paginados.forEach(registro => {
+            const tr = document.createElement('tr');
+            let syncHTML;
+            if (errorIds.has(registro.id))      syncHTML = `<span class="row-sync-error">✗ Error</span>`;
+            else if (queueIds.has(registro.id)) syncHTML = `<span class="row-sync-pending">⏳ Pendiente</span>`;
+            else                                syncHTML = `<span class="row-sync-ok">✓ Enviado</span>`;
+
+            const tv = (registro.tipoVisita || '').toLowerCase();
+            const bc = tv.includes('chiriqui') ? 'badge-chiriqui'
+                     : tv.includes('veraguas') ? 'badge-veraguas'
+                     : tv.includes('panam')    ? 'badge-panama'
+                     : 'badge-otro';
+
+            tr.innerHTML = `
+                <td>${registro.cedula}</td>
+                <td>${registro.nombre}</td>
+                <td>${registro.materia   || 'N/A'}</td>
+                <td>${registro.grupo     || 'N/A'}</td>
+                <td>${registro.semestre  || 'N/A'}</td>
+                <td><span class="badge-visita ${bc}">🏥 ${registro.tipoVisita || 'N/A'}</span></td>
+                <td>${registro.fecha || registro.timestamp?.split(' ')[0] || 'N/A'}</td>
+                <td>${registro.hora  || registro.timestamp?.split(' ')[1] || 'N/A'}</td>
+                <td>${syncHTML}</td>
+                <td><button class="delete-btn" onclick="mostrarModal('${registro.id}')">🗑️ Eliminar</button></td>
+            `;
+            tbody.appendChild(tr);
+        });
+        checkDuplicates(); setupPagination();
+    }
+
+    function checkDuplicates() {
+        const rows = document.querySelectorAll('#registros tbody tr');
+        const seen = new Map();
+        rows.forEach(row => {
+            row.classList.remove('duplicate');
+            const key = `${row.cells[0].textContent}-${row.cells[1].textContent}`;
+            if (seen.has(key)) { row.classList.add('duplicate'); seen.get(key).classList.add('duplicate'); }
+            else seen.set(key, row);
+        });
+    }
+
+    function setupPagination() {
+        const div = document.getElementById('pagination'); div.innerHTML = '';
+        const pc  = Math.ceil(filteredRegistros.length / RECORDS_PER_PAGE);
+        if (pc <= 1) return;
+        const total = filteredRegistros.length;
+        const start = (currentPage - 1) * RECORDS_PER_PAGE + 1;
+        const end   = Math.min(currentPage * RECORDS_PER_PAGE, total);
+
+        const prev = document.createElement('button');
+        prev.innerHTML = '←'; prev.className = 'page-btn arrow'; prev.disabled = currentPage === 1;
+        prev.onclick = () => { if (currentPage > 1) { currentPage--; actualizarTabla(); document.getElementById('pagination').scrollIntoView({ behavior: 'smooth', block: 'nearest' }); } };
+        div.appendChild(prev);
+
+        buildPageRange(currentPage, pc).forEach(p => {
+            if (p === '...') { const d = document.createElement('span'); d.className = 'page-dots'; d.textContent = '···'; div.appendChild(d); }
+            else { const b = document.createElement('button'); b.textContent = p; b.className = 'page-btn' + (p === currentPage ? ' active' : ''); b.onclick = () => { currentPage = p; actualizarTabla(); }; div.appendChild(b); }
+        });
+
+        const next = document.createElement('button');
+        next.innerHTML = '→'; next.className = 'page-btn arrow'; next.disabled = currentPage === pc;
+        next.onclick = () => { if (currentPage < pc) { currentPage++; actualizarTabla(); } };
+        div.appendChild(next);
+
+        const info = document.createElement('div'); info.className = 'pagination-info';
+        info.textContent = `Mostrando ${start}–${end} de ${total} visitas · Página ${currentPage} de ${pc}`;
+        div.appendChild(info);
+    }
+
+    function buildPageRange(cur, total) {
+        if (total <= 7) return Array.from({ length: total }, (_, i) => i + 1);
+        const pages = [], d = 2, left = Math.max(2, cur - d), right = Math.min(total - 1, cur + d);
+        pages.push(1); if (left > 2) pages.push('...');
+        for (let i = left; i <= right; i++) pages.push(i);
+        if (right < total - 1) pages.push('...'); pages.push(total); return pages;
+    }
+
+    function mostrarModal(id) { registroAEliminar = id; document.getElementById('passwordModal').style.display = 'block'; document.getElementById('passwordInput').value = ''; document.getElementById('passwordInput').focus(); }
+    function cerrarModal() { document.getElementById('passwordModal').style.display = 'none'; registroAEliminar = null; }
+    function confirmarEliminacion() {
+        if (document.getElementById('passwordInput').value !== PASSWORD) { showStatus('Contraseña incorrecta', true); return; }
+        setRegistros(getRegistros().filter(r => r.id !== registroAEliminar));
+        setSyncQueue(getSyncQueue().filter(q => q.id !== registroAEliminar));
+        filtrarRegistros(); updateSyncStatusBar(); showStatus('Registro eliminado exitosamente'); cerrarModal();
+    }
+    function mostrarModalEliminarTodos() { document.getElementById('deleteAllModal').style.display = 'block'; document.getElementById('deleteAllPassword').value = ''; document.getElementById('deleteAllPassword').focus(); }
+    function cerrarModalEliminarTodos() { document.getElementById('deleteAllModal').style.display = 'none'; }
+    function confirmarEliminacionTotal() {
+        if (document.getElementById('deleteAllPassword').value !== PASSWORD) { showStatus('Contraseña incorrecta', true); return; }
+        localStorage.removeItem(LS_KEY); localStorage.removeItem(LS_QUEUE_KEY);
+        filteredRegistros = []; currentPage = 1; actualizarTabla(); updateSyncStatusBar();
+        showStatus('Todos los registros de visitas han sido eliminados'); cerrarModalEliminarTodos();
+    }
+
+    function showStatus(message, isError = false) {
+        const el = document.getElementById('statusMessage');
+        el.textContent = message; el.style.display = 'block';
+        el.className = 'status-message ' + (isError ? 'error' : 'success');
+        setTimeout(() => { el.style.display = 'none'; }, 3500);
+    }
+    function showToast(msg) {
+        const n = document.createElement('div'); n.className = 'sync-notification'; n.textContent = msg;
+        document.body.appendChild(n);
+        setTimeout(() => n.classList.add('show'), 80);
+        setTimeout(() => { n.classList.remove('show'); setTimeout(() => n.remove(), 350); }, 2500);
+    }
+
+    function generarPDF() {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF({ orientation: 'landscape' });
+        doc.setFontSize(15); doc.setTextColor(8,145,178); doc.setFont('helvetica','bold');
+        doc.text('Registro de Visitas — Columbus Hospital Simulation Center', doc.internal.pageSize.getWidth()/2, 18, { align: 'center' });
+        doc.setFontSize(10); doc.setTextColor(0); doc.setFont('helvetica','normal');
+        doc.text(`Generado: ${new Date().toLocaleString()}`, doc.internal.pageSize.getWidth()/2, 27, { align: 'center' });
+        const datos = filteredRegistros.map(r => [ r.cedula, r.nombre, r.materia||'N/A', r.grupo||'N/A', r.semestre||'N/A', r.tipoVisita||'N/A', r.fecha||'', r.hora||'' ]);
+        doc.autoTable({ head: [['Cédula','Nombre','Materia/Área','Grupo','Semestre','Tipo de Visita','Fecha','Hora']], body: datos, startY: 34, styles: { fontSize: 8, cellPadding: 3 }, headStyles: { fillColor: [8,145,178], textColor: [255,255,255], fontStyle: 'bold' }, alternateRowStyles: { fillColor: [235,248,255] } });
+        doc.save(`registro-visitas-${new Date().toISOString().slice(0,10)}.pdf`);
+        showStatus('PDF generado exitosamente');
+    }
+
+    /* ================================================================
+       INIT DEL ESCÁNER
+       - Sin experimentalFeatures (causa errores en algunos navegadores)
+       - Sin disableFlip (puede interferir en móviles)
+       - fps 10 más estable que 15
+       - qrbox 250 proporcional al contenedor
+    ================================================================ */
+    const html5QrcodeScanner = new Html5QrcodeScanner(
+        "reader",
+        {
+            fps: 10,
+            qrbox: { width: 250, height: 250 },
+            aspectRatio: 1.0,
+            rememberLastUsedCamera: true,
+            showTorchButtonIfSupported: true
+        }
+    );
+    html5QrcodeScanner.render(onScanSuccess, onScanError);
+
+    function setupDataSync() {
+        window.addEventListener('storage', e => { if (e.key === LS_KEY || e.key === LS_QUEUE_KEY) { filtrarRegistros(); updateSyncStatusBar(); } });
+        syncIntervalId = setInterval(() => { processSyncQueue(); }, SYNC_INTERVAL);
+        window.addEventListener('focus',   () => { updateNetworkBanner(); processSyncQueue(); });
+        window.addEventListener('offline', () => { updateNetworkBanner(); updateSyncStatusBar(); });
+        window.addEventListener('online',  () => { updateNetworkBanner(); resetQueueRetries(); const p = getSyncQueue().length; showOnlineToast(p > 0 ? `🌐 Conexión restaurada — enviando ${p} visita(s)...` : '🌐 Conexión restaurada'); setTimeout(() => processSyncQueue(), 800); });
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+        filtrarRegistros(); updateNetworkBanner(); updateSyncStatusBar();
+        setupDataSync(); setTimeout(processSyncQueue, 1500);
+    });
+
+    document.getElementById('passwordInput').addEventListener('keyup',    e => { if (e.key==='Enter') confirmarEliminacion(); });
+    document.getElementById('deleteAllPassword').addEventListener('keyup', e => { if (e.key==='Enter') confirmarEliminacionTotal(); });
+    window.addEventListener('click', e => {
+        if (e.target === document.getElementById('passwordModal'))  cerrarModal();
+        if (e.target === document.getElementById('deleteAllModal')) cerrarModalEliminarTodos();
+    });
+    window.addEventListener('beforeunload', () => { if (syncIntervalId) clearInterval(syncIntervalId); sendPendingWithBeacon(); });
+    </script>
+</body>
+</html>

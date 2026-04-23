@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generador QR - Visitas | Columbus Hospital</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --azul:      #05117e;
+            --azul-med:  #102e9b;
+            --cian:      #00b4d8;
+            --cian-osc:  #0891b2;
+            --gris-txt:  #6b7280;
+            --texto:     #1e293b;
+            --sombra:    0 4px 20px rgba(8,145,178,0.12);
+            --sombra-lg: 0 12px 40px rgba(8,145,178,0.22);
+            --trans:     all 0.28s cubic-bezier(.22,.68,0,1.1);
+        }
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'DM Sans', sans-serif; background: var(--azul); min-height: 100vh; color: var(--texto); overflow-x: hidden; }
+
+        .bg-layer { position: fixed; inset: 0; z-index: 0; background: linear-gradient(140deg, #05117e 0%, #0d2590 45%, #0e7490 100%); overflow: hidden; }
+        .bg-layer::before { content: ''; position: absolute; width: 700px; height: 700px; border-radius: 50%; background: radial-gradient(circle, rgba(0,180,216,0.12) 0%, transparent 70%); top: -260px; right: -180px; animation: pulseBlob 10s ease-in-out infinite alternate; }
+        .bg-layer::after  { content: ''; position: absolute; width: 500px; height: 500px; border-radius: 50%; background: radial-gradient(circle, rgba(26,86,214,0.10) 0%, transparent 70%); bottom: -160px; left: -120px; animation: pulseBlob 13s ease-in-out infinite alternate-reverse; }
+        @keyframes pulseBlob { from { transform: scale(1) translate(0,0); } to { transform: scale(1.2) translate(30px,20px); } }
+
+        .header { position: relative; z-index: 10; background: rgba(255,255,255,0.97); backdrop-filter: blur(10px); padding: 14px 44px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 2px 20px rgba(5,17,126,0.15); border-bottom: 4px solid var(--cian); }
+        .logo { width: 130px; height: 58px; display: flex; align-items: center; cursor: pointer; transition: var(--trans); }
+        .logo:hover { transform: scale(1.07); }
+        .logo img { max-width: 100%; max-height: 100%; object-fit: contain; }
+        .header-center { flex: 1; text-align: center; }
+        .header-center h1 { font-family: 'Outfit', sans-serif; font-size: 1.45rem; font-weight: 800; background: linear-gradient(90deg, var(--azul), var(--cian-osc)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .header-center small { display: block; font-size: 0.75rem; font-weight: 600; color: var(--cian-osc); letter-spacing: 1.5px; text-transform: uppercase; margin-top: 2px; }
+        .back-btn { display: flex; align-items: center; gap: 6px; background: linear-gradient(135deg, var(--cian-osc), var(--cian)); color: white; padding: 9px 18px; border: none; border-radius: 50px; cursor: pointer; font-family: 'Outfit', sans-serif; font-size: 0.82rem; font-weight: 600; transition: var(--trans); box-shadow: 0 3px 12px rgba(8,145,178,0.30); white-space: nowrap; }
+        .back-btn:hover { transform: translateY(-2px); }
+
+        .wrapper { position: relative; z-index: 5; max-width: 680px; margin: 44px auto; padding: 0 20px 70px; }
+        .module-badge { display: inline-flex; align-items: center; gap: 8px; background: rgba(0,180,216,0.16); border: 1px solid rgba(0,180,216,0.32); color: #67e8f9; font-family: 'Outfit', sans-serif; font-size: 0.75rem; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; padding: 6px 16px; border-radius: 50px; margin-bottom: 14px; }
+
+        .card { background: white; border-radius: 22px; padding: 40px 38px 36px; box-shadow: var(--sombra); border: 1px solid rgba(0,180,216,0.10); position: relative; overflow: hidden; }
+        .card::before { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 5px; background: linear-gradient(90deg, var(--cian-osc), var(--cian)); }
+        .card-title { font-family: 'Outfit', sans-serif; font-size: 1.5rem; font-weight: 800; color: var(--cian-osc); margin-bottom: 6px; }
+        .card-subtitle { font-size: 0.88rem; color: var(--gris-txt); margin-bottom: 28px; line-height: 1.5; }
+
+        .form-group { margin-bottom: 20px; }
+        label { display: block; margin-bottom: 7px; color: var(--cian-osc); font-weight: 600; font-size: 0.88rem; letter-spacing: 0.3px; font-family: 'Outfit', sans-serif; }
+        .warning-note { font-size: 0.77rem; color: #dc2626; margin-top: -4px; margin-bottom: 8px; font-weight: 500; line-height: 1.4; }
+
+        input[type="text"] { width: 100%; padding: 13px 16px; border: 2px solid #e2e8f0; border-radius: 10px; font-size: 0.95rem; font-family: 'DM Sans', sans-serif; transition: var(--trans); background: #f8fafc; color: var(--texto); }
+        input[type="text"]:focus { outline: none; border-color: var(--cian); box-shadow: 0 0 0 3px rgba(0,180,216,0.18); background: white; }
+
+        .select-wrapper { position: relative; }
+        .select-wrapper::after { content: '▾'; position: absolute; right: 14px; top: 50%; transform: translateY(-50%); color: var(--cian-osc); font-size: 1rem; pointer-events: none; }
+        select { width: 100%; padding: 13px 16px; border: 2px solid #e2e8f0; border-radius: 10px; font-size: 0.95rem; font-family: 'DM Sans', sans-serif; transition: var(--trans); background: #f8fafc; color: var(--texto); appearance: none; -webkit-appearance: none; cursor: pointer; }
+        select:focus { outline: none; border-color: var(--cian); box-shadow: 0 0 0 3px rgba(0,180,216,0.18); background: white; }
+
+        /* ─── TIPO VISITA CHIPS ─── */
+        .tipo-label-title { display: block; margin-bottom: 7px; color: var(--cian-osc); font-weight: 600; font-size: 0.88rem; font-family: 'Outfit', sans-serif; }
+        .tipo-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 6px; }
+        .tipo-option { display: block; cursor: pointer; }
+        .tipo-option input[type="radio"] { position: absolute; opacity: 0; width: 0; height: 0; pointer-events: none; }
+        .tipo-card { display: flex; align-items: center; gap: 12px; padding: 14px 16px; border: 2px solid #e2e8f0; border-radius: 12px; background: #f8fafc; transition: var(--trans); user-select: none; }
+        .tipo-card:hover { border-color: var(--cian); background: #f0f9ff; }
+        .tipo-option input[type="radio"]:checked + .tipo-card { border-color: var(--cian); background: linear-gradient(135deg, #e0f9ff, #ccf3fc); box-shadow: 0 0 0 3px rgba(0,180,216,0.18); }
+        .tipo-icon { font-size: 1.6rem; flex-shrink: 0; line-height: 1; }
+        .tipo-text { display: flex; flex-direction: column; gap: 2px; }
+        .tipo-name { font-family: 'Outfit', sans-serif; font-weight: 700; font-size: 0.9rem; color: var(--texto); }
+        .tipo-sub  { font-size: 0.72rem; color: var(--gris-txt); }
+        .tipo-option input[type="radio"]:checked + .tipo-card .tipo-name { color: var(--cian-osc); }
+
+        .btn-generate { width: 100%; padding: 16px 24px; background: linear-gradient(135deg, var(--cian-osc), var(--cian)); color: white; border: none; border-radius: 12px; font-family: 'Outfit', sans-serif; font-size: 1.05rem; font-weight: 700; cursor: pointer; letter-spacing: 0.5px; transition: var(--trans); box-shadow: 0 4px 18px rgba(8,145,178,0.35); margin-top: 8px; position: relative; overflow: hidden; }
+        .btn-generate::after { content: ''; position: absolute; top: 0; left: -100%; width: 100%; height: 100%; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.20), transparent); transition: left 0.5s ease; }
+        .btn-generate:hover { transform: translateY(-3px); box-shadow: 0 8px 28px rgba(8,145,178,0.45); }
+        .btn-generate:hover::after { left: 100%; }
+
+        .qr-box { text-align: center; padding: 28px 20px; background: linear-gradient(135deg, #f0f9ff, #e0f5fc); border-radius: 16px; border: 2px dashed rgba(0,180,216,0.35); margin-bottom: 20px; display: none; }
+        #qrcode { display: flex; justify-content: center; }
+        #qrcode canvas, #qrcode img { border-radius: 10px; }
+
+        .qr-info { background: linear-gradient(135deg, #f0f9ff, #e0f5fc); border-radius: 14px; padding: 20px 22px; border-left: 5px solid var(--cian); margin-bottom: 16px; display: none; }
+        .qr-info h3 { font-family: 'Outfit', sans-serif; font-size: 0.95rem; font-weight: 700; color: var(--cian-osc); margin-bottom: 14px; display: flex; align-items: center; gap: 8px; }
+        .info-row { display: flex; justify-content: space-between; align-items: center; padding: 7px 0; border-bottom: 1px solid rgba(0,180,216,0.12); font-size: 0.87rem; }
+        .info-row:last-child { border-bottom: none; }
+        .info-key { font-weight: 600; color: var(--gris-txt); min-width: 130px; }
+        .info-val { color: var(--texto); font-weight: 500; text-align: right; }
+
+        #downloadQR { display: none; width: 100%; padding: 14px 24px; background: linear-gradient(135deg, #047857, #059669); color: white; border: none; border-radius: 12px; font-family: 'Outfit', sans-serif; font-size: 1rem; font-weight: 700; cursor: pointer; transition: var(--trans); box-shadow: 0 4px 16px rgba(5,150,105,0.32); }
+        #downloadQR:hover { transform: translateY(-3px); box-shadow: 0 8px 24px rgba(5,150,105,0.42); }
+
+        .toast-notif { position: fixed; top: 20px; right: 20px; background: linear-gradient(135deg, #047857, #10b981); color: white; padding: 14px 22px; border-radius: 50px; font-family: 'Outfit', sans-serif; font-weight: 600; font-size: 0.9rem; z-index: 10000; box-shadow: 0 4px 20px rgba(0,0,0,0.15); transform: translateX(120%); transition: transform 0.3s ease; }
+        .toast-notif.show { transform: translateX(0); }
+
+        @media (max-width: 600px) {
+            .header { padding: 12px 16px; }
+            .header-center h1 { font-size: 1.05rem; }
+            .card { padding: 28px 20px; }
+            .tipo-grid { grid-template-columns: 1fr; }
+            .info-row { flex-direction: column; align-items: flex-start; gap: 2px; }
+            .info-val { text-align: left; }
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-layer"></div>
+
+    <header class="header">
+        <div class="logo" onclick="window.location.href='index.html'">
+            <img src="logo.png" alt="Columbus Hospital Logo">
+        </div>
+        <div class="header-center">
+            <h1>Columbus Hospital Simulation Center</h1>
+            <small>🏥 Módulo de Visitas Externas</small>
+        </div>
+        <button class="back-btn" onclick="window.location.href='index.html'">← Inicio</button>
+    </header>
+
+    <div class="wrapper">
+        <div class="module-badge">🪪 Generador QR · Visitas</div>
+
+        <div class="card">
+            <div class="card-title">Generar Código QR de Visita</div>
+            <p class="card-subtitle">Complete los datos del visitante. El código QR generado será escaneado al ingresar al Centro de Simulación.</p>
+
+            <div class="form-group">
+                <label for="cedula">Cédula</label>
+                <input type="text" id="cedula" required placeholder="Ingrese número de cédula">
+            </div>
+
+            <div class="form-group">
+                <label for="nombre">Nombre Completo</label>
+                <p class="warning-note">⚠ Primer nombre y primer apellido — máximo 4 mayúsculas, sin tildes ni caracteres especiales.</p>
+                <input type="text" id="nombre" required placeholder="Ejemplo: Juan Perez">
+            </div>
+
+            <div class="form-group">
+                <label for="materia">Materia / Área</label>
+                <div class="select-wrapper">
+                    <select id="materia" required>
+                        <option value="">Seleccione una materia</option>
+                        <option value="IPM">IPM</option>
+                        <option value="RCP">RCP</option>
+                        <option value="Propedeutica">Propedéutica</option>
+                        <option value="Obstetricia">Obstetricia</option>
+                        <option value="Medicina Interna I">Medicina Interna I</option>
+                        <option value="Medicina Interna II">Medicina Interna II</option>
+                        <option value="Medicina Interna III">Medicina Interna III</option>
+                        <option value="Urgencias">Urgencias</option>
+                        <option value="Pediatria I">Pediatría I</option>
+                        <option value="Pediatria II">Pediatría II</option>
+                        <option value="Ginecologia">Ginecología</option>
+                        <option value="Cardiologia">Cardiología</option>
+                        <option value="EKG">EKG</option>
+                        <option value="Visita General">Visita General</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="grupo">Grupo</label>
+                <div class="select-wrapper">
+                    <select id="grupo" required>
+                        <option value="">Seleccione su grupo</option>
+                        <option value="I">I</option><option value="II">II</option>
+                        <option value="III">III</option><option value="IV">IV</option>
+                        <option value="V">V</option><option value="VI">VI</option>
+                        <option value="VII">VII</option><option value="VIII">VIII</option>
+                        <option value="IX">IX</option><option value="X">X</option>
+                        <option value="XI">XI</option><option value="N/A">N/A</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="nivel">Nivel de Semestre</label>
+                <div class="select-wrapper">
+                    <select id="nivel" required>
+                        <option value="">Seleccione su semestre</option>
+                        <option value="I Regular">I Regular</option>
+                        <option value="I Intermedio">I Intermedio</option>
+                        <option value="II Regular">II Regular</option>
+                        <option value="II Intermedio">II Intermedio</option>
+                        <option value="III Regular">III Regular</option>
+                        <option value="N/A">N/A</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <span class="tipo-label-title">Tipo de Visita / Sede de Origen</span>
+                <div class="tipo-grid">
+                    <label class="tipo-option">
+                        <input type="radio" name="tipoVisita" value="Sede Chiriqui">
+                        <span class="tipo-card">
+                            <span class="tipo-icon">🌋</span>
+                            <span class="tipo-text">
+                                <span class="tipo-name">Sede Chiriquí</span>
+                                <span class="tipo-sub">Visita desde Chiriquí</span>
+                            </span>
+                        </span>
+                    </label>
+                    <label class="tipo-option">
+                        <input type="radio" name="tipoVisita" value="Sede Veraguas">
+                        <span class="tipo-card">
+                            <span class="tipo-icon">🌊</span>
+                            <span class="tipo-text">
+                                <span class="tipo-name">Sede Veraguas</span>
+                                <span class="tipo-sub">Visita desde Veraguas</span>
+                            </span>
+                        </span>
+                    </label>
+                    <label class="tipo-option">
+                        <input type="radio" name="tipoVisita" value="Sede Panama">
+                        <span class="tipo-card">
+                            <span class="tipo-icon">🏙️</span>
+                            <span class="tipo-text">
+                                <span class="tipo-name">Sede Panamá</span>
+                                <span class="tipo-sub">Ciudad de Panamá</span>
+                            </span>
+                        </span>
+                    </label>
+                    <label class="tipo-option">
+                        <input type="radio" name="tipoVisita" value="Otra Sede">
+                        <span class="tipo-card">
+                            <span class="tipo-icon">🏥</span>
+                            <span class="tipo-text">
+                                <span class="tipo-name">Otra Sede</span>
+                                <span class="tipo-sub">Otra institución</span>
+                            </span>
+                        </span>
+                    </label>
+                </div>
+            </div>
+
+            <button class="btn-generate" onclick="generarQR()">🪪 Generar Código QR</button>
+
+            <div style="margin-top:28px;">
+                <div class="qr-box" id="qrBoxWrapper">
+                    <div id="qrcode"></div>
+                </div>
+
+                <div id="qrInfo" class="qr-info">
+                    <h3>📋 Información del Código QR</h3>
+                    <div class="info-row"><span class="info-key">Cédula</span><span class="info-val" id="infoCedula">—</span></div>
+                    <div class="info-row"><span class="info-key">Nombre</span><span class="info-val" id="infoNombre">—</span></div>
+                    <div class="info-row"><span class="info-key">Materia / Área</span><span class="info-val" id="infoMateria">—</span></div>
+                    <div class="info-row"><span class="info-key">Grupo</span><span class="info-val" id="infoGrupo">—</span></div>
+                    <div class="info-row"><span class="info-key">Nivel de Semestre</span><span class="info-val" id="infoNivel">—</span></div>
+                    <div class="info-row"><span class="info-key">Tipo de Visita</span><span class="info-val" id="infoTipo">—</span></div>
+                </div>
+
+                <button id="downloadQR" onclick="descargarQR()">📥 Descargar QR</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function generarQR() {
+            const cedula     = document.getElementById('cedula').value.trim();
+            const nombre     = document.getElementById('nombre').value.trim();
+            const materia    = document.getElementById('materia').value;
+            const grupo      = document.getElementById('grupo').value;
+            const nivel      = document.getElementById('nivel').value;
+            const tipoEl     = document.querySelector('input[name="tipoVisita"]:checked');
+
+            if (!cedula || !nombre || !materia || !grupo || !nivel) {
+                alert('Por favor complete todos los campos.'); return;
+            }
+            if (!tipoEl) {
+                alert('Por favor seleccione el Tipo de Visita.'); return;
+            }
+
+            const countMay = (nombre.match(/[A-Z]/g) || []).length;
+            if (countMay > 4) {
+                alert('El nombre no puede tener más de 4 letras mayúsculas.'); return;
+            }
+
+            const tipoVisita = tipoEl.value;
+
+            /*
+             * DATOS CODIFICADOS EN EL QR
+             * Claves cortas = QR menos denso = más fácil de escanear
+             * El escáner lee: datos.cedula, datos.nombre, datos.materia,
+             *                 datos.grupo, datos.semestre, datos.tipoVisita
+             */
+            const datos = {
+                cedula,
+                nombre,
+                materia,
+                grupo,
+                semestre:   nivel,
+                tipoVisita
+            };
+
+            const qrDiv = document.getElementById('qrcode');
+            qrDiv.innerHTML = '';
+
+            /*
+             * correctLevel: M → QR menos denso que H, mucho más fácil de escanear
+             * Los datos caben perfectamente en nivel M
+             */
+            new QRCode(qrDiv, {
+                text:         JSON.stringify(datos),
+                width:        256,
+                height:       256,
+                colorDark:    '#0891b2',
+                colorLight:   '#ffffff',
+                correctLevel: QRCode.CorrectLevel.M
+            });
+
+            document.getElementById('qrBoxWrapper').style.display = 'block';
+            document.getElementById('infoCedula').textContent  = cedula;
+            document.getElementById('infoNombre').textContent  = nombre;
+            document.getElementById('infoMateria').textContent = materia;
+            document.getElementById('infoGrupo').textContent   = grupo;
+            document.getElementById('infoNivel').textContent   = nivel;
+            document.getElementById('infoTipo').textContent    = tipoVisita;
+            document.getElementById('qrInfo').style.display   = 'block';
+
+            setTimeout(() => {
+                document.getElementById('downloadQR').style.display = 'block';
+                document.getElementById('downloadQR').scrollIntoView({ behavior: 'smooth' });
+            }, 500);
+        }
+
+        function descargarQR() {
+            const qrEl = document.querySelector('#qrcode canvas, #qrcode img');
+            if (!qrEl) { alert('Primero genera un código QR'); return; }
+
+            let qrCanvas = qrEl;
+            if (qrEl.tagName.toLowerCase() === 'img') {
+                const tmp = document.createElement('canvas');
+                tmp.width  = qrEl.naturalWidth  || 256;
+                tmp.height = qrEl.naturalHeight || 256;
+                const tc = tmp.getContext('2d');
+                tc.fillStyle = '#fff'; tc.fillRect(0, 0, tmp.width, tmp.height);
+                tc.drawImage(qrEl, 0, 0, tmp.width, tmp.height);
+                qrCanvas = tmp;
+            }
+
+            const cedula     = document.getElementById('cedula').value.trim();
+            const nombre     = document.getElementById('nombre').value.trim();
+            const materia    = document.getElementById('materia').value;
+            const grupo      = document.getElementById('grupo').value;
+            const nivel      = document.getElementById('nivel').value;
+            const tipoEl     = document.querySelector('input[name="tipoVisita"]:checked');
+            const tipoVisita = tipoEl ? tipoEl.value : '';
+
+            const lines = [
+                `Cedula: ${cedula}`,
+                `Nombre: ${nombre}`,
+                `Materia: ${materia}`,
+                `Grupo: ${grupo}`,
+                `Semestre: ${nivel}`,
+                `Tipo de Visita: ${tipoVisita}`
+            ];
+
+            const canvas = document.createElement('canvas');
+            const ctx    = canvas.getContext('2d');
+            const pad = 22, gap = 20, lh = 22;
+            ctx.font = '15px DM Sans, sans-serif';
+            const maxTxt = Math.max(...lines.map(l => ctx.measureText(l).width));
+            canvas.width  = Math.ceil(Math.max(qrCanvas.width, maxTxt) + pad * 2);
+            canvas.height = Math.ceil(pad * 2 + qrCanvas.height + gap + lines.length * lh + 10);
+            ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, canvas.width, canvas.height);
+            const qrX = Math.floor((canvas.width - qrCanvas.width) / 2);
+            ctx.drawImage(qrCanvas, qrX, pad);
+            ctx.strokeStyle = '#cce7f0'; ctx.lineWidth = 1;
+            ctx.strokeRect(qrX - 1, pad - 1, qrCanvas.width + 2, qrCanvas.height + 2);
+            ctx.fillStyle = '#0e7490'; ctx.font = '15px DM Sans, sans-serif'; ctx.textBaseline = 'top';
+            let y = pad + qrCanvas.height + gap;
+            lines.forEach(line => {
+                const w = ctx.measureText(line).width;
+                ctx.fillText(line, Math.floor((canvas.width - w) / 2), y);
+                y += lh;
+            });
+
+            const fecha    = new Date().toISOString().slice(0, 10);
+            const filename = `QR_Visita_${nombre.replace(/\s+/g, '_')}_${cedula}_${fecha}.png`;
+            const link     = document.createElement('a');
+            link.href      = canvas.toDataURL('image/png', 1.0);
+            link.download  = filename;
+            link.click();
+
+            let t = document.querySelector('.toast-notif');
+            if (!t) { t = document.createElement('div'); t.className = 'toast-notif'; document.body.appendChild(t); }
+            t.textContent = '✅ QR descargado correctamente';
+            setTimeout(() => t.classList.add('show'), 80);
+            setTimeout(() => t.classList.remove('show'), 3200);
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const inputs = document.querySelectorAll('input[type="text"], select');
+            inputs.forEach((inp, i) => {
+                inp.addEventListener('keypress', e => {
+                    if (e.key === 'Enter') {
+                        if (i < inputs.length - 1) inputs[i + 1].focus();
+                        else generarQR();
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>

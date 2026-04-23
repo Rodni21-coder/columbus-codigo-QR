@@ -1,0 +1,703 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Analítico - Columbus Hospital</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <style>
+        :root {
+            --azul:       #05117e;
+            --azul-med:   #102e9b;
+            --azul-vivo:  #1a56d6;
+            --cian:       #00b4d8;
+            --cian-osc:   #0891b2;
+            --violeta:    #7c3aed;
+            --violeta-osc:#5b21b6;
+            --verde:      #059669;
+            --ambar:      #d97706;
+            --rojo:       #dc2626;
+            --blanco:     #ffffff;
+            --gris-texto: #6b7280;
+            --gris-claro: #f1f5f9;
+            --texto:      #1e293b;
+            --borde:      #e2e8f0;
+            --sombra:     0 4px 24px rgba(5,17,126,0.10);
+            --sombra-lg:  0 12px 40px rgba(5,17,126,0.18);
+            --trans:      all 0.28s cubic-bezier(.22,.68,0,1.1);
+        }
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'DM Sans', sans-serif; background: var(--azul); min-height: 100vh; color: var(--texto); }
+
+        .bg-layer { position: fixed; inset: 0; z-index: 0; background: linear-gradient(135deg, #05117e 0%, #0d2590 40%, #102e9b 70%, #071466 100%); overflow: hidden; }
+        .bg-layer::before, .bg-layer::after { content: ''; position: absolute; border-radius: 50%; opacity: 0.06; }
+        .bg-layer::before { width: 600px; height: 600px; background: var(--violeta); top: -200px; right: -100px; }
+        .bg-layer::after  { width: 500px; height: 500px; background: var(--azul-vivo); bottom: -150px; left: -100px; }
+
+        /* HEADER */
+        .header { position: relative; z-index: 10; background: rgba(255,255,255,0.97); backdrop-filter: blur(12px); padding: 14px 32px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 2px 20px rgba(5,17,126,0.15); border-bottom: 3px solid var(--violeta); gap: 16px; }
+        .header-left { display: flex; align-items: center; gap: 16px; }
+        .header-back { background: var(--gris-claro); border: none; width: 40px; height: 40px; border-radius: 10px; cursor: pointer; font-size: 1.2rem; color: var(--azul); transition: var(--trans); display: flex; align-items: center; justify-content: center; }
+        .header-back:hover { background: var(--violeta); color: white; transform: translateX(-2px); }
+        .header-title { font-family: 'Outfit', sans-serif; font-weight: 800; font-size: 1.3rem; background: linear-gradient(90deg, var(--azul), var(--violeta)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; letter-spacing: -0.3px; }
+        .header-badge { background: linear-gradient(135deg, var(--violeta-osc), var(--violeta)); color: white; font-family: 'Outfit', sans-serif; font-size: 0.7rem; font-weight: 600; padding: 6px 14px; border-radius: 50px; letter-spacing: 1px; text-transform: uppercase; white-space: nowrap; }
+
+        /* MAIN */
+        .main { position: relative; z-index: 5; max-width: 1200px; margin: 0 auto; padding: 32px 24px 60px; }
+
+        /* ZONA CARGA */
+        .upload-zone { background: rgba(255,255,255,0.97); border-radius: 22px; padding: 56px 32px; text-align: center; border: 2px dashed #c7d2fe; box-shadow: var(--sombra); transition: var(--trans); }
+        .upload-zone.drag-over { border-color: var(--violeta); background: rgba(237,233,254,0.95); transform: scale(1.01); }
+        .upload-icon { font-size: 3.5rem; margin-bottom: 14px; display: block; }
+        .upload-title { font-family: 'Outfit', sans-serif; font-size: 1.4rem; font-weight: 800; color: var(--azul); margin-bottom: 8px; }
+        .upload-desc { color: var(--gris-texto); font-size: 0.95rem; max-width: 480px; margin: 0 auto 22px; line-height: 1.6; }
+        .upload-btn { display: inline-flex; align-items: center; gap: 10px; background: linear-gradient(135deg, var(--violeta-osc), var(--violeta)); color: white; font-family: 'Outfit', sans-serif; font-weight: 700; font-size: 0.95rem; padding: 13px 28px; border: none; border-radius: 12px; cursor: pointer; transition: var(--trans); box-shadow: 0 4px 14px rgba(124,58,237,0.35); }
+        .upload-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 22px rgba(124,58,237,0.45); }
+        .upload-hint { margin-top: 18px; font-size: 0.78rem; color: var(--gris-texto); }
+
+        .error-box { margin-top: 18px; background: #fef2f2; border-left: 4px solid var(--rojo); color: var(--rojo); padding: 12px 16px; border-radius: 10px; font-size: 0.86rem; font-weight: 500; text-align: left; max-width: 540px; margin-left: auto; margin-right: auto; }
+
+        /* BARRA ARCHIVO CARGADO */
+        .file-bar { background: rgba(255,255,255,0.97); border-radius: 14px; padding: 14px 20px; margin-bottom: 22px; display: flex; align-items: center; justify-content: space-between; gap: 14px; flex-wrap: wrap; box-shadow: var(--sombra); }
+        .file-info { display: flex; align-items: center; gap: 12px; }
+        .file-icon-box { width: 42px; height: 42px; border-radius: 10px; background: linear-gradient(135deg, #d1fae5, #a7f3d0); display: flex; align-items: center; justify-content: center; font-size: 1.3rem; }
+        .file-name { font-weight: 600; font-size: 0.92rem; color: var(--texto); }
+        .file-count { font-size: 0.78rem; color: var(--gris-texto); }
+        .file-change { background: transparent; border: 1.5px solid var(--violeta); color: var(--violeta); font-family: 'Outfit', sans-serif; font-weight: 600; font-size: 0.82rem; padding: 8px 16px; border-radius: 8px; cursor: pointer; transition: var(--trans); display: flex; align-items: center; gap: 6px; }
+        .file-change:hover { background: var(--violeta); color: white; }
+
+        /* STATS */
+        .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 22px; }
+        @media (max-width: 768px) { .stats-grid { grid-template-columns: repeat(2, 1fr); } }
+        .stat-card { background: rgba(255,255,255,0.97); border-radius: 14px; padding: 20px; box-shadow: var(--sombra); }
+        .stat-icon { width: 38px; height: 38px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; margin-bottom: 12px; }
+        .stat-icon.azul   { background: #dbeafe; color: var(--azul-vivo); }
+        .stat-icon.cian   { background: #cffafe; color: var(--cian-osc); }
+        .stat-icon.verde  { background: #d1fae5; color: var(--verde); }
+        .stat-icon.ambar  { background: #fef3c7; color: var(--ambar); }
+        .stat-value { font-family: 'Outfit', sans-serif; font-size: 1.8rem; font-weight: 800; color: var(--texto); line-height: 1; }
+        .stat-label { font-size: 0.78rem; color: var(--gris-texto); margin-top: 4px; }
+
+        /* FILTROS */
+        .filters-card { background: rgba(255,255,255,0.97); border-radius: 14px; padding: 18px 20px; margin-bottom: 22px; box-shadow: var(--sombra); }
+        .filters-header { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
+        .filters-title { font-family: 'Outfit', sans-serif; font-weight: 700; color: var(--texto); font-size: 0.95rem; }
+        .filters-clear { margin-left: auto; background: transparent; border: none; color: var(--rojo); font-size: 0.78rem; cursor: pointer; font-weight: 600; display: flex; align-items: center; gap: 4px; }
+        .filters-clear:hover { text-decoration: underline; }
+        .filters-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+        @media (max-width: 900px) { .filters-grid { grid-template-columns: repeat(2, 1fr); } }
+        @media (max-width: 500px) { .filters-grid { grid-template-columns: 1fr; } }
+        .filter-input, .filter-select { width: 100%; padding: 10px 12px; border: 1.5px solid var(--borde); border-radius: 8px; font-size: 0.88rem; font-family: 'DM Sans', sans-serif; background: white; color: var(--texto); transition: var(--trans); }
+        .filter-input:focus, .filter-select:focus { outline: none; border-color: var(--violeta); box-shadow: 0 0 0 3px rgba(124,58,237,0.12); }
+        .filter-input-wrap { position: relative; }
+        .filter-input-wrap input { padding-left: 34px; }
+        .filter-search-icon { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: var(--gris-texto); font-size: 0.9rem; }
+
+        /* GRÁFICAS */
+        .charts-row { display: grid; grid-template-columns: repeat(2, 1fr); gap: 18px; margin-bottom: 18px; }
+        @media (max-width: 900px) { .charts-row { grid-template-columns: 1fr; } }
+        .chart-card { background: rgba(255,255,255,0.97); border-radius: 14px; padding: 20px; box-shadow: var(--sombra); }
+        .chart-title { font-family: 'Outfit', sans-serif; font-weight: 700; color: var(--texto); font-size: 0.98rem; margin-bottom: 14px; display: flex; align-items: center; gap: 8px; }
+        .chart-wrap { position: relative; height: 320px; }
+        .chart-wrap-small { position: relative; height: 280px; }
+
+        /* TABLA */
+        .table-card { background: rgba(255,255,255,0.97); border-radius: 14px; padding: 20px; box-shadow: var(--sombra); }
+        .table-wrap { overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; font-size: 0.88rem; }
+        th { text-align: left; padding: 10px 12px; border-bottom: 2px solid var(--borde); color: var(--gris-texto); font-weight: 600; font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.5px; }
+        td { padding: 10px 12px; border-bottom: 1px solid #f1f5f9; color: var(--texto); }
+        tr:hover td { background: var(--gris-claro); }
+        .badge-count { display: inline-block; background: linear-gradient(135deg, var(--violeta-osc), var(--violeta)); color: white; padding: 3px 10px; border-radius: 50px; font-weight: 700; font-size: 0.82rem; }
+        .badge-count-low { background: linear-gradient(135deg, var(--rojo), #f87171); }
+        .badge-count-med { background: linear-gradient(135deg, var(--ambar), #fbbf24); }
+        .cedula { font-family: 'Courier New', monospace; font-size: 0.8rem; color: var(--gris-texto); }
+
+        /* Doble tabla Top/Bottom */
+        .tables-row { display: grid; grid-template-columns: repeat(2, 1fr); gap: 18px; margin-bottom: 18px; }
+        @media (max-width: 900px) { .tables-row { grid-template-columns: 1fr; } }
+
+        .chart-title-alert { color: var(--rojo); }
+        .alert-note { background: #fef2f2; border-left: 3px solid var(--rojo); padding: 8px 12px; border-radius: 8px; font-size: 0.78rem; color: #991b1b; margin-bottom: 12px; display: flex; align-items: center; gap: 6px; }
+        .alert-note-info { background: #eff6ff; border-left-color: var(--azul-vivo); color: #1e3a8a; }
+
+        /* Fila de estudiante en riesgo */
+        .row-risk td { background: rgba(254, 242, 242, 0.5); }
+        .row-risk:hover td { background: #fee2e2 !important; }
+
+        .status-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 6px; }
+        .status-dot.critico { background: var(--rojo); box-shadow: 0 0 0 3px rgba(220,38,38,0.2); }
+        .status-dot.bajo    { background: var(--ambar); box-shadow: 0 0 0 3px rgba(217,119,6,0.2); }
+        .status-dot.ok      { background: var(--verde); box-shadow: 0 0 0 3px rgba(5,150,105,0.2); }
+
+        /* HERO inicial */
+        .hero { text-align: center; margin-bottom: 32px; color: white; }
+        .hero-eyebrow { display: inline-block; background: rgba(124,58,237,0.22); border: 1px solid rgba(124,58,237,0.5); color: #c4b5fd; font-family: 'Outfit', sans-serif; font-size: 0.75rem; font-weight: 600; letter-spacing: 2.5px; text-transform: uppercase; padding: 6px 18px; border-radius: 50px; margin-bottom: 14px; }
+        .hero h1 { font-family: 'Outfit', sans-serif; font-size: 2.2rem; font-weight: 800; color: white; line-height: 1.1; margin-bottom: 10px; letter-spacing: -0.5px; }
+        .hero h1 span { color: #c4b5fd; }
+        .hero p { color: rgba(255,255,255,0.65); font-size: 0.95rem; max-width: 520px; margin: 0 auto; line-height: 1.6; }
+
+        .hidden { display: none !important; }
+
+        @media (max-width: 640px) {
+            .header { padding: 12px 18px; }
+            .header-title { font-size: 1rem; }
+            .hero h1 { font-size: 1.6rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-layer"></div>
+
+    <header class="header">
+        <div class="header-left">
+            <button class="header-back" onclick="window.location.href='index.html'" title="Volver">←</button>
+            <h1 class="header-title">📊 Dashboard Analítico</h1>
+        </div>
+        <div class="header-badge">Análisis de Datos</div>
+    </header>
+
+    <main class="main">
+
+        <!-- HERO inicial -->
+        <div class="hero" id="heroSection">
+            <div class="hero-eyebrow">Módulo de Análisis</div>
+            <h1>Visualización de <span>Asistencias</span></h1>
+            <p>Cargue el archivo Excel de asistencia para generar gráficas interactivas y estadísticas detalladas.</p>
+        </div>
+
+        <!-- ZONA DE CARGA (inicial) -->
+        <div class="upload-zone" id="uploadZone">
+            <span class="upload-icon">📂</span>
+            <div class="upload-title">Cargar archivo de asistencia</div>
+            <p class="upload-desc">Sube el archivo Excel (.xlsx) con los registros. Debe contener las columnas: cédula, nombre, materia, grupo, Nivel de Semestre, fecha y hora.</p>
+            <button class="upload-btn" onclick="document.getElementById('fileInput').click()">
+                <span>⬆</span> Seleccionar archivo Excel
+            </button>
+            <div class="upload-hint">O arrastra y suelta el archivo aquí</div>
+            <input type="file" id="fileInput" accept=".xlsx,.xls" style="display:none;">
+            <div class="error-box hidden" id="errorBox"></div>
+        </div>
+
+        <!-- CONTENIDO DEL DASHBOARD (oculto hasta cargar archivo) -->
+        <div id="dashContent" class="hidden">
+
+            <!-- Barra archivo -->
+            <div class="file-bar">
+                <div class="file-info">
+                    <div class="file-icon-box">📊</div>
+                    <div>
+                        <div class="file-name" id="fileName">-</div>
+                        <div class="file-count" id="fileCount">-</div>
+                    </div>
+                </div>
+                <button class="file-change" onclick="document.getElementById('fileInput2').click()">
+                    ⬆ Cambiar archivo
+                </button>
+                <input type="file" id="fileInput2" accept=".xlsx,.xls" style="display:none;">
+            </div>
+
+            <!-- Stats -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon azul">👥</div>
+                    <div class="stat-value" id="statEstudiantes">0</div>
+                    <div class="stat-label">Estudiantes únicos</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon cian">📋</div>
+                    <div class="stat-value" id="statRegistros">0</div>
+                    <div class="stat-label">Registros totales</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon verde">📚</div>
+                    <div class="stat-value" id="statMaterias">0</div>
+                    <div class="stat-label">Materias</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon ambar">📅</div>
+                    <div class="stat-value" id="statDias">0</div>
+                    <div class="stat-label">Días con clases</div>
+                </div>
+            </div>
+
+            <!-- Filtros -->
+            <div class="filters-card">
+                <div class="filters-header">
+                    <span>🔍</span>
+                    <div class="filters-title">Filtros</div>
+                    <button class="filters-clear" id="btnClearFilters" onclick="limpiarFiltros()">✕ Limpiar filtros</button>
+                </div>
+                <div class="filters-grid">
+                    <div class="filter-input-wrap">
+                        <span class="filter-search-icon">🔎</span>
+                        <input type="text" class="filter-input" id="searchInput" placeholder="Buscar por cédula o nombre...">
+                    </div>
+                    <select class="filter-select" id="filterMateria">
+                        <option value="all">Todas las materias</option>
+                    </select>
+                    <select class="filter-select" id="filterSemestre">
+                        <option value="all">Todos los semestres</option>
+                    </select>
+                    <select class="filter-select" id="filterNivel">
+                        <option value="all">Todos los niveles</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Gráficas -->
+            <div class="charts-row">
+                <div class="chart-card">
+                    <div class="chart-title">📚 Asistencia por Materia</div>
+                    <div class="chart-wrap"><canvas id="chartMateria"></canvas></div>
+                </div>
+                <div class="chart-card">
+                    <div class="chart-title">🏆 Distribución por Nivel de Semestre</div>
+                    <div class="chart-wrap"><canvas id="chartNivel"></canvas></div>
+                </div>
+            </div>
+
+            <div class="chart-card" style="margin-bottom: 18px;">
+                <div class="chart-title">🎓 Asistencia por Semestre (Grupo)</div>
+                <div class="chart-wrap-small"><canvas id="chartSemestre"></canvas></div>
+            </div>
+
+            <div class="chart-card" style="margin-bottom: 18px;">
+                <div class="chart-title">📈 Tendencia de Asistencia por Día</div>
+                <div class="chart-wrap-small"><canvas id="chartFecha"></canvas></div>
+            </div>
+
+            <!-- Top y Bottom estudiantes lado a lado -->
+            <div class="tables-row">
+                <div class="table-card">
+                    <div class="chart-title">🏅 Top 10 — Mayor Asistencia</div>
+                    <div class="alert-note alert-note-info">
+                        <span>✨</span>
+                        <span>Estudiantes más constantes en sus asistencias registradas.</span>
+                    </div>
+                    <div class="table-wrap">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Cédula</th>
+                                    <th>Nombre</th>
+                                    <th style="text-align:right;">Asistencias</th>
+                                </tr>
+                            </thead>
+                            <tbody id="topTableBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="table-card">
+                    <div class="chart-title chart-title-alert">⚠ Bottom 10 — Menor Asistencia</div>
+                    <div class="alert-note">
+                        <span>🚨</span>
+                        <span>Estudiantes con pocas asistencias registradas. Requieren seguimiento.</span>
+                    </div>
+                    <div class="table-wrap">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Cédula</th>
+                                    <th>Nombre</th>
+                                    <th style="text-align:right;">Asistencias</th>
+                                </tr>
+                            </thead>
+                            <tbody id="bottomTableBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Resumen por nivel de riesgo -->
+            <div class="table-card">
+                <div class="chart-title">📋 Resumen de Estudiantes por Nivel de Riesgo</div>
+                <div style="font-size: 0.82rem; color: var(--gris-texto); margin-bottom: 14px;">
+                    Clasificación basada en la cantidad de asistencias registradas respecto al promedio del grupo filtrado.
+                </div>
+                <div class="stats-grid" style="margin-bottom:0;">
+                    <div class="stat-card" style="border-left: 4px solid var(--rojo);">
+                        <div class="stat-icon" style="background:#fee2e2; color:var(--rojo);">🚨</div>
+                        <div class="stat-value" id="statCritico" style="color:var(--rojo);">0</div>
+                        <div class="stat-label">Riesgo crítico (&lt; 30% del promedio)</div>
+                    </div>
+                    <div class="stat-card" style="border-left: 4px solid var(--ambar);">
+                        <div class="stat-icon ambar">⚠</div>
+                        <div class="stat-value" id="statBajo" style="color:var(--ambar);">0</div>
+                        <div class="stat-label">Asistencia baja (30%-70%)</div>
+                    </div>
+                    <div class="stat-card" style="border-left: 4px solid var(--verde);">
+                        <div class="stat-icon verde">✅</div>
+                        <div class="stat-value" id="statRegular" style="color:var(--verde);">0</div>
+                        <div class="stat-label">Asistencia regular (70%-130%)</div>
+                    </div>
+                    <div class="stat-card" style="border-left: 4px solid var(--azul-vivo);">
+                        <div class="stat-icon azul">⭐</div>
+                        <div class="stat-value" id="statExcelente" style="color:var(--azul-vivo);">0</div>
+                        <div class="stat-label">Asistencia excelente (&gt; 130%)</div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+    </main>
+
+    <script>
+        let data = [];
+        let charts = {};
+        const COLORS = ['#1e40af', '#0891b2', '#059669', '#d97706', '#dc2626', '#7c3aed', '#db2777', '#65a30d', '#0284c7', '#ea580c', '#4f46e5'];
+
+        // ═══ CARGA DE ARCHIVO ═══
+        document.getElementById('fileInput').addEventListener('change',  e => cargarArchivo(e.target.files[0]));
+        document.getElementById('fileInput2').addEventListener('change', e => cargarArchivo(e.target.files[0]));
+
+        // Drag & drop
+        const uploadZone = document.getElementById('uploadZone');
+        ['dragenter','dragover'].forEach(ev => uploadZone.addEventListener(ev, e => {
+            e.preventDefault(); e.stopPropagation();
+            uploadZone.classList.add('drag-over');
+        }));
+        ['dragleave','drop'].forEach(ev => uploadZone.addEventListener(ev, e => {
+            e.preventDefault(); e.stopPropagation();
+            uploadZone.classList.remove('drag-over');
+        }));
+        uploadZone.addEventListener('drop', e => {
+            if (e.dataTransfer.files.length) cargarArchivo(e.dataTransfer.files[0]);
+        });
+
+        async function cargarArchivo(file) {
+            if (!file) return;
+            const errorBox = document.getElementById('errorBox');
+            errorBox.classList.add('hidden');
+
+            try {
+                const buffer = await file.arrayBuffer();
+                const workbook = XLSX.read(buffer, { type: 'array', cellDates: true });
+
+                let targetSheet = workbook.SheetNames.find(n =>
+                    n.toLowerCase().includes('asistencia') && n.toLowerCase().includes('autom')
+                ) || workbook.SheetNames[0];
+
+                const worksheet = workbook.Sheets[targetSheet];
+                const rawData = XLSX.utils.sheet_to_json(worksheet, { defval: null });
+
+                const normalized = rawData.map(row => {
+                    const c = {};
+                    Object.keys(row).forEach(k => { c[k.trim().toLowerCase()] = row[k]; });
+                    return {
+                        cedula:  c['cedula']  || c['cédula'] || '',
+                        nombre:  c['nombre']  || '',
+                        materia: c['materia'] || '',
+                        grupo:   c['grupo']   || '',
+                        nivel:   c['nivel de semestre'] || c['nivel'] || '',
+                        fecha:   c['fecha'] ? new Date(c['fecha']) : null,
+                        hora:    c['hora'] || ''
+                    };
+                }).filter(r => r.cedula && r.nombre);
+
+                if (normalized.length === 0) {
+                    errorBox.textContent = '⚠ No se encontraron datos válidos. Verifica las columnas del archivo.';
+                    errorBox.classList.remove('hidden');
+                    return;
+                }
+
+                data = normalized;
+                document.getElementById('fileName').textContent  = file.name;
+                document.getElementById('fileCount').textContent = `${data.length} registros cargados`;
+
+                // Ocultar hero y upload, mostrar dashboard
+                document.getElementById('heroSection').classList.add('hidden');
+                document.getElementById('uploadZone').classList.add('hidden');
+                document.getElementById('dashContent').classList.remove('hidden');
+
+                poblarFiltros();
+                renderizarTodo();
+            } catch (err) {
+                errorBox.textContent = '❌ Error al leer el archivo: ' + err.message;
+                errorBox.classList.remove('hidden');
+            }
+        }
+
+        // ═══ FILTROS ═══
+        function poblarFiltros() {
+            const materias  = [...new Set(data.map(r => r.materia))].filter(Boolean).sort();
+            const semestres = [...new Set(data.map(r => r.grupo))].filter(Boolean).sort();
+            const niveles   = [...new Set(data.map(r => r.nivel))].filter(Boolean).sort();
+
+            const fm = document.getElementById('filterMateria');
+            const fs = document.getElementById('filterSemestre');
+            const fn = document.getElementById('filterNivel');
+            fm.innerHTML = '<option value="all">Todas las materias</option>';
+            fs.innerHTML = '<option value="all">Todos los semestres</option>';
+            fn.innerHTML = '<option value="all">Todos los niveles</option>';
+            materias.forEach(m  => fm.innerHTML += `<option value="${m}">${m}</option>`);
+            semestres.forEach(s => fs.innerHTML += `<option value="${s}">Semestre ${s}</option>`);
+            niveles.forEach(n   => fn.innerHTML += `<option value="${n}">Nivel ${n}</option>`);
+
+            fm.addEventListener('change', renderizarTodo);
+            fs.addEventListener('change', renderizarTodo);
+            fn.addEventListener('change', renderizarTodo);
+            document.getElementById('searchInput').addEventListener('input', renderizarTodo);
+        }
+
+        function limpiarFiltros() {
+            document.getElementById('searchInput').value   = '';
+            document.getElementById('filterMateria').value = 'all';
+            document.getElementById('filterSemestre').value= 'all';
+            document.getElementById('filterNivel').value   = 'all';
+            renderizarTodo();
+        }
+
+        function filtrar() {
+            const search = document.getElementById('searchInput').value.toLowerCase();
+            const fm = document.getElementById('filterMateria').value;
+            const fs = document.getElementById('filterSemestre').value;
+            const fn = document.getElementById('filterNivel').value;
+
+            return data.filter(r => {
+                if (fm !== 'all' && r.materia !== fm) return false;
+                if (fs !== 'all' && r.grupo   !== fs) return false;
+                if (fn !== 'all' && r.nivel   !== fn) return false;
+                if (search) {
+                    if (!String(r.cedula).toLowerCase().includes(search) &&
+                        !r.nombre.toLowerCase().includes(search)) return false;
+                }
+                return true;
+            });
+        }
+
+        // ═══ RENDERIZADO ═══
+        function renderizarTodo() {
+            const filtered = filtrar();
+            renderStats(filtered);
+            renderChartMateria(filtered);
+            renderChartNivel(filtered);
+            renderChartSemestre(filtered);
+            renderChartFecha(filtered);
+            renderTopBottomEstudiantes(filtered);
+            renderResumenRiesgo(filtered);
+        }
+
+        function renderStats(filtered) {
+            const estudiantes = new Set(filtered.map(r => r.cedula)).size;
+            const materias    = new Set(filtered.map(r => r.materia)).size;
+            const dias        = new Set(filtered.map(r => r.fecha?.toDateString())).size;
+            document.getElementById('statEstudiantes').textContent = estudiantes.toLocaleString();
+            document.getElementById('statRegistros').textContent   = filtered.length.toLocaleString();
+            document.getElementById('statMaterias').textContent    = materias.toLocaleString();
+            document.getElementById('statDias').textContent        = dias.toLocaleString();
+        }
+
+        function destroyChart(key) { if (charts[key]) { charts[key].destroy(); delete charts[key]; } }
+
+        function renderChartMateria(filtered) {
+            destroyChart('materia');
+            const map = {};
+            filtered.forEach(r => { map[r.materia] = (map[r.materia] || 0) + 1; });
+            const sorted = Object.entries(map).sort((a,b) => b[1]-a[1]);
+            charts.materia = new Chart(document.getElementById('chartMateria'), {
+                type: 'bar',
+                data: {
+                    labels: sorted.map(s => s[0]),
+                    datasets: [{
+                        label: 'Asistencias',
+                        data: sorted.map(s => s[1]),
+                        backgroundColor: '#7c3aed',
+                        borderRadius: 6
+                    }]
+                },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true, maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        x: { grid: { color: '#f1f5f9' }, ticks: { color: '#64748b', font: { size: 11 } } },
+                        y: { grid: { display: false }, ticks: { color: '#64748b', font: { size: 11 } } }
+                    }
+                }
+            });
+        }
+
+        function renderChartNivel(filtered) {
+            destroyChart('nivel');
+            const map = {};
+            filtered.forEach(r => { map[r.nivel] = (map[r.nivel] || 0) + 1; });
+            const labels = Object.keys(map);
+            const values = Object.values(map);
+            charts.nivel = new Chart(document.getElementById('chartNivel'), {
+                type: 'doughnut',
+                data: {
+                    labels,
+                    datasets: [{
+                        data: values,
+                        backgroundColor: COLORS.slice(0, labels.length),
+                        borderWidth: 2,
+                        borderColor: '#fff'
+                    }]
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom', labels: { color: '#475569', font: { size: 12 }, padding: 14 } }
+                    }
+                }
+            });
+        }
+
+        function renderChartSemestre(filtered) {
+            destroyChart('semestre');
+            const map = {};
+            filtered.forEach(r => { map[r.grupo] = (map[r.grupo] || 0) + 1; });
+            const orden = ['I','II','III','IV','V','VI','VII','VIII','IX','X','XI','XII'];
+            const sorted = Object.entries(map).sort((a,b) => orden.indexOf(a[0]) - orden.indexOf(b[0]));
+            charts.semestre = new Chart(document.getElementById('chartSemestre'), {
+                type: 'bar',
+                data: {
+                    labels: sorted.map(s => 'Sem. ' + s[0]),
+                    datasets: [{
+                        label: 'Asistencias',
+                        data: sorted.map(s => s[1]),
+                        backgroundColor: sorted.map((_, i) => COLORS[i % COLORS.length]),
+                        borderRadius: 6
+                    }]
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        x: { grid: { display: false }, ticks: { color: '#64748b', font: { size: 11 } } },
+                        y: { grid: { color: '#f1f5f9' }, ticks: { color: '#64748b', font: { size: 11 } } }
+                    }
+                }
+            });
+        }
+
+        function renderChartFecha(filtered) {
+            destroyChart('fecha');
+            const map = {};
+            filtered.forEach(r => {
+                if (!r.fecha) return;
+                const key = r.fecha.toISOString().split('T')[0];
+                map[key] = (map[key] || 0) + 1;
+            });
+            const sorted = Object.entries(map).sort((a,b) => a[0].localeCompare(b[0]));
+            charts.fecha = new Chart(document.getElementById('chartFecha'), {
+                type: 'line',
+                data: {
+                    labels: sorted.map(s => new Date(s[0]).toLocaleDateString('es-PA', { day:'2-digit', month:'short' })),
+                    datasets: [{
+                        label: 'Asistencias',
+                        data: sorted.map(s => s[1]),
+                        borderColor: '#0891b2',
+                        backgroundColor: 'rgba(8,145,178,0.15)',
+                        fill: true,
+                        tension: 0.35,
+                        pointRadius: 3,
+                        pointBackgroundColor: '#0891b2',
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        x: { grid: { display: false }, ticks: { color: '#64748b', font: { size: 10 }, maxRotation: 45 } },
+                        y: { grid: { color: '#f1f5f9' }, ticks: { color: '#64748b', font: { size: 11 } } }
+                    }
+                }
+            });
+        }
+
+        function renderTopBottomEstudiantes(filtered) {
+            // Agrupar por cédula
+            const map = {};
+            filtered.forEach(r => {
+                if (!map[r.cedula]) map[r.cedula] = { cedula: r.cedula, nombre: r.nombre, count: 0 };
+                map[r.cedula].count++;
+            });
+            const estudiantes = Object.values(map);
+
+            // TOP 10 — mayor asistencia
+            const top = [...estudiantes].sort((a, b) => b.count - a.count).slice(0, 10);
+            const tbodyTop = document.getElementById('topTableBody');
+            tbodyTop.innerHTML = top.map((e, i) => `
+                <tr>
+                    <td style="color:#94a3b8; font-weight:600;">${i + 1}</td>
+                    <td class="cedula">${e.cedula}</td>
+                    <td style="font-weight:500;">${e.nombre}</td>
+                    <td style="text-align:right;"><span class="badge-count">${e.count}</span></td>
+                </tr>
+            `).join('') || '<tr><td colspan="4" style="text-align:center; color:#94a3b8; padding:20px;">Sin datos que mostrar</td></tr>';
+
+            // BOTTOM 10 — menor asistencia (ordenado de menor a mayor)
+            const bottom = [...estudiantes].sort((a, b) => a.count - b.count).slice(0, 10);
+
+            // Calcular promedio para decidir si es crítico o bajo
+            const promedio = estudiantes.length > 0
+                ? estudiantes.reduce((s, e) => s + e.count, 0) / estudiantes.length
+                : 0;
+
+            const tbodyBottom = document.getElementById('bottomTableBody');
+            tbodyBottom.innerHTML = bottom.map((e, i) => {
+                const ratio = promedio > 0 ? e.count / promedio : 0;
+                let dotClass, badgeClass, rowClass = '';
+                if (ratio < 0.3) {
+                    dotClass = 'critico';
+                    badgeClass = 'badge-count-low';
+                    rowClass = 'row-risk';
+                } else if (ratio < 0.7) {
+                    dotClass = 'bajo';
+                    badgeClass = 'badge-count-med';
+                } else {
+                    dotClass = 'ok';
+                    badgeClass = '';
+                }
+                return `
+                    <tr class="${rowClass}">
+                        <td style="color:#94a3b8; font-weight:600;">${i + 1}</td>
+                        <td class="cedula">${e.cedula}</td>
+                        <td style="font-weight:500;">
+                            <span class="status-dot ${dotClass}"></span>${e.nombre}
+                        </td>
+                        <td style="text-align:right;"><span class="badge-count ${badgeClass}">${e.count}</span></td>
+                    </tr>
+                `;
+            }).join('') || '<tr><td colspan="4" style="text-align:center; color:#94a3b8; padding:20px;">Sin datos que mostrar</td></tr>';
+        }
+
+        function renderResumenRiesgo(filtered) {
+            const map = {};
+            filtered.forEach(r => {
+                if (!map[r.cedula]) map[r.cedula] = 0;
+                map[r.cedula]++;
+            });
+            const counts = Object.values(map);
+            if (counts.length === 0) {
+                ['statCritico', 'statBajo', 'statRegular', 'statExcelente'].forEach(id => {
+                    document.getElementById(id).textContent = '0';
+                });
+                return;
+            }
+            const promedio = counts.reduce((s, c) => s + c, 0) / counts.length;
+            let critico = 0, bajo = 0, regular = 0, excelente = 0;
+            counts.forEach(c => {
+                const ratio = c / promedio;
+                if (ratio < 0.3)      critico++;
+                else if (ratio < 0.7) bajo++;
+                else if (ratio <= 1.3) regular++;
+                else                  excelente++;
+            });
+            document.getElementById('statCritico').textContent   = critico;
+            document.getElementById('statBajo').textContent      = bajo;
+            document.getElementById('statRegular').textContent   = regular;
+            document.getElementById('statExcelente').textContent = excelente;
+        }
+    </script>
+</body>
+</html>
