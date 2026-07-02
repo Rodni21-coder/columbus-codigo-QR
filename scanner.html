@@ -404,6 +404,7 @@
                         <th>Cédula</th>
                         <th>Nombre</th>
                         <th>Materia</th>
+                            <th>Tema</th>
                         <th>Grupo</th>
                         <th>Nivel de Semestre</th>
                         <th>Fecha</th>
@@ -423,7 +424,7 @@
     /* ================================================================
        CONFIGURACIÓN — IGUAL AL ORIGINAL
     ================================================================ */
-    const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbykUHPlzjUhqe0UFj4hXuCB3BCHrJHTu4jjpgtjySSMmA3JjlXIVgmzncoeIk4YFDjLag/exec";
+    const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxgfl1YOFSfNe2So9qZnQb_Q_qvPGB6wn5kW-LeieTBDm_w9IvciEYOpA3ZK1XD8sp9gA/exec";
     const PASSWORD           = "admin123";
     const SCAN_COOLDOWN      = 5000;
     const SYNC_INTERVAL      = 3000;
@@ -519,21 +520,34 @@
         setRegistros(registros);
     }
  
-    async function sendToSheets(item) {
-        if (!isOnline()) return false;
-        const controller = new AbortController();
-        const timeoutId  = setTimeout(() => controller.abort(), 9000);
-        try {
-            await fetch(GOOGLE_SCRIPT_URL, {
-                method: 'POST', mode: 'no-cors',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(item.registro), signal: controller.signal
-            });
-            clearTimeout(timeoutId); return true;
-        } catch(e) {
-            clearTimeout(timeoutId); return false;
-        }
+  async function sendToSheets(item) {
+    if (!isOnline()) return false;
+    const controller = new AbortController();
+    const timeoutId  = setTimeout(() => controller.abort(), 9000);
+    try {
+        // Convertir datos a parámetros de URL (GET funciona con no-cors en Apps Script)
+        const params = new URLSearchParams({
+            cedula:        item.registro.cedula || '',
+            nombre:        item.registro.nombre || '',
+            materia:       item.registro.materia || '',
+            tema:          item.registro.tema || '',
+            grupo:         item.registro.grupo || '',
+            nivelSemestre: item.registro.nivelSemestre || '',
+        });
+        
+        await fetch(`${GOOGLE_SCRIPT_URL}?${params.toString()}`, {
+            method: 'GET',
+            mode: 'no-cors',
+            signal: controller.signal
+        });
+        
+        clearTimeout(timeoutId);
+        return true;
+    } catch(e) {
+        clearTimeout(timeoutId);
+        return false;
     }
+}
     function sendPendingWithBeacon() {
         if (!isOnline()) return;
         getSyncQueue().forEach(item => {
@@ -630,6 +644,7 @@
                 id:            `${Date.now()}_${Math.random().toString(36).slice(2,7)}`,
                 cedula:        datos.cedula,
                 nombre:        datos.nombre,
+                tema: datos.tema || datos.Tema || datos.topic || datos.tema_estudiante || datos.temaEstudiante || '',
                 materia:       datos.materia,
                 grupo:         datos.grupo,
                 semestre:      datos.nivelSemestre || datos.nivel || datos.semestre || '',
@@ -677,6 +692,7 @@
                 <td>${registro.cedula}</td>
                 <td>${registro.nombre}</td>
                 <td>${registro.materia || 'N/A'}</td>
+                <td>${registro.tema || 'N/A'}</td>
                 <td>${registro.grupo || 'N/A'}</td>
                 <td>${registro.nivelSemestre || registro.semestre || 'N/A'}</td>
                 <td>${registro.fecha || registro.timestamp?.split(' ')[0] || 'N/A'}</td>
@@ -830,13 +846,13 @@
         doc.setFontSize(12); doc.setTextColor(0); doc.setFont('helvetica','normal');
         doc.text(`Generado: ${new Date().toLocaleString()}`, 105, 30, { align: 'center' });
         const datos = filteredRegistros.map(r => [
-            r.cedula, r.nombre, r.materia || 'N/A', r.grupo || 'N/A',
+            r.cedula, r.nombre, r.materia || 'N/A', r.tema || 'N/A', r.grupo || 'N/A',
             r.nivelSemestre || r.semestre || 'N/A',
             r.fecha || r.timestamp?.split(' ')[0] || 'N/A',
             r.hora  || r.timestamp?.split(' ')[1] || 'N/A'
         ]);
         doc.autoTable({
-            head: [['Cédula','Nombre','Materia','Grupo','Nivel Semestre','Fecha','Hora']],
+            head: [['Cédula','Nombre','Materia','Tema','Grupo','Nivel Semestre','Fecha','Hora']],
             body: datos, startY: 40,
             styles: { fontSize: 8, cellPadding: 3 },
             headStyles: { fillColor: [5,17,126], textColor: [255,255,255], fontStyle: 'bold' },
@@ -872,6 +888,7 @@
     </script>
 </body>
 </html>
+ 
  
 
 
