@@ -424,7 +424,7 @@
     /* ================================================================
        CONFIGURACIÓN — IGUAL AL ORIGINAL
     ================================================================ */
-    const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxgfl1YOFSfNe2So9qZnQb_Q_qvPGB6wn5kW-LeieTBDm_w9IvciEYOpA3ZK1XD8sp9gA/exec";
+    const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycby9hf8OjgLEF6X2O3oG-pCSZAf3n0KFs_fE8Mu_3pjtwOtYt4Rp_vrowF3jQKJ_2vXwAA/exec";
     const PASSWORD           = "admin123";
     const SCAN_COOLDOWN      = 5000;
     const SYNC_INTERVAL      = 3000;
@@ -525,8 +525,8 @@
     const controller = new AbortController();
     const timeoutId  = setTimeout(() => controller.abort(), 9000);
     try {
-        // Convertir datos a parámetros de URL (GET funciona con no-cors en Apps Script)
         const params = new URLSearchParams({
+            id:            item.registro.id || '',      // ← CLAVE ANTI-DUPLICADO
             cedula:        item.registro.cedula || '',
             nombre:        item.registro.nombre || '',
             materia:       item.registro.materia || '',
@@ -534,19 +534,20 @@
             grupo:         item.registro.grupo || '',
             nivelSemestre: item.registro.nivelSemestre || '',
         });
-        
+
         await fetch(`${GOOGLE_SCRIPT_URL}?${params.toString()}`, {
             method: 'GET',
             mode: 'no-cors',
             signal: controller.signal
         });
-        
+
         clearTimeout(timeoutId);
         return true;
     } catch(e) {
         clearTimeout(timeoutId);
         return false;
     }
+
 }
     function sendPendingWithBeacon() {
         if (!isOnline()) return;
