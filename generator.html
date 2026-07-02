@@ -335,6 +335,11 @@
                     </select>
                 </div>
             </div>
+
+            <div class="form-group">
+                <label for="tema">Tema</label>
+                <input type="text" id="tema" required placeholder="Ingrese el tema que dará el estudiante">
+            </div>
  
             <div class="form-group">
                 <label for="grupo">Grupo</label>
@@ -399,6 +404,10 @@
                         <span class="info-key">Nivel de Semestre</span>
                         <span class="info-val" id="infoNivel">—</span>
                     </div>
+                    <div class="info-row">
+                        <span class="info-key">Tema</span>
+                        <span class="info-val" id="infoTema">—</span>
+                    </div>
                 </div>
  
                 <button id="downloadQR" onclick="descargarQR()">📥 Descargar QR</button>
@@ -411,10 +420,11 @@
             const cedula  = document.getElementById('cedula').value.trim();
             const nombre  = document.getElementById('nombre').value.trim();
             const materia = document.getElementById('materia').value;
+            const tema    = document.getElementById('tema').value.trim();
             const grupo   = document.getElementById('grupo').value.trim();
             const nivel   = document.getElementById('nivel').value.trim();
  
-            if (!cedula || !nombre || !materia || !grupo || !nivel) {
+            if (!cedula || !nombre || !materia || !grupo || !nivel || !tema) {
                 alert('Por favor complete todos los campos');
                 return;
             }
@@ -426,7 +436,7 @@
                 return;
             }
  
-            const datos = { cedula, nombre, materia, grupo, nivel };
+            const datos = { cedula, nombre, materia, grupo, nivel, tema };
  
             const qrCodeDiv = document.getElementById('qrcode');
             qrCodeDiv.innerHTML = '';
@@ -446,6 +456,7 @@
             document.getElementById('infoMateria').textContent = materia;
             document.getElementById('infoGrupo').textContent = grupo;
             document.getElementById('infoNivel').textContent = nivel;
+            document.getElementById('infoTema').textContent = tema;
             document.getElementById('qrInfo').style.display = 'block';
  
             setTimeout(() => {
@@ -474,6 +485,7 @@
             const cedula  = document.getElementById('cedula').value.trim();
             const nombre  = document.getElementById('nombre').value.trim();
             const materia = document.getElementById('materia').value;
+            const tema    = document.getElementById('tema').value.trim();
             const grupo   = document.getElementById('grupo').value.trim();
             const nivel   = document.getElementById('nivel').value.trim();
  
@@ -484,6 +496,7 @@
                 `Cédula: ${cedula}`,
                 `Nombre: ${nombre}`,
                 `Materia: ${materia}`,
+                `Tema: ${tema}`,
                 `Grupo: ${grupo}`,
                 `Nivel de Semestre: ${nivel}`
             ];
@@ -513,7 +526,8 @@
             const fecha = new Date().toISOString().slice(0,10);
             const link  = document.createElement('a');
             link.href     = canvas.toDataURL("image/png", 1.0);
-            link.download = `QR_${nombre.replace(/\s+/g,'_')}_${cedula}_${materia}_${fecha}.png`;
+            const safeTema = tema.replace(/\s+/g,'_').replace(/[^a-zA-Z0-9_-]/g,'');
+            link.download = `QR_${nombre.replace(/\s+/g,'_')}_${cedula}_${materia}_${safeTema}_${fecha}.png`;
             link.click();
  
             mostrarConfirmacion('✅ QR descargado correctamente');
